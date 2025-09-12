@@ -1,4 +1,5 @@
-version: '3.8'
+# Docker Compose file for SolarNexus Production Deployment
+# Note: version attribute is obsolete in newer Docker Compose versions
 
 networks:
   solarnexus-network:
@@ -57,7 +58,7 @@ services:
   # Backend API
   backend:
     build:
-      context: ../backend
+      context: ../solarnexus-backend
       dockerfile: Dockerfile
     image: solarnexus-backend:latest
     container_name: solarnexus-backend
@@ -66,13 +67,14 @@ services:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://${POSTGRES_USER:-solarnexus}:${POSTGRES_PASSWORD:-solarnexus}@postgres:5432/${POSTGRES_DB:-solarnexus}
       - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=${JWT_SECRET}
-      - SOLAX_API_TOKEN=${SOLAX_API_TOKEN}
-      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
-      - EMAIL_USER=${EMAIL_USER}
-      - EMAIL_PASS=${EMAIL_PASS}
+      - JWT_SECRET=${JWT_SECRET:-default_jwt_secret_change_in_production}
+      - SOLAX_API_TOKEN=${SOLAX_API_TOKEN:-}
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY:-}
+      - EMAIL_USER=${EMAIL_USER:-}
+      - EMAIL_PASS=${EMAIL_PASS:-}
       - MUNICIPAL_RATE_API_KEY=${MUNICIPAL_RATE_API_KEY:-}
       - MUNICIPAL_RATE_ENDPOINT=${MUNICIPAL_RATE_ENDPOINT:-}
+      - REACT_APP_API_URL=${REACT_APP_API_URL:-https://nexus.gonxt.tech/api}
     ports:
       - "3000:3000"
     volumes:
@@ -94,11 +96,19 @@ services:
   # Frontend Web App
   frontend:
     build:
-      context: ../frontend
+      context: ../
       dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=${REACT_APP_API_URL:-https://nexus.gonxt.tech/api}
+        - REACT_APP_ENVIRONMENT=${REACT_APP_ENVIRONMENT:-production}
+        - REACT_APP_VERSION=${REACT_APP_VERSION:-1.0.0}
     image: solarnexus-frontend:latest
     container_name: solarnexus-frontend
     restart: unless-stopped
+    environment:
+      - REACT_APP_API_URL=${REACT_APP_API_URL:-https://nexus.gonxt.tech/api}
+      - REACT_APP_ENVIRONMENT=${REACT_APP_ENVIRONMENT:-production}
+      - REACT_APP_VERSION=${REACT_APP_VERSION:-1.0.0}
     ports:
       - "8080:80"
     volumes:
