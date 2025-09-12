@@ -1,0 +1,140 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: solarnexus-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-solarnexus}
+      POSTGRES_USER: ${POSTGRES_USER:-solarnexus}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-solarnexus}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - /opt/solarnexus/backups/database:/backups
+    ports:
+      - "5432:5432"
+    networks:
+      - solarnexus-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-solarnexus}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: solarnexus-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - solarnexus-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend API
+  backend:
+    build:
+      context: ../solarnexus-backend
+      dockerfile: Dockerfile
+    image: solarnexus-backend:latest
+    container_name: solarnexus-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-solarnexus}:${POSTGRES_PASSWORD:-solarnexus}@postgres:5432/${POSTGRES_DB:-solarnexus}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-default_jwt_secret_change_in_production}
+      SOLAX_API_TOKEN: ${SOLAX_API_TOKEN:-}
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY:-}
+      EMAIL_USER: ${EMAIL_USER:-}
+      EMAIL_PASS: ${EMAIL_PASS:-}
+      MUNICIPAL_RATE_API_KEY: ${MUNICIPAL_RATE_API_KEY:-}
+      MUNICIPAL_RATE_ENDPOINT: ${MUNICIPAL_RATE_ENDPOINT:-}
+      REACT_APP_API_URL: ${REACT_APP_API_URL:-https://nexus.gonxt.tech/api}
+    ports:
+      - "3000:3000"
+    volumes:
+      - /opt/solarnexus/logs:/app/logs
+    networks:
+      - solarnexus-network
+    depends_on:
+      - postgres
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Frontend Web App
+  frontend:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: ${REACT_APP_API_URL:-https://nexus.gonxt.tech/api}
+        REACT_APP_ENVIRONMENT: ${REACT_APP_ENVIRONMENT:-production}
+        REACT_APP_VERSION: ${REACT_APP_VERSION:-1.0.0}
+    image: solarnexus-frontend:latest
+    container_name: solarnexus-frontend
+    restart: unless-stopped
+    environment:
+      REACT_APP_API_URL: ${REACT_APP_API_URL:-https://nexus.gonxt.tech/api}
+      REACT_APP_ENVIRONMENT: ${REACT_APP_ENVIRONMENT:-production}
+      REACT_APP_VERSION: ${REACT_APP_VERSION:-1.0.0}
+    ports:
+      - "8080:80"
+    volumes:
+      - ../nginx/conf.d:/etc/nginx/conf.d:ro
+    networks:
+      - solarnexus-network
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: solarnexus-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../nginx/conf.d:/etc/nginx/conf.d:ro
+      - ../nginx/ssl:/etc/nginx/ssl:ro
+      - /var/log/nginx:/var/log/nginx
+    networks:
+      - solarnexus-network
+    depends_on:
+      - frontend
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  solarnexus-network:
+    driver: bridge
