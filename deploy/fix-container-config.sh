@@ -131,9 +131,26 @@ echo -e "${BLUE}🗄️  Initializing database...${NC}"
 # Initialize database
 docker exec solarnexus-postgres psql -U solarnexus -c "CREATE DATABASE solarnexus;" 2>/dev/null || echo "Database already exists"
 
+# Find the correct path for migration file
+MIGRATION_PATHS=(
+    "/opt/solarnexus/app/solarnexus-backend/migration.sql"
+    "/opt/solarnexus/solarnexus-backend/migration.sql"
+    "./solarnexus-backend/migration.sql"
+    "../solarnexus-backend/migration.sql"
+)
+
+MIGRATION_FILE=""
+for path in "${MIGRATION_PATHS[@]}"; do
+    if [[ -f "$path" ]]; then
+        MIGRATION_FILE="$path"
+        break
+    fi
+done
+
 # Copy and run migration
-if [[ -f "/opt/solarnexus/app/solarnexus-backend/migration.sql" ]]; then
-    docker cp /opt/solarnexus/app/solarnexus-backend/migration.sql solarnexus-postgres:/tmp/migration.sql
+if [[ -n "$MIGRATION_FILE" ]]; then
+    echo -e "${GREEN}✅ Found migration file: $MIGRATION_FILE${NC}"
+    docker cp "$MIGRATION_FILE" solarnexus-postgres:/tmp/migration.sql
     docker exec solarnexus-postgres psql -U solarnexus -d solarnexus -f /tmp/migration.sql
     echo -e "${GREEN}✅ Database migration completed${NC}"
 else
@@ -141,8 +158,29 @@ else
 fi
 
 echo -e "${BLUE}🔧 Updating main Docker Compose file...${NC}"
-# Update the main docker-compose file to fix compatibility issues
-cd /opt/solarnexus/app
+# Find the correct working directory
+WORK_DIRS=(
+    "/opt/solarnexus/app"
+    "/opt/solarnexus"
+    "$(pwd)"
+)
+
+WORK_DIR=""
+for dir in "${WORK_DIRS[@]}"; do
+    if [[ -d "$dir" ]] && [[ -f "$dir/deploy/docker-compose.production.yml" || -f "$dir/docker-compose.production.yml" ]]; then
+        WORK_DIR="$dir"
+        break
+    fi
+done
+
+if [[ -n "$WORK_DIR" ]]; then
+    cd "$WORK_DIR"
+    echo -e "${GREEN}✅ Working directory: $WORK_DIR${NC}"
+else
+    echo -e "${RED}❌ Could not find SolarNexus directory${NC}"
+    echo -e "${YELLOW}Please run this script from the SolarNexus root directory${NC}"
+    exit 1
+fi
 
 # Backup original file
 cp deploy/docker-compose.production.yml deploy/docker-compose.production.yml.backup
