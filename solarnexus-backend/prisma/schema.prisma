@@ -1,0 +1,453 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  engineType    = "binary"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Multi-tenant organization model
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  domain      String?  @unique
+  logo        String?
+  settings    Json?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  users       User[]
+  projects    Project[]
+  sites       Site[]
+  licenses    License[]
+  
+  @@map("organizations")
+}
+
+// User roles: SUPER_ADMIN, CUSTOMER, FUNDER, OM_PROVIDER
+enum UserRole {
+  SUPER_ADMIN
+  CUSTOMER
+  FUNDER
+  OM_PROVIDER
+}
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  password       String
+  firstName      String
+  lastName       String
+  phone          String?
+  avatar         String?
+  role           UserRole
+  isActive       Boolean   @default(true)
+  emailVerified  Boolean   @default(false)
+  lastLoginAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Multi-tenant
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Relations
+  refreshTokens  RefreshToken[]
+  notifications  Notification[]
+  auditLogs      AuditLog[]
+  
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model License {
+  id             String   @id @default(cuid())
+  organizationId String
+  licenseType    String   // BASIC, PREMIUM, ENTERPRISE
+  maxSites       Int
+  maxUsers       Int
+  features       Json     // Array of enabled features
+  isActive       Boolean  @default(true)
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("licenses")
+}
+
+model Project {
+  id             String   @id @default(cuid())
+  name           String
+  description    String?
+  organizationId String
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sites        Site[]
+
+  @@map("projects")
+}
+
+model Site {
+  id             String   @id @default(cuid())
+  name           String
+  address        String
+  municipality   String?
+  latitude       Float
+  longitude      Float
+  timezone       String   @default("UTC")
+  capacity       Float    // kW capacity
+  installDate    DateTime
+  isActive       Boolean  @default(true)
+  
+  // Multi-tenant
+  organizationId String
+  projectId      String?
+  
+  // Site-specific settings
+  municipalRate  Float?   // Rate per kWh
+  touTariff      Json?    // Time-of-use tariff structure
+  targetPerformance Float? // Expected performance ratio
+  
+  // SolaX Integration
+  solaxClientId     String?
+  solaxClientSecret String?
+  solaxPlantId      String?
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project        Project?     @relation(fields: [projectId], references: [id])
+  devices        Device[]
+  energyData     EnergyData[]
+  alerts         Alert[]
+  maintenanceRecords MaintenanceRecord[]
+  weatherData    WeatherData[]
+  siteMetrics    SiteMetrics[]
+
+  @@map("sites")
+}
+
+enum DeviceType {
+  INVERTER
+  BATTERY
+  METER
+  WEATHER_STATION
+  EV_CHARGER
+}
+
+enum DeviceStatus {
+  ONLINE
+  OFFLINE
+  MAINTENANCE
+  ERROR
+}
+
+model Device {
+  id           String       @id @default(cuid())
+  serialNumber String       @unique
+  model        String
+  manufacturer String
+  deviceType   DeviceType
+  status       DeviceStatus @default(OFFLINE)
+  firmware     String?
+  installDate  DateTime
+  lastSeen     DateTime?
+  
+  siteId       String
+  site         Site         @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  energyData   EnergyData[]
+  alerts       Alert[]
+
+  @@map("devices")
+}
+
+model EnergyData {
+  id                String   @id @default(cuid())
+  timestamp         DateTime
+  
+  // Solar generation data
+  solarGeneration   Float?   // kWh
+  solarPower        Float?   // kW instantaneous
+  
+  // Grid consumption data
+  gridConsumption   Float?   // kWh
+  gridPower         Float?   // kW instantaneous
+  
+  // Battery data
+  batteryCharge     Float?   // kWh stored
+  batteryPower      Float?   // kW charging/discharging
+  batterySOC        Float?   // State of charge %
+  
+  // Environmental data
+  irradiance        Float?   // W/m²
+  temperature       Float?   // °C
+  windSpeed         Float?   // m/s
+  
+  // Calculated fields
+  netConsumption    Float?   // Grid consumption - Solar generation
+  selfConsumption   Float?   // Solar used directly
+  exportedEnergy    Float?   // Solar exported to grid
+  
+  siteId            String
+  deviceId          String?
+  
+  site              Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  device            Device?  @relation(fields: [deviceId], references: [id])
+  
+  createdAt         DateTime @default(now())
+
+  @@index([siteId, timestamp])
+  @@index([deviceId, timestamp])
+  @@map("energy_data")
+}
+
+enum AlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AlertStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+  CLOSED
+}
+
+model Alert {
+  id          String        @id @default(cuid())
+  title       String
+  description String
+  severity    AlertSeverity
+  status      AlertStatus   @default(OPEN)
+  alertType   String        // PERFORMANCE, MAINTENANCE, SECURITY, etc.
+  
+  siteId      String
+  deviceId    String?
+  
+  resolvedAt  DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  site        Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  device      Device?       @relation(fields: [deviceId], references: [id])
+
+  @@index([siteId, status])
+  @@map("alerts")
+}
+
+model MaintenanceRecord {
+  id            String   @id @default(cuid())
+  title         String
+  description   String
+  scheduledDate DateTime
+  completedDate DateTime?
+  cost          Float?
+  technician    String?
+  notes         String?
+  
+  siteId        String
+  site          Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("maintenance_records")
+}
+
+// SDG Goals tracking
+model SDGMetric {
+  id              String   @id @default(cuid())
+  siteId          String
+  goalNumber      Int      // SDG goal number (1-17)
+  metricName      String   // e.g., "CO2 Avoided", "Clean Energy Generated"
+  value           Float
+  unit            String   // e.g., "tonnes CO2", "kWh"
+  calculationDate DateTime
+  
+  createdAt       DateTime @default(now())
+
+  @@index([siteId, goalNumber])
+  @@map("sdg_metrics")
+}
+
+// Financial tracking
+model FinancialRecord {
+  id            String   @id @default(cuid())
+  siteId        String
+  recordType    String   // SAVINGS, EARNINGS, COST
+  amount        Float
+  currency      String   @default("USD")
+  description   String
+  periodStart   DateTime
+  periodEnd     DateTime
+  
+  createdAt     DateTime @default(now())
+
+  @@index([siteId, recordType])
+  @@map("financial_records")
+}
+
+// Notifications
+enum NotificationType {
+  EMAIL
+  SMS
+  PUSH
+  IN_APP
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+}
+
+model Notification {
+  id        String             @id @default(cuid())
+  userId    String
+  type      NotificationType
+  status    NotificationStatus @default(PENDING)
+  title     String
+  message   String
+  data      Json?              // Additional data
+  sentAt    DateTime?
+  readAt    DateTime?
+  
+  createdAt DateTime           @default(now())
+
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@map("notifications")
+}
+
+// Audit logging
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String   // CREATE, UPDATE, DELETE, LOGIN, etc.
+  resource  String   // Table/resource name
+  resourceId String? // ID of the affected resource
+  oldValues Json?
+  newValues Json?
+  ipAddress String?
+  userAgent String?
+  
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([resource, resourceId])
+  @@map("audit_logs")
+}
+
+// ML Predictions
+model Prediction {
+  id            String   @id @default(cuid())
+  siteId        String
+  predictionType String  // PERFORMANCE, MAINTENANCE, WEATHER
+  model         String   // Model name/version
+  inputData     Json     // Input features
+  prediction    Json     // Prediction results
+  confidence    Float    // Confidence score
+  validUntil    DateTime // When prediction expires
+  
+  createdAt     DateTime @default(now())
+
+  @@index([siteId, predictionType])
+  @@map("predictions")
+}
+
+// Weather Data
+model WeatherData {
+  id              String   @id @default(cuid())
+  siteId          String
+  timestamp       DateTime
+  temperature     Float    // Celsius
+  humidity        Float    // Percentage
+  pressure        Float    // hPa
+  windSpeed       Float    // m/s
+  windDirection   Float    // Degrees
+  cloudCover      Float    // Percentage
+  visibility      Float    // Meters
+  uvIndex         Float    // UV Index
+  description     String   // Weather description
+  irradiance      Float?   // Solar irradiance W/m²
+  performanceRatio Float?  // Weather impact on solar performance
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, timestamp])
+  @@map("weather_data")
+}
+
+// Site Performance Metrics
+model SiteMetrics {
+  id                String   @id @default(cuid())
+  siteId            String
+  date              DateTime @db.Date
+  totalGeneration   Float    @default(0)
+  totalConsumption  Float    @default(0)
+  totalGridImport   Float    @default(0)
+  totalGridExport   Float    @default(0)
+  averageEfficiency Float    @default(0)
+  capacityFactor    Float    @default(0) // Percentage
+  availability      Float    @default(0) // Percentage
+  averageTemperature Float?
+  lastUpdated       DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, date])
+  @@map("site_metrics")
+}
+
+// Data Synchronization Statistics
+model SyncStats {
+  id              String   @id @default(cuid())
+  timestamp       DateTime
+  sitesProcessed  Int      @default(0)
+  recordsUpdated  Int      @default(0)
+  errors          Int      @default(0)
+  duration        Int      @default(0) // Milliseconds
+  createdAt       DateTime @default(now())
+
+  @@map("sync_stats")
+}

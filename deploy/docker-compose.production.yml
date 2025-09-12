@@ -1,0 +1,260 @@
+version: '3.8'
+
+networks:
+  solarnexus-network:
+    driver: bridge
+    name: solarnexus-network
+
+volumes:
+  postgres_data:
+    name: solarnexus_postgres_data
+  redis_data:
+    name: solarnexus_redis_data
+  ssl_certs:
+    name: solarnexus_ssl_certs
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: solarnexus-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-solarnexus}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-solarnexus}
+      POSTGRES_DB: ${POSTGRES_DB:-solarnexus}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - solarnexus-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-solarnexus} -d ${POSTGRES_DB:-solarnexus}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: solarnexus-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - solarnexus-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend API
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    image: solarnexus-backend:latest
+    container_name: solarnexus-backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-solarnexus}:${POSTGRES_PASSWORD:-solarnexus}@postgres:5432/${POSTGRES_DB:-solarnexus}
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - SOLAX_API_TOKEN=${SOLAX_API_TOKEN}
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - MUNICIPAL_RATE_API_KEY=${MUNICIPAL_RATE_API_KEY:-}
+      - MUNICIPAL_RATE_ENDPOINT=${MUNICIPAL_RATE_ENDPOINT:-}
+    ports:
+      - "3000:3000"
+    volumes:
+      - /opt/solarnexus/logs:/app/logs
+    networks:
+      - solarnexus-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Frontend Web App
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    image: solarnexus-frontend:latest
+    container_name: solarnexus-frontend
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ../nginx/conf.d:/etc/nginx/conf.d:ro
+    networks:
+      - solarnexus-network
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: solarnexus-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../nginx/conf.d:/etc/nginx/conf.d:ro
+      - ../dist:/var/www/html:ro
+      - ssl_certs:/etc/nginx/ssl:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - solarnexus-network
+    depends_on:
+      - backend
+      - frontend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: solarnexus-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../monitoring/prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    networks:
+      - solarnexus-network
+    profiles:
+      - monitoring
+
+  # Grafana Dashboard
+  grafana:
+    image: grafana/grafana:latest
+    container_name: solarnexus-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ../monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - solarnexus-network
+    depends_on:
+      - prometheus
+    profiles:
+      - monitoring
+
+  # Alertmanager
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: solarnexus-alertmanager
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    volumes:
+      - ../monitoring/alertmanager:/etc/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    networks:
+      - solarnexus-network
+    profiles:
+      - monitoring
+
+  # Node Exporter for System Metrics
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: solarnexus-node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - solarnexus-network
+    profiles:
+      - monitoring
+
+  # PostgreSQL Exporter
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: solarnexus-postgres-exporter
+    restart: unless-stopped
+    ports:
+      - "9187:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER:-solarnexus}:${POSTGRES_PASSWORD:-solarnexus}@postgres:5432/${POSTGRES_DB:-solarnexus}?sslmode=disable
+    networks:
+      - solarnexus-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - monitoring
+
+  # Redis Exporter
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: solarnexus-redis-exporter
+    restart: unless-stopped
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+    networks:
+      - solarnexus-network
+    depends_on:
+      redis:
+        condition: service_healthy
+    profiles:
+      - monitoring
+
+volumes:
+  prometheus_data:
+  grafana_data:

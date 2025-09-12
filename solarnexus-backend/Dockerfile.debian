@@ -1,0 +1,64 @@
+# Multi-stage build for production optimization
+FROM node:20-slim AS base
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    curl \
+    openssl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Production stage
+FROM node:20-slim AS production
+
+# Create non-root user
+RUN groupadd --gid 1001 nodejs
+RUN useradd --uid 1001 --gid nodejs --shell /bin/bash --create-home solarnexus
+
+# Install production dependencies and TypeScript runtime
+RUN apt-get update && apt-get install -y \
+    curl \
+    python3 \
+    make \
+    g++ \
+    openssl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy package files and install all dependencies (including dev for ts-node)
+COPY --from=base /app/package*.json ./
+RUN npm ci && npm cache clean --force
+
+# Copy source code and configuration
+COPY --chown=solarnexus:nodejs . .
+COPY --from=base /app/prisma ./prisma
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Create necessary directories
+RUN mkdir -p /app/uploads /app/logs && \
+    chown -R solarnexus:nodejs /app/uploads /app/logs
+
+# Switch to non-root user
+USER solarnexus
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/health || exit 1
+
+EXPOSE 3000
+
+# Start the application with ts-node and path resolution
+CMD ["npx", "ts-node", "-r", "tsconfig-paths/register", "src/server.ts"]

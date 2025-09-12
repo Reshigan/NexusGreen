@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Solar Power Dashboard Design System - Professional Navy Blue Theme */
+
+@layer base {
+  :root {
+    /* Solar Navy Blue Theme */
+    --background: 0 0% 100%;
+    --foreground: 216 84% 8%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 216 84% 8%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 216 84% 8%;
+
+    /* Primary: Professional Navy Blue */
+    --primary: 216 84% 15%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 216 60% 25%;
+    --primary-dark: 216 84% 10%;
+
+    /* Secondary: Light Navy */
+    --secondary: 216 30% 95%;
+    --secondary-foreground: 216 84% 15%;
+
+    /* Muted tones */
+    --muted: 216 20% 96%;
+    --muted-foreground: 216 15% 45%;
+
+    /* Accent: Solar Blue */
+    --accent: 200 80% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Success: Solar Green */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning: Solar Orange */
+    --warning: 35 91% 60%;
+    --warning-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 216 20% 90%;
+    --input: 216 20% 95%;
+    --ring: 216 84% 15%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Dark mode: Deep navy background */
+    --background: 216 50% 8%;
+    --foreground: 0 0% 95%;
+
+    --card: 216 40% 12%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 216 40% 12%;
+    --popover-foreground: 0 0% 95%;
+
+    /* Primary: Light blue for dark mode */
+    --primary: 200 80% 50%;
+    --primary-foreground: 216 50% 8%;
+    --primary-light: 200 70% 60%;
+    --primary-dark: 200 90% 40%;
+
+    /* Secondary: Dark navy variations */
+    --secondary: 216 30% 18%;
+    --secondary-foreground: 0 0% 95%;
+
+    /* Muted dark tones */
+    --muted: 216 25% 15%;
+    --muted-foreground: 216 10% 65%;
+
+    /* Accent: Bright solar blue */
+    --accent: 200 80% 50%;
+    --accent-foreground: 216 50% 8%;
+
+    /* Success: Bright green */
+    --success: 142 70% 45%;
+    --success-foreground: 216 50% 8%;
+
+    /* Warning: Solar orange */
+    --warning: 35 85% 65%;
+    --warning-foreground: 216 50% 8%;
+
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 95%;
+
+    --border: 216 30% 20%;
+    --input: 216 30% 18%;
+    --ring: 200 80% 50%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
