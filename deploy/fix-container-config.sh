@@ -133,10 +133,10 @@ docker exec solarnexus-postgres psql -U solarnexus -c "CREATE DATABASE solarnexu
 
 # Find the correct path for migration file
 MIGRATION_PATHS=(
-    "/opt/solarnexus/app/solarnexus-backend/migration.sql"
-    "/opt/solarnexus/solarnexus-backend/migration.sql"
     "./solarnexus-backend/migration.sql"
     "../solarnexus-backend/migration.sql"
+    "/root/SolarNexus/solarnexus-backend/migration.sql"
+    "~/SolarNexus/solarnexus-backend/migration.sql"
 )
 
 MIGRATION_FILE=""
@@ -160,9 +160,11 @@ fi
 echo -e "${BLUE}🔧 Updating main Docker Compose file...${NC}"
 # Find the correct working directory
 WORK_DIRS=(
-    "/opt/solarnexus/app"
-    "/opt/solarnexus"
     "$(pwd)"
+    "/root/SolarNexus"
+    "~/SolarNexus"
+    "./SolarNexus"
+    "../SolarNexus"
 )
 
 WORK_DIR=""

@@ -26,13 +26,14 @@ echo -e "${BLUE}🔍 Finding SolarNexus directory...${NC}"
 
 # Possible locations for SolarNexus
 POSSIBLE_DIRS=(
-    "/opt/solarnexus/app"
-    "/opt/solarnexus"
     "/root/SolarNexus"
     "/home/*/SolarNexus"
     "$(pwd)"
     "/tmp/SolarNexus"
     "/var/www/SolarNexus"
+    "./SolarNexus"
+    "../SolarNexus"
+    "~/SolarNexus"
 )
 
 SOLARNEXUS_DIR=""
@@ -49,14 +50,16 @@ done
 if [[ -z "$SOLARNEXUS_DIR" ]]; then
     echo -e "${YELLOW}⚠️  SolarNexus directory not found. Let's create it...${NC}"
     
-    # Create the expected directory structure
-    mkdir -p /opt/solarnexus/app
-    cd /opt/solarnexus/app
+    # Create in current directory or /root
+    if [[ -w "$(pwd)" ]]; then
+        SOLARNEXUS_DIR="$(pwd)/SolarNexus"
+    else
+        SOLARNEXUS_DIR="/root/SolarNexus"
+    fi
     
-    echo -e "${BLUE}📥 Cloning SolarNexus repository...${NC}"
-    git clone https://github.com/Reshigan/SolarNexus.git .
+    echo -e "${BLUE}📥 Cloning SolarNexus repository to: $SOLARNEXUS_DIR${NC}"
+    git clone https://github.com/Reshigan/SolarNexus.git "$SOLARNEXUS_DIR"
     
-    SOLARNEXUS_DIR="/opt/solarnexus/app"
     echo -e "${GREEN}✅ SolarNexus cloned to: $SOLARNEXUS_DIR${NC}"
 else
     echo -e "${GREEN}✅ Found SolarNexus directory: $SOLARNEXUS_DIR${NC}"
