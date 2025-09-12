@@ -1,7 +1,7 @@
 {
-  "name": "solarnexus-backend",
+  "name": "nexus-green-backend",
   "version": "1.0.0",
-  "description": "SolarNexus - Multi-tenant Solar Energy Management Platform Backend",
+  "description": "Nexus Green - Multi-tenant Solar Energy Management Platform Backend",
   "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/server.ts",

@@ -72,17 +72,16 @@ function AppSidebar() {
           {!collapsed ? (
             <div className="flex items-center gap-2">
               <img
-                src="/gonxt-logo.jpeg"
-                alt="GoNXT logo"
-                className="h-7 w-auto object-contain drop-shadow-sm"
+                src="/nexus-green-logo.svg"
+                alt="Nexus Green"
+                className="h-8 w-auto object-contain drop-shadow-sm"
                 loading="eager"
                 decoding="async"
                 style={{ imageRendering: 'auto' }}
               />
-              <h2 className="text-lg font-bold">PPA Dashboard</h2>
             </div>
           ) : (
-            <img src="/gonxt-logo.jpeg" alt="GoNXT logo" className="h-7 w-auto object-contain" />
+            <img src="/nexus-green-icon.svg" alt="Nexus Green" className="h-8 w-auto object-contain" />
           )}
         </div>
       </SidebarHeader>

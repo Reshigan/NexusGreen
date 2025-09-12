@@ -1,21 +1,21 @@
-# SolarNexus - Multi-Tenant Solar Energy Management Platform
+# 🌿 Nexus Green - Multi-Tenant Solar Energy Management Platform
 
 <div align="center">
-  <img src="public/solarnexus-logo.svg" alt="SolarNexus Logo" width="300"/>
+  <img src="public/nexus-green-logo.svg" alt="Nexus Green Logo" width="300"/>
   
-  **Empowering Solar Energy Through Intelligent Analytics**
+  **⚡ Connecting Solar Energy Through Intelligent Analytics ⚡**
   
-  [![Production Ready](https://img.shields.io/badge/Production-Ready-green.svg)](https://github.com/Reshigan/PPA-Frontend)
-  [![Docker](https://img.shields.io/badge/Docker-Enabled-blue.svg)](https://docker.com)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://typescriptlang.org)
-  [![React](https://img.shields.io/badge/React-18.0-blue.svg)](https://reactjs.org)
-  [![Node.js](https://img.shields.io/badge/Node.js-20.0-green.svg)](https://nodejs.org)
-  [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15.0-blue.svg)](https://postgresql.org)
+  [![Production Ready](https://img.shields.io/badge/Production-Ready-00FF88.svg)](https://github.com/Reshigan/SolarNexus)
+  [![Docker](https://img.shields.io/badge/Docker-Enabled-00D4FF.svg)](https://docker.com)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-00FF88.svg)](https://typescriptlang.org)
+  [![React](https://img.shields.io/badge/React-18.0-00D4FF.svg)](https://reactjs.org)
+  [![Node.js](https://img.shields.io/badge/Node.js-20.0-00FF88.svg)](https://nodejs.org)
+  [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15.0-00D4FF.svg)](https://postgresql.org)
 </div>
 
 ## 🌟 Overview
 
-SolarNexus is a sophisticated, production-ready multi-tenant solar energy management platform designed for the modern renewable energy ecosystem. Built with cutting-edge technology, it provides comprehensive analytics, predictive maintenance, and SDG impact tracking for solar installations.
+**Nexus Green** is a sophisticated, production-ready multi-tenant solar energy management platform designed for the modern renewable energy ecosystem. Built with cutting-edge technology and an edgy, tech-forward design, it provides comprehensive analytics, predictive maintenance, and SDG impact tracking for solar installations.
 
 ### 🎯 Key Features
 

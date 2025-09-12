@@ -2,123 +2,119 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Solar Power Dashboard Design System - Professional Navy Blue Theme */
+/* Nexus Green Design System - Edgy Tech-Forward Theme */
 
 @layer base {
   :root {
-    /* Solar Navy Blue Theme */
+    /* Nexus Green Light Theme */
     --background: 0 0% 100%;
-    --foreground: 216 84% 8%;
+    --foreground: 160 100% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 216 84% 8%;
+    --card-foreground: 160 100% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 216 84% 8%;
+    --popover-foreground: 160 100% 10%;
 
-    /* Primary: Professional Navy Blue */
-    --primary: 216 84% 15%;
+    /* Primary: Deep Forest Green */
+    --primary: 160 73% 19%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 216 60% 25%;
-    --primary-dark: 216 84% 10%;
+    --primary-light: 160 60% 30%;
+    --primary-dark: 160 80% 15%;
 
-    /* Secondary: Light Navy */
-    --secondary: 216 30% 95%;
-    --secondary-foreground: 216 84% 15%;
+    /* Secondary: Light Green */
+    --secondary: 160 30% 95%;
+    --secondary-foreground: 160 73% 19%;
 
     /* Muted tones */
-    --muted: 216 20% 96%;
-    --muted-foreground: 216 15% 45%;
+    --muted: 160 20% 96%;
+    --muted-foreground: 160 15% 45%;
 
-    /* Accent: Solar Blue */
-    --accent: 200 80% 50%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent: Nexus Green (Electric Lime) */
+    --accent: 160 100% 50%;
+    --accent-foreground: 160 100% 10%;
 
-    /* Success: Solar Green */
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 100%;
+    /* Success: Nexus Green */
+    --success: 160 100% 50%;
+    --success-foreground: 160 100% 10%;
 
-    /* Warning: Solar Orange */
-    --warning: 35 91% 60%;
-    --warning-foreground: 0 0% 100%;
+    /* Warning: Bright Amber */
+    --warning: 45 100% 50%;
+    --warning-foreground: 160 100% 10%;
 
-    --destructive: 0 84.2% 60.2%;
+    /* Error: Vibrant Red */
+    --destructive: 0 100% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 216 20% 90%;
-    --input: 216 20% 95%;
-    --ring: 216 84% 15%;
+    --border: 160 20% 90%;
+    --input: 160 20% 95%;
+    --ring: 160 100% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.25rem; /* Sharper corners for edgy feel */
 
     --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
+    --sidebar-foreground: 160 100% 15%;
+    --sidebar-primary: 160 73% 19%;
     --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 160 30% 95%;
+    --sidebar-accent-foreground: 160 73% 19%;
+    --sidebar-border: 160 20% 90%;
+    --sidebar-ring: 160 100% 50%;
   }
 
   .dark {
-    /* Dark mode: Deep navy background */
-    --background: 216 50% 8%;
-    --foreground: 0 0% 95%;
+    /* Dark mode: Carbon Black background with Nexus Green accents */
+    --background: 0 0% 10%;
+    --foreground: 160 100% 88%;
 
-    --card: 216 40% 12%;
-    --card-foreground: 0 0% 95%;
+    --card: 210 40% 17%;
+    --card-foreground: 160 100% 88%;
 
-    --popover: 216 40% 12%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 210 40% 17%;
+    --popover-foreground: 160 100% 88%;
 
-    /* Primary: Light blue for dark mode */
-    --primary: 200 80% 50%;
-    --primary-foreground: 216 50% 8%;
-    --primary-light: 200 70% 60%;
-    --primary-dark: 200 90% 40%;
+    /* Primary: Electric Nexus Green for dark mode */
+    --primary: 160 100% 50%;
+    --primary-foreground: 0 0% 10%;
+    --primary-light: 160 100% 60%;
+    --primary-dark: 160 100% 40%;
 
-    /* Secondary: Dark navy variations */
-    --secondary: 216 30% 18%;
-    --secondary-foreground: 0 0% 95%;
+    /* Secondary: Steel Gray variations */
+    --secondary: 210 40% 17%;
+    --secondary-foreground: 160 100% 88%;
 
     /* Muted dark tones */
-    --muted: 216 25% 15%;
-    --muted-foreground: 216 10% 65%;
+    --muted: 210 40% 15%;
+    --muted-foreground: 210 20% 65%;
 
-    /* Accent: Bright solar blue */
-    --accent: 200 80% 50%;
-    --accent-foreground: 216 50% 8%;
+    /* Accent: Energy Blue */
+    --accent: 190 100% 50%;
+    --accent-foreground: 0 0% 10%;
 
-    /* Success: Bright green */
-    --success: 142 70% 45%;
-    --success-foreground: 216 50% 8%;
+    /* Success: Nexus Green */
+    --success: 160 100% 50%;
+    --success-foreground: 0 0% 10%;
 
-    /* Warning: Solar orange */
-    --warning: 35 85% 65%;
-    --warning-foreground: 216 50% 8%;
+    /* Warning: Bright Amber */
+    --warning: 45 100% 60%;
+    --warning-foreground: 0 0% 10%;
 
-    --destructive: 0 70% 55%;
-    --destructive-foreground: 0 0% 95%;
+    /* Error: Vibrant Red */
+    --destructive: 0 100% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 216 30% 20%;
-    --input: 216 30% 18%;
-    --ring: 200 80% 50%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 210 40% 20%;
+    --input: 210 40% 17%;
+    --ring: 160 100% 50%;
+    
+    --sidebar-background: 0 0% 10%;
+    --sidebar-foreground: 160 100% 88%;
+    --sidebar-primary: 160 100% 50%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 210 40% 17%;
+    --sidebar-accent-foreground: 160 100% 88%;
+    --sidebar-border: 210 40% 20%;
+    --sidebar-ring: 160 100% 50%;
   }
 }
 
@@ -129,5 +125,59 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Nexus Green Custom Effects */
+@layer components {
+  .nexus-glow {
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+  }
+  
+  .nexus-border {
+    border: 1px solid hsl(var(--accent));
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+  }
+  
+  .energy-gradient {
+    background: linear-gradient(135deg, hsl(160 73% 19%) 0%, hsl(160 100% 50%) 100%);
+  }
+  
+  .energy-text {
+    background: linear-gradient(45deg, hsl(160 100% 50%) 0%, hsl(190 100% 50%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .glass-morphism {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .dark .glass-morphism {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 136, 0.2);
+  }
+  
+  .hexagon-pattern {
+    background-image: 
+      radial-gradient(circle at 25% 25%, rgba(0, 255, 136, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(0, 212, 255, 0.1) 0%, transparent 50%);
+  }
+  
+  .animate-pulse-green {
+    animation: pulse-green 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  @keyframes pulse-green {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(0, 255, 136, 0);
+    }
   }
 }

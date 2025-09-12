@@ -1,0 +1,46 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Primary Gradient -->
+    <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0D4F3C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00FF88;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Energy Gradient -->
+    <linearGradient id="energyGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00FF88;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00D4FF;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Glow Filter -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Hexagonal Solar Panel Pattern -->
+  <g transform="translate(4, 4)">
+    <!-- Top row hexagons -->
+    <polygon points="10,4 16,0 22,4 22,12 16,16 10,12" fill="url(#primaryGradient)" stroke="#00FF88" stroke-width="0.5"/>
+    <polygon points="20,4 26,0 32,4 32,12 26,16 20,12" fill="url(#primaryGradient)" stroke="#00FF88" stroke-width="0.5"/>
+    <polygon points="30,4 36,0 42,4 42,12 36,16 30,12" fill="url(#primaryGradient)" stroke="#00FF88" stroke-width="0.5"/>
+    
+    <!-- Middle row hexagons -->
+    <polygon points="5,13 11,9 17,13 17,21 11,25 5,21" fill="url(#primaryGradient)" stroke="#00FF88" stroke-width="0.5"/>
+    <polygon points="15,13 21,9 27,13 27,21 21,25 15,21" fill="#0D4F3C" stroke="#00FF88" stroke-width="0.5"/>
+    <polygon points="25,13 31,9 37,13 37,21 31,25 25,21" fill="url(#primaryGradient)" stroke="#00FF88" stroke-width="0.5"/>
+    <polygon points="35,13 41,9 47,13 47,21 41,25 35,21" fill="url(#primaryGradient)" stroke="#00FF88" stroke-width="0.5"/>
+    
+    <!-- Bottom row hexagons -->
+    <polygon points="10,22 16,18 22,22 22,30 16,34 10,30" fill="url(#primaryGradient)" stroke="#00FF88" stroke-width="0.5"/>
+    <polygon points="20,22 26,18 32,22 32,30 26,34 20,30" fill="url(#primaryGradient)" stroke="#00FF88" stroke-width="0.5"/>
+    <polygon points="30,22 36,18 42,22 42,30 36,34 30,30" fill="url(#primaryGradient)" stroke="#00FF88" stroke-width="0.5"/>
+    
+    <!-- Central Lightning Bolt -->
+    <path d="M21 11 L27 11 L23 17 L29 17 L21 25 L25 19 L19 19 Z" fill="url(#energyGradient)" filter="url(#glow)"/>
+  </g>
+</svg>
