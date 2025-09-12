@@ -99,6 +99,7 @@ CREATE TABLE "sites" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "address" TEXT NOT NULL,
+    "municipality" TEXT,
     "latitude" DOUBLE PRECISION NOT NULL,
     "longitude" DOUBLE PRECISION NOT NULL,
     "timezone" TEXT NOT NULL DEFAULT 'UTC',
@@ -354,4 +355,82 @@ ALTER TABLE "notifications" ADD CONSTRAINT "notifications_userId_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- Insert default organization
+INSERT INTO "organizations" ("id", "name", "slug", "domain", "settings", "isActive", "createdAt", "updatedAt")
+VALUES (
+    'org_default_solarnexus',
+    'SolarNexus Default Organization',
+    'solarnexus-default',
+    'nexus.gonxt.tech',
+    '{"theme": "default", "timezone": "UTC", "currency": "USD"}',
+    true,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+) ON CONFLICT ("id") DO NOTHING;
+
+-- Insert default license
+INSERT INTO "licenses" ("id", "organizationId", "licenseType", "maxSites", "maxUsers", "features", "isActive", "expiresAt", "createdAt", "updatedAt")
+VALUES (
+    'lic_default_solarnexus',
+    'org_default_solarnexus',
+    'enterprise',
+    1000,
+    100,
+    '{"analytics": true, "predictive_maintenance": true, "sdg_tracking": true, "multi_tenant": true}',
+    true,
+    '2025-12-31 23:59:59',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+) ON CONFLICT ("id") DO NOTHING;
+
+-- Insert default super admin user (password: admin123)
+INSERT INTO "users" ("id", "email", "password", "firstName", "lastName", "role", "isActive", "emailVerified", "organizationId", "createdAt", "updatedAt")
+VALUES (
+    'user_admin_solarnexus',
+    'admin@nexus.gonxt.tech',
+    '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj/VcSAg/9PS',
+    'System',
+    'Administrator',
+    'SUPER_ADMIN',
+    true,
+    true,
+    'org_default_solarnexus',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+) ON CONFLICT ("email") DO NOTHING;
+
+-- Insert sample project
+INSERT INTO "projects" ("id", "name", "description", "organizationId", "isActive", "createdAt", "updatedAt")
+VALUES (
+    'proj_demo_solarnexus',
+    'Demo Solar Project',
+    'Demonstration project for SolarNexus platform',
+    'org_default_solarnexus',
+    true,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+) ON CONFLICT ("id") DO NOTHING;
+
+-- Insert sample site
+INSERT INTO "sites" ("id", "name", "address", "municipality", "latitude", "longitude", "timezone", "capacity", "installDate", "isActive", "organizationId", "projectId", "municipalRate", "touTariff", "targetPerformance", "createdAt", "updatedAt")
+VALUES (
+    'site_demo_solarnexus',
+    'Demo Solar Site',
+    '123 Solar Street, Green City, EC 12345',
+    'Green City',
+    -26.2041,
+    28.0473,
+    'Africa/Johannesburg',
+    50.0,
+    '2024-01-15 00:00:00',
+    true,
+    'org_default_solarnexus',
+    'proj_demo_solarnexus',
+    0.15,
+    '{"peak": 0.25, "standard": 0.15, "off_peak": 0.08}',
+    95.0,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+) ON CONFLICT ("id") DO NOTHING;
 
