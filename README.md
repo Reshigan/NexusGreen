@@ -15,13 +15,28 @@
 
 ## 🚀 Quick Installation
 
-### Option 1: One-Command Install (Recommended)
+### 🔒 Option 1: SSL Production Install (Recommended)
+
+```bash
+curl -o quick-ssl-install.sh https://raw.githubusercontent.com/Reshigan/SolarNexus/main/quick-ssl-install.sh
+chmod +x quick-ssl-install.sh
+sudo ./quick-ssl-install.sh your-domain.com your-email@domain.com
+```
+
+**Features:**
+- 🔐 **Automatic SSL certificates** with Let's Encrypt
+- 🛡️ **Security hardening** with firewall and fail2ban
+- 🚀 **HTTP/2 and modern TLS** support
+- 🔄 **Auto-renewal** of certificates
+- ⚡ **Production-ready** configuration
+
+### 🏠 Option 2: Local Development Install
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/Reshigan/SolarNexus/main/quick-install.sh | bash
 ```
 
-### Option 2: Manual Install
+### 🔧 Option 3: Manual Install
 
 ```bash
 git clone https://github.com/Reshigan/SolarNexus.git
@@ -37,11 +52,12 @@ cd SolarNexus
 - ✅ Ready to use in under 2 minutes!
 
 **Access your application:**
-- **Web App**: http://localhost:80
+- **SSL Production**: https://your-domain.com
+- **Local Development**: http://localhost:80
 - **API**: http://localhost:3000
 - **Health Check**: http://localhost:3000/health
 
-📖 **Need help?** See [SIMPLE-INSTALL.md](SIMPLE-INSTALL.md) for detailed instructions.
+📖 **Need help?** See [SSL-INSTALL.md](SSL-INSTALL.md) for SSL setup or [SIMPLE-INSTALL.md](SIMPLE-INSTALL.md) for local installation.
 
 ## 🌟 Overview
 
