@@ -46,11 +46,11 @@ print_step() {
 # Check if running as root or with sudo
 if [[ $EUID -eq 0 ]]; then
     DOCKER_CMD="docker"
-    DOCKER_COMPOSE_CMD="docker-compose"
+    DOCKER_COMPOSE_CMD="docker compose"
     SUDO_CMD=""
 else
     DOCKER_CMD="sudo docker"
-    DOCKER_COMPOSE_CMD="sudo docker-compose"
+    DOCKER_COMPOSE_CMD="sudo docker compose"
     SUDO_CMD="sudo"
 fi
 
