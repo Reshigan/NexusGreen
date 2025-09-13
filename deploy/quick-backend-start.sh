@@ -23,10 +23,12 @@ fi
 
 # Find SolarNexus directory
 SOLARNEXUS_DIR=""
-if [[ -f "docker-compose.yml" ]]; then
+if [[ -f "docker-compose.simple.yml" ]]; then
     SOLARNEXUS_DIR="$(pwd)"
 elif [[ -d "SolarNexus" ]]; then
     SOLARNEXUS_DIR="$(pwd)/SolarNexus"
+elif [[ -d "/home/ubuntu/SolarNexus" ]]; then
+    SOLARNEXUS_DIR="/home/ubuntu/SolarNexus"
 elif [[ -d "/root/SolarNexus" ]]; then
     SOLARNEXUS_DIR="/root/SolarNexus"
 else
@@ -38,16 +40,16 @@ fi
 cd "$SOLARNEXUS_DIR"
 echo -e "${GREEN}✅ Working in: $SOLARNEXUS_DIR${NC}"
 
-# Check if we have docker-compose.yml
-if [[ ! -f "docker-compose.yml" ]]; then
-    echo -e "${RED}❌ docker-compose.yml not found in $SOLARNEXUS_DIR${NC}"
+# Check if we have docker-compose.simple.yml
+if [[ ! -f "docker-compose.simple.yml" ]]; then
+    echo -e "${RED}❌ docker-compose.simple.yml not found in $SOLARNEXUS_DIR${NC}"
     exit 1
 fi
 
 echo -e "${BLUE}🐳 Starting backend services...${NC}"
 
 # Start only backend services using docker-compose
-docker-compose up -d postgres redis backend
+docker-compose -f docker-compose.simple.yml up -d postgres redis backend
 
 echo -e "${BLUE}⏳ Waiting for services to start...${NC}"
 sleep 15
@@ -86,9 +88,9 @@ echo "  • Database: localhost:5432 (user: solarnexus, db: solarnexus)"
 echo "  • Redis: localhost:6379"
 
 echo -e "\n${BLUE}🔧 Useful commands:${NC}"
-echo "  • Check status: docker-compose ps"
-echo "  • View logs: docker-compose logs backend"
-echo "  • Stop services: docker-compose down"
+echo "  • Check status: docker-compose -f docker-compose.simple.yml ps"
+echo "  • View logs: docker-compose -f docker-compose.simple.yml logs backend"
+echo "  • Stop services: docker-compose -f docker-compose.simple.yml down"
 echo "  • Database shell: docker exec -it solarnexus-postgres psql -U solarnexus -d solarnexus"
 echo "  • Redis shell: docker exec -it solarnexus-redis redis-cli"
 

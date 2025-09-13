@@ -141,7 +141,7 @@ If you have your own SSL certificates:
 ### Service Status
 Check if all services are running:
 ```bash
-cd /opt/solarnexus
+cd /home/ubuntu/SolarNexus
 docker-compose -f docker-compose.ssl.yml ps
 ```
 
@@ -159,7 +159,7 @@ docker-compose -f docker-compose.ssl.yml logs backend
 ### SSL Certificate Status
 Check certificate expiration:
 ```bash
-openssl x509 -enddate -noout -in /opt/solarnexus/nginx/ssl/fullchain.pem
+openssl x509 -enddate -noout -in /home/ubuntu/SolarNexus/nginx/ssl/fullchain.pem
 ```
 
 ### Manual Certificate Renewal
@@ -171,14 +171,14 @@ Force certificate renewal:
 ### Restart Services
 Restart all services:
 ```bash
-cd /opt/solarnexus
+cd /home/ubuntu/SolarNexus
 docker-compose -f docker-compose.ssl.yml restart
 ```
 
 ### Update Application
 Update to latest version:
 ```bash
-cd /opt/solarnexus
+cd /home/ubuntu/SolarNexus
 git pull origin main
 docker-compose -f docker-compose.ssl.yml up -d --build
 ```
@@ -259,8 +259,8 @@ docker-compose -f docker-compose.ssl.yml restart nginx
 ```
 
 ### Log Locations
-- **Application logs**: `/opt/solarnexus/logs/`
-- **Nginx logs**: `/opt/solarnexus/logs/nginx/`
+- **Application logs**: `/home/ubuntu/SolarNexus/logs/`
+- **Nginx logs**: `/home/ubuntu/SolarNexus/logs/nginx/`
 - **Installation log**: `/var/log/solarnexus-install.log`
 - **Docker logs**: `docker-compose logs`
 
@@ -290,8 +290,8 @@ Set up monitoring for:
 
 ### Backup Strategy
 Regular backups should include:
-- Application data (`/opt/solarnexus`)
-- SSL certificates (`/opt/solarnexus/ssl`)
+- Application data (`/home/ubuntu/SolarNexus`)
+- SSL certificates (`/home/ubuntu/SolarNexus/ssl`)
 - Database dumps
 - Configuration files
 
@@ -349,22 +349,22 @@ wget https://raw.githubusercontent.com/Reshigan/SolarNexus/main/install-ssl.sh &
 ### Management Commands
 ```bash
 # Service status
-docker-compose -f /opt/solarnexus/docker-compose.ssl.yml ps
+docker-compose -f /home/ubuntu/SolarNexus/docker-compose.ssl.yml ps
 
 # View logs
-docker-compose -f /opt/solarnexus/docker-compose.ssl.yml logs
+docker-compose -f /home/ubuntu/SolarNexus/docker-compose.ssl.yml logs
 
 # Restart services
-docker-compose -f /opt/solarnexus/docker-compose.ssl.yml restart
+docker-compose -f /home/ubuntu/SolarNexus/docker-compose.ssl.yml restart
 
 # Update application
-cd /opt/solarnexus && git pull && docker-compose -f docker-compose.ssl.yml up -d --build
+cd /home/ubuntu/SolarNexus && git pull && docker-compose -f docker-compose.ssl.yml up -d --build
 ```
 
 ### SSL Commands
 ```bash
 # Check certificate expiration
-openssl x509 -enddate -noout -in /opt/solarnexus/nginx/ssl/fullchain.pem
+openssl x509 -enddate -noout -in /home/ubuntu/SolarNexus/nginx/ssl/fullchain.pem
 
 # Manual renewal
 /usr/local/bin/renew-solarnexus-ssl.sh

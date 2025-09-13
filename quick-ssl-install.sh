@@ -46,6 +46,10 @@ echo ""
 # Quick dependency installation
 echo -e "${BLUE}📦 Installing dependencies...${NC}"
 apt-get update -qq
+
+# Remove conflicting packages first
+apt-get remove -y containerd.io docker-ce docker-ce-cli 2>/dev/null || true
+
 apt-get install -y docker.io docker-compose git curl wget openssl
 
 # Start Docker
@@ -53,7 +57,7 @@ systemctl start docker
 systemctl enable docker
 
 # Clone repository
-INSTALL_DIR="/opt/solarnexus"
+INSTALL_DIR="/home/ubuntu/SolarNexus"
 echo -e "${BLUE}📥 Setting up SolarNexus...${NC}"
 mkdir -p "$INSTALL_DIR"
 cd "$INSTALL_DIR"

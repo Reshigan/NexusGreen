@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-INSTALL_DIR="/opt/solarnexus"
+INSTALL_DIR="/home/ubuntu/SolarNexus"
 LOG_FILE="/var/log/solarnexus-install.log"
 
 # Default values
@@ -123,6 +123,9 @@ install_dependencies() {
     # Update package list
     apt-get update -qq
     
+    # Remove conflicting packages first
+    apt-get remove -y containerd.io docker-ce docker-ce-cli 2>/dev/null || true
+    
     # Install required packages
     apt-get install -y \
         curl \
@@ -144,7 +147,8 @@ install_dependencies() {
     systemctl start docker
     systemctl enable docker
     
-    # Add current user to docker group if not root
+    # Add ubuntu user to docker group
+    usermod -aG docker ubuntu 2>/dev/null || true
     if [[ $SUDO_USER ]]; then
         usermod -aG docker $SUDO_USER
     fi
@@ -224,7 +228,7 @@ clone_repository() {
     fi
     
     # Set permissions
-    chown -R $SUDO_USER:$SUDO_USER "$INSTALL_DIR" 2>/dev/null || true
+    chown -R ubuntu:ubuntu "$INSTALL_DIR" 2>/dev/null || true
     
     log "${GREEN}✅ Repository cloned successfully${NC}"
 }
@@ -517,7 +521,7 @@ EOF
     # Create backup script
     cat > "$INSTALL_DIR/backup-ssl.sh" << 'EOF'
 #!/bin/bash
-BACKUP_DIR="/opt/solarnexus-backups"
+BACKUP_DIR="/home/ubuntu/SolarNexus-backups"
 DATE=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="$BACKUP_DIR/solarnexus_ssl_backup_$DATE.tar.gz"
 
