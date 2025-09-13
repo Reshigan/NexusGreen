@@ -62,11 +62,7 @@ else
     fi
 fi
 
-# Debug: Show final directory after detection
-echo "🔍 DEBUG: Final working directory after detection: $(pwd)"
-echo "🔍 DEBUG: SOLARNEXUS_DIR is set to: ${SOLARNEXUS_DIR:-not set}"
-echo "🔍 DEBUG: Files in final directory:"
-ls -la
+# Directory detection completed successfully
 
 INSTALL_DIR="$(pwd)"
 LOG_FILE="$INSTALL_DIR/deployment.log"
@@ -98,6 +94,15 @@ ensure_correct_directory() {
         ls -la
         error_message "SOLARNEXUS_DIR was set to: ${SOLARNEXUS_DIR:-not set}"
         exit 1
+    fi
+}
+
+# Docker Compose wrapper function
+docker_compose() {
+    if command_exists "docker-compose"; then
+        docker-compose "$@"
+    else
+        docker compose "$@"
     fi
 }
 
@@ -151,12 +156,17 @@ check_requirements() {
     fi
     
     # Check for required commands
-    local required_commands=("docker" "docker-compose" "curl" "git")
+    local required_commands=("docker" "curl" "git")
     for cmd in "${required_commands[@]}"; do
         if ! command_exists "$cmd"; then
             error_exit "Required command '$cmd' is not installed"
         fi
     done
+    
+    # Check for docker-compose (either standalone or plugin)
+    if ! command_exists "docker-compose" && ! docker compose version >/dev/null 2>&1; then
+        error_exit "Docker Compose is not available (neither 'docker-compose' nor 'docker compose')"
+    fi
     
     # Check Docker daemon
     if ! docker info >/dev/null 2>&1; then
@@ -309,11 +319,10 @@ start_databases() {
     # Ensure we're in the correct directory
     ensure_correct_directory
     
-    info_message "Working directory: $(pwd)"
-    info_message "Using docker-compose file: $(pwd)/docker-compose.final.yml"
+    # Directory validation completed
     
     # Start only database services first
-    docker-compose -f docker-compose.final.yml up -d postgres redis
+    docker_compose -f docker-compose.final.yml up -d postgres redis
     
     # Wait for services to be healthy
     info_message "Waiting for database services to be ready..."
@@ -322,8 +331,8 @@ start_databases() {
     local attempt=0
     
     while [[ $attempt -lt $max_attempts ]]; do
-        if docker-compose -f docker-compose.final.yml ps postgres | grep -q "healthy"; then
-            if docker-compose -f docker-compose.final.yml ps redis | grep -q "healthy"; then
+        if docker_compose -f docker-compose.final.yml ps postgres | grep -q "healthy"; then
+            if docker_compose -f docker-compose.final.yml ps redis | grep -q "healthy"; then
                 success_message "Database services are ready"
                 return 0
             fi
@@ -360,7 +369,7 @@ start_backend() {
     info_message "Building and starting backend service..."
     ensure_correct_directory
     
-    docker-compose -f docker-compose.final.yml up -d --build backend
+    docker_compose -f docker-compose.final.yml up -d --build backend
     
     # Wait for backend to be healthy
     info_message "Waiting for backend service to be ready..."
@@ -369,7 +378,7 @@ start_backend() {
     local attempt=0
     
     while [[ $attempt -lt $max_attempts ]]; do
-        if docker-compose -f docker-compose.final.yml ps backend | grep -q "healthy"; then
+        if docker_compose -f docker-compose.final.yml ps backend | grep -q "healthy"; then
             success_message "Backend service is ready"
             return 0
         fi
@@ -387,7 +396,7 @@ start_frontend() {
     info_message "Building and starting frontend service..."
     ensure_correct_directory
     
-    docker-compose -f docker-compose.final.yml up -d --build frontend
+    docker_compose -f docker-compose.final.yml up -d --build frontend
     
     # Wait for frontend to be healthy
     info_message "Waiting for frontend service to be ready..."
@@ -396,7 +405,7 @@ start_frontend() {
     local attempt=0
     
     while [[ $attempt -lt $max_attempts ]]; do
-        if docker-compose -f docker-compose.final.yml ps frontend | grep -q "healthy"; then
+        if docker_compose -f docker-compose.final.yml ps frontend | grep -q "healthy"; then
             success_message "Frontend service is ready"
             return 0
         fi
@@ -418,7 +427,7 @@ verify_deployment() {
     local all_healthy=true
     
     for service in "${services[@]}"; do
-        if docker-compose -f docker-compose.final.yml ps "$service" | grep -q "Up"; then
+        if docker_compose -f docker-compose.final.yml ps "$service" | grep -q "Up"; then
             success_message "$service: Running"
         else
             warning_message "$service: Not running properly"
@@ -461,7 +470,7 @@ create_management_scripts() {
 #!/bin/bash
 echo "🔍 SolarNexus Service Status"
 echo "============================"
-docker-compose -f docker-compose.final.yml ps
+docker_compose -f docker-compose.final.yml ps
 echo ""
 echo "🌐 Service Endpoints:"
 echo "  • Frontend: http://localhost/"
@@ -474,7 +483,7 @@ EOF
     cat > stop.sh << 'EOF'
 #!/bin/bash
 echo "🛑 Stopping SolarNexus services..."
-docker-compose -f docker-compose.final.yml down
+docker_compose -f docker-compose.final.yml down
 echo "✅ All services stopped"
 EOF
     chmod +x stop.sh
@@ -483,7 +492,7 @@ EOF
     cat > start.sh << 'EOF'
 #!/bin/bash
 echo "🚀 Starting SolarNexus services..."
-docker-compose -f docker-compose.final.yml up -d
+docker_compose -f docker-compose.final.yml up -d
 echo "✅ All services started"
 EOF
     chmod +x start.sh
@@ -493,11 +502,11 @@ EOF
 #!/bin/bash
 SERVICE=${1:-}
 if [[ -n "$SERVICE" ]]; then
-    docker-compose -f docker-compose.final.yml logs -f "$SERVICE"
+    docker_compose -f docker-compose.final.yml logs -f "$SERVICE"
 else
     echo "Usage: ./logs.sh [service_name]"
     echo "Available services: postgres, redis, backend, frontend"
-    echo "Or use: docker-compose -f docker-compose.final.yml logs -f"
+    echo "Or use: docker_compose -f docker-compose.final.yml logs -f"
 fi
 EOF
     chmod +x logs.sh
@@ -528,10 +537,10 @@ print_summary() {
     echo "  • Start Services: ./start.sh"
     echo ""
     print_status "$CYAN" "📚 Docker Commands:"
-    echo "  • Service Status: docker-compose -f docker-compose.final.yml ps"
-    echo "  • View Logs: docker-compose -f docker-compose.final.yml logs [service]"
-    echo "  • Restart: docker-compose -f docker-compose.final.yml restart"
-    echo "  • Stop All: docker-compose -f docker-compose.final.yml down"
+    echo "  • Service Status: docker_compose -f docker-compose.final.yml ps"
+    echo "  • View Logs: docker_compose -f docker-compose.final.yml logs [service]"
+    echo "  • Restart: docker_compose -f docker-compose.final.yml restart"
+    echo "  • Stop All: docker_compose -f docker-compose.final.yml down"
     echo ""
     print_status "$GREEN" "✅ SolarNexus is ready for production use!"
     print_status "$GREEN" "🌟 Access your solar management portal at: http://localhost/"
@@ -545,11 +554,7 @@ main() {
     print_status "$PURPLE" "🚀 $SCRIPT_NAME v$SCRIPT_VERSION"
     print_status "$PURPLE" "=================================="
     
-    # Debug: Show initial directory
-    info_message "DEBUG: Script started from directory: $(pwd)"
-    info_message "DEBUG: Script location: $0"
-    info_message "DEBUG: Files in current directory:"
-    ls -la
+    # Script initialization completed
     
     # Execute deployment steps
     check_requirements
