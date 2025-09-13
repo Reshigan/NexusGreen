@@ -59,11 +59,20 @@ echo ""
 print_warning "This script will completely remove all existing SolarNexus installations"
 print_warning "and perform a fresh installation from scratch."
 echo ""
-read -p "Are you sure you want to continue? (type 'YES' to confirm): " confirm
 
-if [ "$confirm" != "YES" ]; then
-    print_error "Installation cancelled by user"
-    exit 1
+# Check if running in non-interactive mode (piped from curl)
+if [ -t 0 ]; then
+    # Interactive mode - ask for confirmation
+    read -p "Are you sure you want to continue? (type 'YES' to confirm): " confirm
+    if [ "$confirm" != "YES" ]; then
+        print_error "Installation cancelled by user"
+        exit 1
+    fi
+else
+    # Non-interactive mode (piped) - auto-confirm with warning
+    print_warning "Running in non-interactive mode - proceeding automatically"
+    print_status "To cancel, press Ctrl+C within 5 seconds..."
+    sleep 5
 fi
 
 print_header "STEP 1: System Preparation"
