@@ -50,16 +50,20 @@ RUN apk add --no-cache \
 
 WORKDIR /app
 
-# Copy package files and install all dependencies (including dev for ts-node)
+# Copy package files and install dependencies with limited cache
 COPY --from=base /app/package*.json ./
-RUN npm ci && npm cache clean --force
+RUN npm ci --omit=dev --no-audit --no-fund && \
+    npm install -g ts-node tsconfig-paths typescript && \
+    npm cache clean --force && \
+    rm -rf /tmp/* /var/tmp/* /root/.npm
 
 # Copy source code and configuration
 COPY --chown=solarnexus:nodejs . .
 COPY --from=base /app/prisma ./prisma
 
-# Generate Prisma client
-RUN npx prisma generate
+# Generate Prisma client and clean up
+RUN npx prisma generate && \
+    rm -rf /tmp/* /var/tmp/*
 
 # Create necessary directories
 RUN mkdir -p /app/uploads /app/logs && \
