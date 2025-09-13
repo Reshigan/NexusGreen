@@ -13,26 +13,35 @@
   [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15.0-00D4FF.svg)](https://postgresql.org)
 </div>
 
-## 🚀 One-Command Installation
+## 🚀 Quick Installation
 
-Get SolarNexus running in minutes with our automated installer:
+### Option 1: One-Command Install (Recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Reshigan/SolarNexus/main/deploy/CLEAN-INSTALL.sh | bash
+curl -sSL https://raw.githubusercontent.com/Reshigan/SolarNexus/main/quick-install.sh | bash
+```
+
+### Option 2: Manual Install
+
+```bash
+git clone https://github.com/Reshigan/SolarNexus.git
+cd SolarNexus
+./install.sh
 ```
 
 **What this does:**
-- ✅ Installs Docker and Docker Compose automatically
-- ✅ Removes any previous installations completely  
-- ✅ Downloads and builds the latest SolarNexus
-- ✅ Sets up secure passwords and production configuration
-- ✅ Starts all services with health monitoring
-- ✅ Provides management commands for easy operation
+- ✅ Automatically sets up Docker containers
+- ✅ Builds and starts all services (Frontend, Backend, Database, Cache)
+- ✅ Creates secure default configuration
+- ✅ Provides health checks and monitoring
+- ✅ Ready to use in under 2 minutes!
 
 **Access your application:**
-- **Frontend**: http://localhost
-- **Backend API**: http://localhost:3000
+- **Web App**: http://localhost:80
+- **API**: http://localhost:3000
 - **Health Check**: http://localhost:3000/health
+
+📖 **Need help?** See [SIMPLE-INSTALL.md](SIMPLE-INSTALL.md) for detailed instructions.
 
 ## 🌟 Overview
 
