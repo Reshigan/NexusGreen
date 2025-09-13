@@ -1,9 +1,9 @@
-# 🌿 Nexus Green - Multi-Tenant Solar Energy Management Platform
+# 🌞 SolarNexus - Unified Solar Energy Management Platform
 
 <div align="center">
-  <img src="public/nexus-green-logo.svg" alt="Nexus Green Logo" width="300"/>
+  <img src="public/nexus-green-logo.svg" alt="SolarNexus Logo" width="300"/>
   
-  **⚡ Connecting Solar Energy Through Intelligent Analytics ⚡**
+  **⚡ Complete Solar Energy Management Solution ⚡**
   
   [![Production Ready](https://img.shields.io/badge/Production-Ready-00FF88.svg)](https://github.com/Reshigan/SolarNexus)
   [![Docker](https://img.shields.io/badge/Docker-Enabled-00D4FF.svg)](https://docker.com)
@@ -15,7 +15,7 @@
 
 ## 🌟 Overview
 
-**Nexus Green** is a sophisticated, production-ready multi-tenant solar energy management platform designed for the modern renewable energy ecosystem. Built with cutting-edge technology and an edgy, tech-forward design, it provides comprehensive analytics, predictive maintenance, and SDG impact tracking for solar installations.
+**SolarNexus** is a comprehensive, production-ready solar energy management platform that combines frontend and backend components in a single, unified repository. Built with modern technologies and designed for scalability, it provides real-time analytics, multi-tenant architecture, and comprehensive solar installation management.
 
 ### 🎯 Key Features
 
@@ -30,18 +30,48 @@
 
 ## 🏗️ Architecture
 
-### System Components
+### 🏗️ Unified Repository Structure
+
+This repository contains both frontend and backend components:
+
+```
+SolarNexus/
+├── 📱 Frontend (React + TypeScript + Vite)
+│   ├── src/                    # React application source
+│   ├── public/                 # Static assets
+│   ├── package.json           # Frontend dependencies
+│   └── Dockerfile             # Frontend container
+│
+├── 🔧 Backend (Node.js + Express + Prisma)
+│   └── solarnexus-backend/
+│       ├── src/               # Backend API source
+│       ├── prisma/            # Database schema
+│       ├── package.json       # Backend dependencies
+│       └── Dockerfile         # Backend container
+│
+├── 🐳 Infrastructure
+│   ├── deploy/                # Deployment scripts
+│   ├── docker-compose.yml     # Service orchestration
+│   └── nginx/                 # Reverse proxy config
+│
+└── 📚 Documentation
+    ├── README.md              # This file
+    ├── PROJECT_STRUCTURE.md   # Detailed structure
+    └── DEPLOYMENT_INSTRUCTIONS.md
+```
+
+### System Architecture
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   React Frontend │    │  Node.js Backend │    │   PostgreSQL    │
-│   (Port 3000)   │◄──►│   (Port 5000)   │◄──►│   (Port 5432)   │
+│   (Port 80)     │◄──►│   (Port 3000)   │◄──►│   (Port 5432)   │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
          ▼                       ▼                       ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │      Nginx      │    │  Prisma ORM     │    │   Redis Cache   │
-│   (Port 80/443) │    │   Type Safety   │    │   (Optional)    │
+│   (Port 80/443) │    │   Type Safety   │    │   (Port 6379)   │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
@@ -49,16 +79,17 @@
 
 **Frontend:**
 - React 18 with TypeScript
-- Shadcn-ui & Tailwind CSS for modern UI
+- Vite for fast development and building
+- Tailwind CSS + shadcn/ui components
 - React Router for navigation
-- Axios for API communication
+- Recharts for data visualization
 
 **Backend:**
 - Node.js 20 with Express.js
 - TypeScript for type safety
 - Prisma ORM for database management
 - JWT for authentication
-- Nodemailer for email services
+- Redis for caching and sessions
 
 **Database:**
 - PostgreSQL 15 for primary data storage
@@ -78,49 +109,48 @@
 - Node.js 20+ (for development)
 - Git
 
-### 1. Clone the Repository
+### 🚀 Production Deployment (Recommended)
+
+**One-Command Installation:**
 
 ```bash
-git clone https://github.com/Reshigan/PPA-Frontend.git
-cd PPA-Frontend
+# Clone the repository
+git clone https://github.com/Reshigan/SolarNexus.git
+cd SolarNexus
+
+# Run the complete installation script
+sudo ./deploy/clean-install.sh
 ```
 
-### 2. Environment Setup
+This script will:
+- ✅ Clean up any existing installations
+- ✅ Install in current directory (`$(pwd)/SolarNexus`)
+- ✅ Set up all services with Docker Compose
+- ✅ Initialize database with sample data
+- ✅ Configure Nginx reverse proxy
+- ✅ Test all services
 
-Copy the production environment file:
+### 🛠️ Development Setup
+
+**Backend Services Only:**
 
 ```bash
-cp .env.production .env
+# Clone and start backend services
+git clone https://github.com/Reshigan/SolarNexus.git
+cd SolarNexus
+
+# Start PostgreSQL, Redis, and Backend API
+./deploy/quick-backend-start.sh
 ```
 
-Update the environment variables in `.env`:
-
-```env
-# Database
-DATABASE_URL="postgresql://solarnexus:your_secure_password@postgres:5432/solarnexus"
-
-# JWT
-JWT_SECRET="your_jwt_secret_key_here"
-
-# Email Configuration
-EMAIL_HOST="smtp.gmail.com"
-EMAIL_PORT=587
-EMAIL_USER="your-email@gmail.com"
-EMAIL_PASS="your-app-password"
-
-# SolaX API
-SOLAX_API_TOKEN="your_solax_api_token"
-
-# Server
-PORT=5000
-NODE_ENV=production
-```
-
-### 3. Deploy with Docker
+**Full Development Environment:**
 
 ```bash
-# Build and start all services
+# Start all services
 docker-compose up -d
+
+# Or start specific services
+docker-compose up -d postgres redis backend
 
 # View logs
 docker-compose logs -f
@@ -129,21 +159,28 @@ docker-compose logs -f
 docker-compose ps
 ```
 
-### 4. Initialize Database
+**Frontend Development Server:**
 
 ```bash
-# Run database migrations
-docker-compose exec backend npx prisma migrate deploy
+# Install frontend dependencies
+npm install
 
-# (Optional) Seed initial data
-docker-compose exec backend npx prisma db seed
+# Start development server (with hot reload)
+npm run dev
+
+# Build for production
+npm run build
 ```
 
-### 5. Access the Application
+### 🌐 Access Points
 
-- **Frontend:** http://localhost (or your domain)
-- **Backend API:** http://localhost/api
-- **Database:** localhost:5432
+After successful deployment:
+
+- **Frontend Application:** http://localhost/
+- **Backend API:** http://localhost:3000/
+- **API Health Check:** http://localhost:3000/health
+- **Database:** localhost:5432 (user: solarnexus, db: solarnexus)
+- **Redis:** localhost:6379
 
 ## 👥 User Roles & Permissions
 
@@ -220,38 +257,81 @@ const energyData = await solarDataService.getEnergyData(
 - System performance metrics
 - Equipment status monitoring
 
-## 🛠️ Development
+## 🛠️ Development Guide
 
-### Local Development Setup
+### Frontend Development
 
 ```bash
 # Install dependencies
 npm install
 
-# Start development servers
+# Start development server (with hot reload)
 npm run dev
-
-# Run tests
-npm test
 
 # Build for production
 npm run build
+
+# Preview production build
+npm run preview
+
+# Run linting
+npm run lint
+```
+
+### Backend Development
+
+```bash
+cd solarnexus-backend
+
+# Install dependencies
+npm install
+
+# Generate Prisma client
+npx prisma generate
+
+# Run database migrations
+npx prisma migrate dev
+
+# Start development server
+npm run dev
+
+# View database in browser
+npx prisma studio
 ```
 
 ### Database Management
 
 ```bash
-# Generate Prisma client
-npx prisma generate
-
-# Create migration
+# Create new migration
 npx prisma migrate dev --name your_migration_name
 
-# Reset database
+# Deploy migrations to production
+npx prisma migrate deploy
+
+# Reset database (development only)
 npx prisma migrate reset
 
-# View database
-npx prisma studio
+# Seed database with sample data
+npx prisma db seed
+```
+
+### Docker Development
+
+```bash
+# Start all services
+docker-compose up -d
+
+# Start specific services
+docker-compose up -d postgres redis
+
+# View logs
+docker-compose logs -f backend
+
+# Rebuild services
+docker-compose up -d --build
+
+# Stop all services
+docker-compose down
 ```
 
 ### API Documentation
@@ -345,10 +425,23 @@ For support and questions:
 - **UN SDG Framework** for sustainability metrics
 - **Open Source Community** for the amazing tools and libraries
 
+## 📁 Repository Structure
+
+For detailed information about the repository structure, see [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md).
+
+## 📋 Additional Documentation
+
+- **[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)** - Detailed repository structure and architecture
+- **[DEPLOYMENT_INSTRUCTIONS.md](DEPLOYMENT_INSTRUCTIONS.md)** - Comprehensive deployment guide
+- **[SYSTEM_DESIGN.md](SYSTEM_DESIGN.md)** - System architecture and design decisions
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Common issues and solutions
+
 ---
 
 <div align="center">
-  <strong>Built with ❤️ for a sustainable future</strong>
+  <strong>🌞 SolarNexus - Unified Solar Energy Management Platform 🌞</strong>
   
-  [Website](https://solarnexus.com) • [Documentation](https://docs.solarnexus.com) • [Support](mailto:support@solarnexus.com)
+  <p><em>Built with ❤️ for a sustainable future</em></p>
+  
+  **This repository serves as the single source of truth for the entire SolarNexus application.**
 </div>

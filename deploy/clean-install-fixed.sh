@@ -18,7 +18,7 @@ NC='\033[0m' # No Color
 # Check if running as root
 if [[ $EUID -ne 0 ]]; then
    echo -e "${RED}❌ This script should be run as root or with sudo${NC}"
-   echo "Usage: sudo ./clean-install.sh"
+   echo "Usage: sudo ./clean-install-fixed.sh"
    exit 1
 fi
 
