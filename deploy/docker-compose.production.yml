@@ -58,7 +58,7 @@ services:
 
   backend:
     build:
-      context: ./solarnexus-backend
+      context: ../solarnexus-backend
       dockerfile: Dockerfile
       target: production
     container_name: solarnexus-backend
@@ -99,7 +99,7 @@ services:
 
   frontend:
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile
       args:
         - VITE_API_URL=${VITE_API_URL}
