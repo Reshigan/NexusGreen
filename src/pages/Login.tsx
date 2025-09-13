@@ -36,7 +36,7 @@ const Login = () => {
       let data: any = {};
       if (ct.includes('application/json') && raw) { try { data = JSON.parse(raw); } catch {} }
       if (!res.ok || data.error) { throw new Error(data?.error || `Failed with status ${res.status}`); }
-      toast({ title: 'Login Successful', description: 'Welcome to your Solar Investment Dashboard' });
+      toast({ title: 'Login Successful', description: 'Welcome to SolarNexus Dashboard' });
       navigate('/dashboard');
     } catch (err: any) {
       toast({ title: 'Login Failed', description: err.message || 'Unexpected error', variant: 'destructive' });
@@ -51,17 +51,17 @@ const Login = () => {
         <CardHeader className="text-center">
           <div className="flex flex-col items-center gap-2">
             <img
-              src="/gonxt-logo.jpeg"
-              alt="GoNXT logo"
-              title="GoNXT"
+              src="/solarnexus-logo.svg"
+              alt="SolarNexus logo"
+              title="SolarNexus"
               className="h-14 md:h-16 w-auto object-contain drop-shadow-sm"
               loading="eager"
               decoding="async"
             />
-            <CardTitle className="text-2xl font-bold">PPA Dashboard</CardTitle>
+            <CardTitle className="text-2xl font-bold">SolarNexus</CardTitle>
           </div>
           <CardDescription>
-            Welcome to your Solar Investment Dashboard
+            Welcome to your Solar Energy Management Platform
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -71,7 +71,7 @@ const Login = () => {
               <Input
                 id="email"
                 type="email"
-                placeholder="investor@solarfund.com"
+                placeholder="user@solarnexus.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
