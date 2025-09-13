@@ -24,6 +24,19 @@ chmod +x deploy-final.sh
 sudo ./deploy-final.sh
 ```
 
+**Note**: The script will automatically detect if you need to clone the repository first. If the SolarNexus files aren't found in the current directory, it will guide you through the setup.
+
+### Alternative: Clone First, Then Deploy
+
+```bash
+# Clone the repository first
+git clone https://github.com/Reshigan/SolarNexus.git
+cd SolarNexus
+
+# Run the deployment script
+sudo ./deploy-final.sh
+```
+
 That's it! The script will handle everything automatically.
 
 ## 📁 Deployment Files Overview

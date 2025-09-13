@@ -13,7 +13,14 @@ Get SolarNexus running in production with a single command:
 curl -o deploy-final.sh https://raw.githubusercontent.com/Reshigan/SolarNexus/main/deploy-final.sh && chmod +x deploy-final.sh && sudo ./deploy-final.sh
 ```
 
-**That's it!** Your complete solar energy management platform will be running at `http://localhost/`
+**That's it!** The script will:
+- ✅ Automatically detect if you need to clone the repository
+- ✅ Guide you through the setup process
+- ✅ Handle all Docker configurations
+- ✅ Start all services with health checks
+- ✅ Provide management scripts for ongoing operations
+
+Your complete solar energy management platform will be running at `http://localhost/`
 
 ## ✨ What You Get
 

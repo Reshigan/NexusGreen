@@ -9,6 +9,59 @@ set -euo pipefail
 # Script configuration
 SCRIPT_VERSION="1.0.0"
 SCRIPT_NAME="SolarNexus Final Deployment"
+
+# Determine the correct working directory
+if [[ -f "docker-compose.final.yml" && -f "Dockerfile.final" ]]; then
+    # We're already in the SolarNexus directory
+    SOLARNEXUS_DIR="$(pwd)"
+elif [[ -f "SolarNexus/docker-compose.final.yml" && -f "SolarNexus/Dockerfile.final" ]]; then
+    # SolarNexus directory is a subdirectory
+    SOLARNEXUS_DIR="$(pwd)/SolarNexus"
+    echo "🔍 Found SolarNexus directory, changing to: $SOLARNEXUS_DIR"
+    cd "$SOLARNEXUS_DIR"
+elif [[ -d "SolarNexus" ]]; then
+    # Check if SolarNexus directory has the required files
+    if [[ -f "SolarNexus/docker-compose.final.yml" && -f "SolarNexus/Dockerfile.final" ]]; then
+        SOLARNEXUS_DIR="$(pwd)/SolarNexus"
+        echo "🔍 Found SolarNexus directory, changing to: $SOLARNEXUS_DIR"
+        cd "$SOLARNEXUS_DIR"
+    else
+        echo "❌ ERROR: SolarNexus directory found but missing required files"
+        echo "Please ensure docker-compose.final.yml and Dockerfile.final exist in the SolarNexus directory"
+        exit 1
+    fi
+else
+    echo "🔍 SolarNexus deployment files not found in current directory"
+    echo "📥 Would you like to clone the SolarNexus repository? (y/N)"
+    read -r response
+    if [[ "$response" =~ ^[Yy]$ ]]; then
+        echo "📥 Cloning SolarNexus repository..."
+        if command -v git >/dev/null 2>&1; then
+            git clone https://github.com/Reshigan/SolarNexus.git
+            if [[ -d "SolarNexus" && -f "SolarNexus/docker-compose.final.yml" ]]; then
+                SOLARNEXUS_DIR="$(pwd)/SolarNexus"
+                echo "✅ Repository cloned successfully, changing to: $SOLARNEXUS_DIR"
+                cd "$SOLARNEXUS_DIR"
+            else
+                echo "❌ ERROR: Failed to clone repository or files are missing"
+                exit 1
+            fi
+        else
+            echo "❌ ERROR: git is not installed. Please install git first:"
+            echo "  Ubuntu/Debian: sudo apt update && sudo apt install git"
+            echo "  CentOS/RHEL: sudo yum install git"
+            exit 1
+        fi
+    else
+        echo "❌ Cannot proceed without SolarNexus deployment files"
+        echo "Please either:"
+        echo "  1. Run this script from inside the SolarNexus directory"
+        echo "  2. Run this script from a directory containing SolarNexus subdirectory"
+        echo "  3. Clone the repository first: git clone https://github.com/Reshigan/SolarNexus.git"
+        exit 1
+    fi
+fi
+
 INSTALL_DIR="$(pwd)"
 LOG_FILE="$INSTALL_DIR/deployment.log"
 
