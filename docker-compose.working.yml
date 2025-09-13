@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: solarnexus-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: solarnexus
+      POSTGRES_USER: solarnexus
+      POSTGRES_PASSWORD: solarnexus
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - solarnexus-network
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: solarnexus-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - solarnexus-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./solarnexus-backend
+      dockerfile: Dockerfile.debian
+      target: production
+    container_name: solarnexus-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://solarnexus:solarnexus@postgres:5432/solarnexus
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: your_super_secure_jwt_secret_key_2024
+      JWT_REFRESH_SECRET: your_super_secure_jwt_refresh_secret_key_2024
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    ports:
+      - "3000:3000"
+    networks:
+      - solarnexus-network
+    depends_on:
+      - postgres
+      - redis
+
+  # Frontend (React)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: solarnexus-frontend
+    restart: unless-stopped
+    environment:
+      REACT_APP_API_URL: http://localhost:3000
+      REACT_APP_ENVIRONMENT: production
+    ports:
+      - "80:80"
+    networks:
+      - solarnexus-network
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  solarnexus-network:
+    driver: bridge
