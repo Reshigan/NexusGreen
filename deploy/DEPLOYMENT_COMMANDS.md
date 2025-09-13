@@ -1,6 +1,6 @@
 # 🚀 SolarNexus Production Deployment Commands
 
-## Server: 13.244.63.26 | Domain: nexus.gonxt.tech
+## Server: 13.245.249.110 | Domain: nexus.gonxt.tech
 
 ### 📋 Quick Reference Commands
 
@@ -8,7 +8,7 @@
 
 ```bash
 # SSH to production server
-ssh root@13.244.63.26
+ssh root@13.245.249.110
 
 # One-command deployment
 curl -fsSL https://raw.githubusercontent.com/Reshigan/SolarNexus/main/deploy/production-deploy.sh | sudo bash
@@ -199,9 +199,9 @@ sudo systemctl start solarnexus-monitoring
 sudo /opt/solarnexus/monitoring/start-monitoring.sh
 
 # Access monitoring
-# Grafana: http://13.244.63.26:3001
-# Prometheus: http://13.244.63.26:9090
-# Alertmanager: http://13.244.63.26:9093
+# Grafana: http://13.245.249.110:3001
+# Prometheus: http://13.245.249.110:9090
+# Alertmanager: http://13.245.249.110:9093
 
 # Check monitoring status
 docker ps | grep -E "(prometheus|grafana|alertmanager)"
@@ -279,13 +279,13 @@ https://nexus.gonxt.tech/api/health     # API health check
 https://nexus.gonxt.tech/health         # Frontend health check
 
 # Monitoring URLs (internal)
-http://13.244.63.26:3001               # Grafana dashboard
-http://13.244.63.26:9090               # Prometheus metrics
-http://13.244.63.26:9093               # Alertmanager
+http://13.245.249.110:3001               # Grafana dashboard
+http://13.245.249.110:9090               # Prometheus metrics
+http://13.245.249.110:9093               # Alertmanager
 
 # Development URLs (if needed)
-http://13.244.63.26:3000               # Backend API
-http://13.244.63.26:8080               # Frontend app
+http://13.245.249.110:3000               # Backend API
+http://13.245.249.110:8080               # Frontend app
 ```
 
 ## 📞 Emergency Commands
@@ -333,7 +333,7 @@ curl http://localhost:3001/api/health
 
 ## 🎯 Quick Deployment Summary
 
-1. **SSH to server**: `ssh root@13.244.63.26`
+1. **SSH to server**: `ssh root@13.245.249.110`
 2. **One-command deploy**: `curl -fsSL https://raw.githubusercontent.com/Reshigan/SolarNexus/main/deploy/production-deploy.sh | sudo bash`
 3. **Configure API keys**: `sudo ./scripts/setup-production-keys.sh`
 4. **Setup SSL**: `sudo ./scripts/setup-ssl.sh`

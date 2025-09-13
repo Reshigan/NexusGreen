@@ -133,7 +133,7 @@ update_nginx_config() {
 # HTTP to HTTPS redirect
 server {
     listen 80;
-    server_name nexus.gonxt.tech www.nexus.gonxt.tech 13.244.63.26;
+    server_name nexus.gonxt.tech www.nexus.gonxt.tech 13.245.249.110;
     
     # Health check (allow HTTP for monitoring)
     location /health {

@@ -7,7 +7,7 @@ This directory contains all the scripts and configurations needed to deploy Sola
 ### 1. Initial Production Deployment
 
 ```bash
-# On your production server (13.244.63.26)
+# On your production server (13.245.249.110)
 sudo ./production-deploy.sh
 ```
 

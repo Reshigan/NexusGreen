@@ -65,7 +65,7 @@ services:
       SOLAX_API_TOKEN: ${SOLAX_API_TOKEN}
       SOLAX_API_URL: ${SOLAX_API_URL:-https://www.solaxcloud.com:9443/proxy/api/getRealtimeInfo.do}
       FRONTEND_URL: ${FRONTEND_URL:-https://app.solarnexus.com}
-      SERVER_IP: ${SERVER_IP:-13.244.63.26}
+      SERVER_IP: ${SERVER_IP:-13.245.249.110}
     volumes:
       - ./uploads:/app/uploads
       - ./logs:/app/logs

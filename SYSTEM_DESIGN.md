@@ -372,7 +372,7 @@ interface SolaxApiConfig {
 #### SolaX Database Integration
 ```typescript
 interface SolaxDatabaseConfig {
-  host: '13.244.241.5';
+  host: '13.245.249.110';
   user: 'dev';
   password: 'Developer1234#';
   database: 'PPA_Reporting';

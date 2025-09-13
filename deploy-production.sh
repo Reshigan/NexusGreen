@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 DOMAIN="nexus.gonxt.tech"
-SERVER_IP="13.244.63.26"
+SERVER_IP="13.245.249.110"
 DOCKER_COMPOSE_FILE="docker-compose.yml"
 ENV_FILE=".env.production"
 
