@@ -13,6 +13,27 @@
   [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15.0-00D4FF.svg)](https://postgresql.org)
 </div>
 
+## 🚀 One-Command Installation
+
+Get SolarNexus running in minutes with our automated installer:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Reshigan/SolarNexus/main/deploy/CLEAN-INSTALL.sh | bash
+```
+
+**What this does:**
+- ✅ Installs Docker and Docker Compose automatically
+- ✅ Removes any previous installations completely  
+- ✅ Downloads and builds the latest SolarNexus
+- ✅ Sets up secure passwords and production configuration
+- ✅ Starts all services with health monitoring
+- ✅ Provides management commands for easy operation
+
+**Access your application:**
+- **Frontend**: http://localhost
+- **Backend API**: http://localhost:3000
+- **Health Check**: http://localhost:3000/health
+
 ## 🌟 Overview
 
 **SolarNexus** is a comprehensive, production-ready solar energy management platform that combines frontend and backend components in a single, unified repository. Built with modern technologies and designed for scalability, it provides real-time analytics, multi-tenant architecture, and comprehensive solar installation management.
