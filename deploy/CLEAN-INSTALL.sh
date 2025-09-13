@@ -227,7 +227,7 @@ CMD ["sh", "-c", "if command -v pm2 >/dev/null 2>&1; then pm2-runtime start ecos
 EOF
 
 # Frontend Dockerfile
-cat > solarnexus-frontend/Dockerfile << 'EOF'
+cat > Dockerfile << 'EOF'
 FROM node:20-alpine as build
 
 # Install build dependencies
@@ -463,7 +463,7 @@ services:
 
   frontend:
     build:
-      context: ./solarnexus-frontend
+      context: .
       dockerfile: Dockerfile
       args:
         - VITE_API_URL=${VITE_API_URL}
