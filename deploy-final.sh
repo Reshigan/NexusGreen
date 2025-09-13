@@ -62,6 +62,12 @@ else
     fi
 fi
 
+# Debug: Show final directory after detection
+echo "🔍 DEBUG: Final working directory after detection: $(pwd)"
+echo "🔍 DEBUG: SOLARNEXUS_DIR is set to: ${SOLARNEXUS_DIR:-not set}"
+echo "🔍 DEBUG: Files in final directory:"
+ls -la
+
 INSTALL_DIR="$(pwd)"
 LOG_FILE="$INSTALL_DIR/deployment.log"
 
@@ -81,6 +87,18 @@ log() {
     local message="$*"
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     echo -e "[$timestamp] [$level] $message" | tee -a "$LOG_FILE"
+}
+
+# Ensure we're in the correct directory for docker-compose commands
+ensure_correct_directory() {
+    if [[ ! -f "docker-compose.final.yml" ]]; then
+        error_message "CRITICAL: docker-compose.final.yml not found in current directory: $(pwd)"
+        error_message "This should not happen - directory detection failed!"
+        error_message "Files in current directory:"
+        ls -la
+        error_message "SOLARNEXUS_DIR was set to: ${SOLARNEXUS_DIR:-not set}"
+        exit 1
+    fi
 }
 
 # Print colored output
@@ -288,6 +306,12 @@ pull_images() {
 start_databases() {
     info_message "Starting database services..."
     
+    # Ensure we're in the correct directory
+    ensure_correct_directory
+    
+    info_message "Working directory: $(pwd)"
+    info_message "Using docker-compose file: $(pwd)/docker-compose.final.yml"
+    
     # Start only database services first
     docker-compose -f docker-compose.final.yml up -d postgres redis
     
@@ -334,6 +358,7 @@ initialize_database() {
 # Start backend service
 start_backend() {
     info_message "Building and starting backend service..."
+    ensure_correct_directory
     
     docker-compose -f docker-compose.final.yml up -d --build backend
     
@@ -360,6 +385,7 @@ start_backend() {
 # Start frontend service
 start_frontend() {
     info_message "Building and starting frontend service..."
+    ensure_correct_directory
     
     docker-compose -f docker-compose.final.yml up -d --build frontend
     
@@ -518,6 +544,12 @@ main() {
     
     print_status "$PURPLE" "🚀 $SCRIPT_NAME v$SCRIPT_VERSION"
     print_status "$PURPLE" "=================================="
+    
+    # Debug: Show initial directory
+    info_message "DEBUG: Script started from directory: $(pwd)"
+    info_message "DEBUG: Script location: $0"
+    info_message "DEBUG: Files in current directory:"
+    ls -la
     
     # Execute deployment steps
     check_requirements
