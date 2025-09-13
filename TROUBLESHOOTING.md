@@ -1,5 +1,59 @@
 # 🔧 SolarNexus Troubleshooting Guide
 
+## 🚨 Quick Solutions for Immediate Issues
+
+### Frontend Not Starting (TradeAI/SolarNexus)
+
+**Symptoms:**
+- Backend is healthy but frontend doesn't respond
+- Port 80 not accessible
+- Frontend container exits or restarts
+
+**Quick Fixes:**
+```bash
+# 1. Check container status
+docker ps -a
+
+# 2. Check frontend logs
+docker logs tradeai_frontend  # or solarnexus-frontend
+
+# 3. Restart frontend container
+docker restart tradeai_frontend
+
+# 4. Rebuild frontend
+docker-compose up -d --build frontend
+
+# 5. Check if port 80 is blocked
+sudo ufw status
+```
+
+### Installation Directory Conflicts
+
+**Error:** `fatal: destination path '.' already exists and is not an empty directory`
+
+**Solution:**
+```bash
+# Use the fix script
+sudo ./fix-installation.sh
+
+# Or manually remove and reinstall
+sudo rm -rf /home/ubuntu/SolarNexus
+```
+
+### Docker Package Conflicts
+
+**Error:** `Conflict. The container name is already in use`
+
+**Solution:**
+```bash
+# Use the Docker fix script
+sudo ./fix-docker.sh
+
+# Or manually fix
+sudo apt-get remove -y containerd.io docker-ce docker-ce-cli
+sudo apt-get install -y docker.io docker-compose
+```
+
 ## Common Deployment Issues and Solutions
 
 ### 1. Missing Environment Variables
