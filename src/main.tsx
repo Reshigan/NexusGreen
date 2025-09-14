@@ -1,5 +1,10 @@
+import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import SimpleApp from './SimpleApp.tsx'
 import './index.css'
+import NexusGreenApp from './NexusGreenApp.tsx'
 
-createRoot(document.getElementById("root")!).render(<SimpleApp />);
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <NexusGreenApp />
+  </StrictMode>
+);
