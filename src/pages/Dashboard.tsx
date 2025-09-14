@@ -3,12 +3,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 import { 
   Sun, 
+  Zap,
+  TrendingUp,
+  AlertTriangle,
+  DollarSign,
+  Battery,
+  Leaf,
+  MapPin,
+  Calendar,
   Download,
   FileDown,
   Grid3X3,
-  Braces
+  Braces,
+  Activity,
+  BarChart3,
+  Settings,
+  Bell
 } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import PlantOverviewChart from "@/components/PlantOverviewChart";
@@ -16,25 +29,115 @@ import PlantListView from "@/components/PlantListView";
 import TimeFilter from "@/components/TimeFilter";
 import PlantsMap from "@/components/PlantsMap";
 
-// Mock data - will be progressively replaced with API integration
+// Enhanced mock data for solar energy management platform
 const mockStats = {
+  totalGeneration: 1247.8, // kWh today
   totalSavings: 48560, // USD
-  monthlyYield: 12340,
+  monthlyYield: 12340, // kWh this month
   activeAlerts: 2,
-  performance: 94.2
+  performance: 94.2, // %
+  activeSites: 12,
+  totalCapacity: 850.5, // kW
+  co2Saved: 892.4, // kg CO2
+  systemEfficiency: 87.3, // %
+  gridExport: 234.5, // kWh
+  batteryLevel: 78, // %
+  weatherCondition: "Sunny"
 };
 
+const mockSites = [
+  {
+    id: 1,
+    name: "Solar Farm Alpha",
+    location: "Sydney, NSW",
+    capacity: 250.5,
+    currentGeneration: 187.3,
+    efficiency: 94.2,
+    status: "optimal",
+    alerts: 0,
+    lastUpdate: "2 min ago"
+  },
+  {
+    id: 2,
+    name: "Rooftop Installation Beta",
+    location: "Melbourne, VIC",
+    capacity: 150.0,
+    currentGeneration: 98.7,
+    efficiency: 89.1,
+    status: "good",
+    alerts: 1,
+    lastUpdate: "5 min ago"
+  },
+  {
+    id: 3,
+    name: "Commercial Complex Gamma",
+    location: "Brisbane, QLD",
+    capacity: 450.0,
+    currentGeneration: 312.8,
+    efficiency: 96.7,
+    status: "optimal",
+    alerts: 0,
+    lastUpdate: "1 min ago"
+  }
+];
+
+const mockAlerts = [
+  {
+    id: 1,
+    type: "warning",
+    message: "Inverter efficiency below threshold at Site Beta",
+    time: "10 min ago",
+    severity: "medium"
+  },
+  {
+    id: 2,
+    type: "info",
+    message: "Maintenance scheduled for Site Alpha tomorrow",
+    time: "1 hour ago",
+    severity: "low"
+  }
+];
+
 const Dashboard = () => {
-  const [selectedView, setSelectedView] = useState<"overview" | "list">("overview");
-  const [plantsCount, setPlantsCount] = useState<number | null>(null);
-  const [plantsCountLoading, setPlantsCountLoading] = useState<boolean>(false);
-  const [plantsCountError, setPlantsCountError] = useState<string | null>(null);
-  
+  const [selectedView, setSelectedView] = useState<"overview" | "sites" | "analytics">("overview");
   const [timeFilter, setTimeFilter] = useState({
-    period: "month",
-    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+    period: "today",
+    startDate: new Date(new Date().setHours(0, 0, 0, 0)),
     endDate: new Date()
   });
+  const [realTimeData, setRealTimeData] = useState(mockStats);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Simulate real-time data updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRealTimeData(prev => ({
+        ...prev,
+        totalGeneration: prev.totalGeneration + Math.random() * 5,
+        performance: Math.max(85, Math.min(98, prev.performance + (Math.random() - 0.5) * 2)),
+        batteryLevel: Math.max(20, Math.min(100, prev.batteryLevel + (Math.random() - 0.5) * 3))
+      }));
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "optimal": return "text-green-600 bg-green-50 border-green-200";
+      case "good": return "text-blue-600 bg-blue-50 border-blue-200";
+      case "warning": return "text-yellow-600 bg-yellow-50 border-yellow-200";
+      case "error": return "text-red-600 bg-red-50 border-red-200";
+      default: return "text-gray-600 bg-gray-50 border-gray-200";
+    }
+  };
+
+  const formatNumber = (num: number, decimals: number = 1) => {
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    }).format(num);
+  };
 
   const handleExportCSV = async (type: "overview" | "detailed") => {
     try {
@@ -305,87 +408,300 @@ const Dashboard = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">PPA Dashboard</h1>
-            <p className="text-muted-foreground">Monitor your solar investments and performance</p>
+            <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+              <Sun className="h-8 w-8 text-yellow-500" />
+              SolarNexus Dashboard
+            </h1>
+            <p className="text-muted-foreground">Real-time solar energy monitoring and management</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => handleExportCSV("overview")}
-            >
+            <Badge variant="outline" className="text-green-600 border-green-200">
+              <Activity className="h-3 w-3 mr-1" />
+              Live Data
+            </Badge>
+            <Button variant="outline" size="sm" onClick={() => handleExportCSV("overview")}>
               <Download className="h-4 w-4 mr-2" />
-              Export Data
+              Export
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleExportJSON}
-            >
-              <Braces className="h-4 w-4 mr-2" />
-              Export JSON
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleExportPDF}
-            >
-              <FileDown className="h-4 w-4 mr-2" />
-              Export PDF
+            <Button variant="outline" size="sm">
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
             </Button>
           </div>
         </div>
 
+        {/* Key Performance Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="border-l-4 border-l-green-500">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Today's Generation</CardTitle>
+              <Zap className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {formatNumber(realTimeData.totalGeneration)} kWh
+              </div>
+              <p className="text-xs text-muted-foreground">
+                +12.5% from yesterday
+              </p>
+              <Progress value={75} className="mt-2" />
+            </CardContent>
+          </Card>
 
-        {/* Solar Plants Portfolio Section */}
-        <div className="mb-2">
-          <h2 className="text-xl font-bold text-foreground mb-2">Solar Plants Portfolio</h2>
-          <div className="grid grid-cols-1 gap-4">
+          <Card className="border-l-4 border-l-blue-500">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Sites</CardTitle>
+              <MapPin className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">
+                {realTimeData.activeSites}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {realTimeData.totalCapacity} kW total capacity
+              </p>
+              <div className="flex items-center mt-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                <span className="text-xs">All systems operational</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-yellow-500">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">System Performance</CardTitle>
+              <TrendingUp className="h-4 w-4 text-yellow-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-yellow-600">
+                {formatNumber(realTimeData.performance)}%
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Efficiency rating
+              </p>
+              <Progress value={realTimeData.performance} className="mt-2" />
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-red-500">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Alerts</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-red-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">
+                {realTimeData.activeAlerts}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Requires attention
+              </p>
+              <Button variant="outline" size="sm" className="mt-2 w-full">
+                <Bell className="h-3 w-3 mr-1" />
+                View Alerts
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Secondary Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Financial Savings</CardTitle>
+              <DollarSign className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">${formatNumber(realTimeData.totalSavings)}</div>
+              <p className="text-xs text-muted-foreground">Total lifetime savings</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">CO₂ Reduction</CardTitle>
+              <Leaf className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">{formatNumber(realTimeData.co2Saved)} kg</div>
+              <p className="text-xs text-muted-foreground">Carbon footprint reduced</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Battery Storage</CardTitle>
+              <Battery className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">{formatNumber(realTimeData.batteryLevel)}%</div>
+              <p className="text-xs text-muted-foreground">Current charge level</p>
+              <Progress value={realTimeData.batteryLevel} className="mt-2" />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content Tabs */}
+        <Tabs value={selectedView} onValueChange={(value: any) => setSelectedView(value)} className="space-y-4">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="sites">Site Management</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            {/* Real-time Energy Chart */}
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Plants</CardTitle>
-                <Grid3X3 className="h-4 w-4 text-muted-foreground" />
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Real-time Energy Production
+                </CardTitle>
+                <CardDescription>
+                  Live energy generation data across all sites
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {plantsCountLoading && ("Loading...")}
-                  {!plantsCountLoading && plantsCountError && (<span className="text-destructive">Error</span>)}
-                  {!plantsCountLoading && !plantsCountError && plantsCount !== null && (plantsCount)}
-                  {!plantsCountLoading && !plantsCountError && plantsCount === null && ("—")}
+                <div className="h-80">
+                  <PlantOverviewChart timeFilter={timeFilter} />
                 </div>
-                <Badge variant="secondary" className="mt-1">
-                  All Active
-                </Badge>
               </CardContent>
             </Card>
-          </div>
-        </div>
 
-        {/* Plant List View (overview) above map */}
-        <div className="mb-6">
-          <PlantListView />
-        </div>
-        <PlantsMap />
-        <div className="py-2">
-          <TimeFilter 
-            value={timeFilter}
-            onChange={setTimeFilter}
-          />
-        </div>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sun className="h-5 w-5" />
-              Plant Performance Overview
-            </CardTitle>
-            <CardDescription>
-              Total yield and performance metrics across all your plants
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <PlantOverviewChart timeFilter={timeFilter} />
-          </CardContent>
-        </Card>
+            {/* Recent Alerts */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5" />
+                  Recent Alerts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {mockAlerts.map((alert) => (
+                    <div key={alert.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <AlertTriangle className={`h-4 w-4 ${alert.severity === 'medium' ? 'text-yellow-500' : 'text-blue-500'}`} />
+                        <div>
+                          <p className="text-sm font-medium">{alert.message}</p>
+                          <p className="text-xs text-muted-foreground">{alert.time}</p>
+                        </div>
+                      </div>
+                      <Badge variant={alert.severity === 'medium' ? 'destructive' : 'secondary'}>
+                        {alert.severity}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="sites" className="space-y-6">
+            {/* Site Status Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {mockSites.map((site) => (
+                <Card key={site.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{site.name}</CardTitle>
+                      <Badge className={getStatusColor(site.status)}>
+                        {site.status}
+                      </Badge>
+                    </div>
+                    <CardDescription className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {site.location}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Capacity</p>
+                        <p className="font-semibold">{formatNumber(site.capacity)} kW</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Current Gen.</p>
+                        <p className="font-semibold">{formatNumber(site.currentGeneration)} kW</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Efficiency</p>
+                        <p className="font-semibold">{formatNumber(site.efficiency)}%</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Alerts</p>
+                        <p className="font-semibold">{site.alerts}</p>
+                      </div>
+                    </div>
+                    <Progress value={(site.currentGeneration / site.capacity) * 100} />
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>Last updated: {site.lastUpdate}</span>
+                      <Button variant="ghost" size="sm">
+                        View Details
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Site Map */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  Site Locations
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <p className="text-muted-foreground">Interactive map will be displayed here</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6">
+            {/* Time Filter */}
+            <div className="flex items-center gap-4">
+              <TimeFilter value={timeFilter} onChange={setTimeFilter} />
+            </div>
+
+            {/* Analytics Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Performance Trends</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+                    <p className="text-muted-foreground">Performance trend chart</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Financial Analysis</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+                    <p className="text-muted-foreground">Financial analysis chart</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Detailed Analytics */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Detailed Analytics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PlantOverviewChart timeFilter={timeFilter} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );
