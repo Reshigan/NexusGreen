@@ -151,12 +151,39 @@ echo ""
 
 # 5. WAIT FOR STARTUP
 header "⏳ Waiting for Application Startup"
-log "Waiting for container to be ready..."
-sleep 10
+log "Waiting for containers to be ready..."
+log "- Database initialization and seeding in progress..."
+log "- API backend starting..."
+log "- Frontend container starting..."
+sleep 20
+
+# Check database seeding status
+log "🗄️  Checking database seeding status..."
+for i in {1..12}; do
+    if docker-compose exec -T nexus-db psql -U nexususer -d nexusgreen -c "SELECT COUNT(*) FROM companies;" > /dev/null 2>&1; then
+        log "✅ Database seeded successfully!"
+        break
+    else
+        log "   Waiting for database seeding... ($i/12)"
+        sleep 5
+    fi
+done
+
+# Check API health
+log "🔍 Checking API backend health..."
+for i in {1..10}; do
+    if curl -s http://localhost:3001/health > /dev/null 2>&1; then
+        log "✅ API backend is healthy!"
+        break
+    else
+        log "   Waiting for API backend... ($i/10)"
+        sleep 3
+    fi
+done
 
 # Check container status
 if docker ps | grep -q "nexus-green-prod"; then
-    log "Container is running"
+    log "✅ Frontend container is running"
 else
     error "Container failed to start"
     echo ""
@@ -204,11 +231,11 @@ info "   • http://nexus.gonxt.tech"
 info "   • http://localhost"
 info "   • http://$(hostname -I | awk '{print $1}')"
 echo ""
-info "🐳 Docker details:"
-info "   • Container: nexus-green-prod"
-info "   • Image: nexus-green:latest"
+info "🐳 Docker services:"
+info "   • Frontend: nexus-green-prod (port 80)"
+info "   • API Backend: nexus-green-api (port 3001)"
+info "   • Database: nexus-green-db (PostgreSQL)"
 info "   • Network: nexus-green-network"
-info "   • Logs: docker logs nexus-green-prod"
 echo ""
 info "📁 Installation details:"
 info "   • Location: $INSTALL_DIR"
@@ -217,9 +244,10 @@ info "   • Config: docker-compose.yml"
 echo ""
 info "🔧 Management commands:"
 info "   cd $INSTALL_DIR"
-info "   docker-compose logs -f                    # View logs"
-info "   docker-compose restart                    # Restart"
-info "   docker-compose down && docker-compose up -d    # Rebuild"
+info "   docker-compose logs -f                    # View all logs"
+info "   docker-compose logs -f nexus-api          # API logs"
+info "   docker-compose logs -f nexus-db           # Database logs"
+info "   docker-compose restart                    # Restart all"
 info "   docker-compose ps                         # Status"
 echo ""
 info "🔄 Update process:"
@@ -229,8 +257,16 @@ info "   docker-compose down"
 info "   docker build -t nexus-green:latest ."
 info "   docker-compose up -d"
 echo ""
+info "🗄️  Database info:"
+info "   • Demo company: SolarTech Solutions (Pty) Ltd"
+info "   • 3 solar installations with 30 days of data"
+info "   • Login: admin@solartech.co.za / admin123"
+info "   • API endpoint: http://localhost:3001/api"
+echo ""
 info "🔒 Next steps:"
-info "   • Test: curl -I http://nexus.gonxt.tech"
+info "   • Test frontend: curl -I http://localhost"
+info "   • Test API: curl http://localhost:3001/api/status"
+info "   • View data: Access dashboard for real solar data!"
 info "   • SSL: Configure SSL certificates in docker/ssl/"
 info "   • Monitor: docker-compose logs -f"
 echo ""

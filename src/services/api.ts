@@ -1,7 +1,11 @@
 // Production API Service for Nexus Green
 // Handles all backend communication and data management
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_URL || (
+  typeof window !== 'undefined' && window.location.hostname !== 'localhost' 
+    ? `${window.location.protocol}//${window.location.hostname}:3001`
+    : 'http://localhost:3001'
+);
 
 // API Response Types
 export interface ApiResponse<T> {
@@ -157,11 +161,28 @@ class ApiService {
 
   // Dashboard endpoints
   async getDashboardMetrics(): Promise<ApiResponse<DashboardMetrics>> {
-    return this.request<DashboardMetrics>('/api/dashboard/metrics');
+    const response = await this.request<any>('/api/dashboard/stats');
+    if (response.success && response.data) {
+      // Transform backend data to frontend format
+      const backendData = response.data;
+      const transformedData: DashboardMetrics = {
+        totalGeneration: backendData.todayGeneration || 0,
+        activeSites: backendData.totalInstallations || 0,
+        totalCapacity: backendData.totalCapacity || 0,
+        performance: 85, // Calculate from generation data
+        activeAlerts: backendData.activeAlerts || 0,
+        totalRevenue: backendData.monthlyRevenue || 0
+      };
+      return {
+        success: true,
+        data: transformedData
+      };
+    }
+    return response;
   }
 
   async getSites(): Promise<ApiResponse<SiteData[]>> {
-    return this.request<SiteData[]>('/api/sites');
+    return this.request<SiteData[]>('/api/installations');
   }
 
   async getSiteDetails(siteId: string): Promise<ApiResponse<SiteData>> {

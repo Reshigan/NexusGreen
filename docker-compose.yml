@@ -1,5 +1,4 @@
 # Nexus Green Production Docker Compose
-version: '3.8'
 
 services:
   nexus-green:
@@ -10,7 +9,7 @@ services:
     container_name: nexus-green-prod
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "80:8080"
       - "443:443"
     environment:
       - VITE_APP_NAME=Nexus Green
@@ -35,36 +34,55 @@ services:
       - "com.nexusgreen.service=frontend"
       - "com.nexusgreen.version=4.0.0"
 
-  # Optional: API backend service (uncomment when ready)
-  # nexus-api:
-  #   build:
-  #     context: ./api
-  #     dockerfile: Dockerfile
-  #   container_name: nexus-green-api
-  #   restart: unless-stopped
-  #   ports:
-  #     - "3001:3001"
-  #   environment:
-  #     - NODE_ENV=production
-  #     - PORT=3001
-  #   networks:
-  #     - nexus-network
-  #   depends_on:
-  #     - nexus-db
+  # API backend service
+  nexus-api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: nexus-green-api
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=postgresql://nexususer:nexuspass123@nexus-green-db:5432/nexusgreen
+      - JWT_SECRET=nexus-green-jwt-secret-2024
+    networks:
+      - nexus-network
+    depends_on:
+      nexus-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  # Optional: Database service (uncomment when ready)
-  # nexus-db:
-  #   image: postgres:15-alpine
-  #   container_name: nexus-green-db
-  #   restart: unless-stopped
-  #   environment:
-  #     - POSTGRES_DB=nexusgreen
-  #     - POSTGRES_USER=nexususer
-  #     - POSTGRES_PASSWORD=nexuspass123
-  #   volumes:
-  #     - nexus-db-data:/var/lib/postgresql/data
-  #   networks:
-  #     - nexus-network
+  # Database service with seeding
+  nexus-db:
+    image: postgres:15-alpine
+    container_name: nexus-green-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=nexusgreen
+      - POSTGRES_USER=nexususer
+      - POSTGRES_PASSWORD=nexuspass123
+    volumes:
+      - nexus-db-data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+      - ./database/seed:/seed-data
+    networks:
+      - nexus-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexususer -d nexusgreen"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    ports:
+      - "5432:5432"
 
 networks:
   nexus-network:
