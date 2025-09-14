@@ -9,6 +9,7 @@ import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
+import ModernDashboard from "./pages/ModernDashboard";
 import PlantDetails from "./pages/PlantDetails";
 import Projects from "./pages/Projects";
 import Analytics from "./pages/Analytics";
@@ -31,7 +32,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard" element={<ModernDashboard />} />
+            <Route path="/dashboard-classic" element={<Dashboard />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
