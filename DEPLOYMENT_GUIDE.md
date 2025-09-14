@@ -128,13 +128,13 @@ git pull && docker-compose up -d --build
 ### Database Management
 ```bash
 # Access database
-docker-compose exec nexus-green-db psql -U nexusgreen -d nexusgreen
+docker-compose exec nexus-db psql -U nexususer -d nexusgreen
 
 # Backup database
-docker-compose exec nexus-green-db pg_dump -U nexusgreen nexusgreen > backup.sql
+docker-compose exec nexus-db pg_dump -U nexususer nexusgreen > backup.sql
 
 # Restore database
-docker-compose exec -T nexus-green-db psql -U nexusgreen -d nexusgreen < backup.sql
+docker-compose exec -T nexus-db psql -U nexususer -d nexusgreen < backup.sql
 ```
 
 ### Monitoring
@@ -146,8 +146,8 @@ docker stats
 tail -f /var/log/nexusgreen-monitor.log
 
 # Check application logs
-docker-compose logs nexus-green-api
-docker-compose logs nexus-green-prod
+docker-compose logs nexus-api
+docker-compose logs nexus-green
 ```
 
 ---
@@ -235,16 +235,16 @@ docker-compose down && docker-compose up -d
 #### Database Connection Issues
 ```bash
 # Check database status
-docker-compose exec nexus-green-db pg_isready -U nexusgreen
+docker-compose exec nexus-db pg_isready -U nexususer
 
 # Restart database
-docker-compose restart nexus-green-db
+docker-compose restart nexus-db
 ```
 
 #### API Not Responding
 ```bash
 # Check API logs
-docker-compose logs nexus-green-api
+docker-compose logs nexus-api
 
 # Test API directly
 curl http://localhost:3001/api/health
@@ -275,7 +275,7 @@ docker-compose up -d --build
 ```bash
 # Create full backup
 mkdir -p /opt/backups/nexusgreen-$(date +%Y%m%d)
-docker-compose exec nexus-green-db pg_dump -U nexusgreen nexusgreen > /opt/backups/nexusgreen-$(date +%Y%m%d)/database.sql
+docker-compose exec nexus-db pg_dump -U nexususer nexusgreen > /opt/backups/nexusgreen-$(date +%Y%m%d)/database.sql
 cp -r /opt/nexusgreen /opt/backups/nexusgreen-$(date +%Y%m%d)/application
 ```
 

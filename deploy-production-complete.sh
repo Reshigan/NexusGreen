@@ -178,7 +178,7 @@ print_header "PHASE 5: DATABASE INITIALIZATION"
 print_status "Initializing production database..."
 
 # Start database container first
-docker-compose up -d nexus-green-db
+docker-compose up -d nexus-db
 
 # Wait for database to be ready
 print_status "Waiting for database to be ready..."
@@ -186,7 +186,7 @@ sleep 30
 
 # Check if database is responding
 for i in {1..30}; do
-    if docker-compose exec -T nexus-green-db pg_isready -U nexusgreen; then
+    if docker-compose exec -T nexus-db pg_isready -U nexususer; then
         print_success "Database is ready"
         break
     fi
@@ -305,9 +305,9 @@ check_service() {
 cd /opt/nexusgreen
 
 # Check all services
-check_service "nexus-green-db"
-check_service "nexus-green-api"
-check_service "nexus-green-prod"
+check_service "nexus-db"
+check_service "nexus-api"
+check_service "nexus-green"
 
 # Check disk space
 df -h | grep -E "/$|/opt" >> "$LOG_FILE"

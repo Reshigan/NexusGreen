@@ -149,25 +149,25 @@ run_test "Docker daemon is running" "docker info > /dev/null 2>&1"
 run_test "Docker Compose is available" "docker-compose --version > /dev/null 2>&1"
 
 # Test containers
-run_test "Database container is running" "docker-compose ps | grep -q 'nexus-green-db.*Up'"
-run_test "API container is running" "docker-compose ps | grep -q 'nexus-green-api.*Up'"
-run_test "Frontend container is running" "docker-compose ps | grep -q 'nexus-green-prod.*Up'"
+run_test "Database container is running" "docker-compose ps | grep -q 'nexus-db.*Up'"
+run_test "API container is running" "docker-compose ps | grep -q 'nexus-api.*Up'"
+run_test "Frontend container is running" "docker-compose ps | grep -q 'nexus-green.*Up'"
 
 print_section "DATABASE TESTS"
 
 # Test database connectivity
-run_test "Database is accepting connections" "docker-compose exec -T nexus-green-db pg_isready -U nexusgreen"
+run_test "Database is accepting connections" "docker-compose exec -T nexus-db pg_isready -U nexususer"
 
 # Test database schema
-run_test "Companies table exists" "docker-compose exec -T nexus-green-db psql -U nexusgreen -d nexusgreen -c '\dt companies' | grep -q companies"
-run_test "Users table exists" "docker-compose exec -T nexus-green-db psql -U nexusgreen -d nexusgreen -c '\dt users' | grep -q users"
-run_test "Installations table exists" "docker-compose exec -T nexus-green-db psql -U nexusgreen -d nexusgreen -c '\dt installations' | grep -q installations"
-run_test "Energy generation table exists" "docker-compose exec -T nexus-green-db psql -U nexusgreen -d nexusgreen -c '\dt energy_generation' | grep -q energy_generation"
+run_test "Companies table exists" "docker-compose exec -T nexus-db psql -U nexususer -d nexusgreen -c '\dt companies' | grep -q companies"
+run_test "Users table exists" "docker-compose exec -T nexus-db psql -U nexususer -d nexusgreen -c '\dt users' | grep -q users"
+run_test "Installations table exists" "docker-compose exec -T nexus-db psql -U nexususer -d nexusgreen -c '\dt installations' | grep -q installations"
+run_test "Energy generation table exists" "docker-compose exec -T nexus-db psql -U nexususer -d nexusgreen -c '\dt energy_generation' | grep -q energy_generation"
 
 # Test data integrity
-run_test "Companies have data" "docker-compose exec -T nexus-green-db psql -U nexusgreen -d nexusgreen -c 'SELECT COUNT(*) FROM companies;' | grep -q '[1-9]'"
-run_test "Installations have data" "docker-compose exec -T nexus-green-db psql -U nexusgreen -d nexusgreen -c 'SELECT COUNT(*) FROM installations;' | grep -q '[1-9]'"
-run_test "Energy generation has data" "docker-compose exec -T nexus-green-db psql -U nexusgreen -d nexusgreen -c 'SELECT COUNT(*) FROM energy_generation;' | grep -q '[1-9]'"
+run_test "Companies have data" "docker-compose exec -T nexus-db psql -U nexususer -d nexusgreen -c 'SELECT COUNT(*) FROM companies;' | grep -q '[1-9]'"
+run_test "Installations have data" "docker-compose exec -T nexus-db psql -U nexususer -d nexusgreen -c 'SELECT COUNT(*) FROM installations;' | grep -q '[1-9]'"
+run_test "Energy generation has data" "docker-compose exec -T nexus-db psql -U nexususer -d nexusgreen -c 'SELECT COUNT(*) FROM energy_generation;' | grep -q '[1-9]'"
 
 print_section "BACKEND API TESTS"
 
@@ -300,7 +300,7 @@ fi
 
 print_test "Energy generation data exists"
 ((TOTAL_TESTS++))
-energy_count=$(docker-compose exec -T nexus-green-db psql -U nexusgreen -d nexusgreen -t -c 'SELECT COUNT(*) FROM energy_generation;' | tr -d ' \n')
+energy_count=$(docker-compose exec -T nexus-db psql -U nexususer -d nexusgreen -t -c 'SELECT COUNT(*) FROM energy_generation;' | tr -d ' \n')
 if [ "$energy_count" -gt 1000 ]; then
     print_pass "Energy generation data exists ($energy_count records)"
 else
@@ -310,8 +310,8 @@ fi
 print_section "MONITORING TESTS"
 
 # Test logging
-run_test "Application logs are being generated" "docker-compose logs --tail=10 nexus-green-api | grep -q '.'"
-run_test "Database logs are being generated" "docker-compose logs --tail=10 nexus-green-db | grep -q '.'"
+run_test "Application logs are being generated" "docker-compose logs --tail=10 nexus-api | grep -q '.'"
+run_test "Database logs are being generated" "docker-compose logs --tail=10 nexus-db | grep -q '.'"
 
 # Test resource usage
 print_test "Memory usage is reasonable"
