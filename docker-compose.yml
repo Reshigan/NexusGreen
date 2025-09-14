@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: production
-    container_name: nexus-green-prod
+    container_name: nexus-green
     restart: unless-stopped
     ports:
       - "80:8080"
@@ -39,7 +39,7 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile
-    container_name: nexus-green-api
+    container_name: nexus-api
     restart: unless-stopped
     ports:
       - "3001:3001"
@@ -64,7 +64,7 @@ services:
   # Database service with seeding
   nexus-db:
     image: postgres:15-alpine
-    container_name: nexus-green-db
+    container_name: nexus-db
     restart: unless-stopped
     environment:
       - POSTGRES_DB=nexusgreen
