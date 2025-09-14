@@ -1,64 +1,60 @@
-# Multi-stage build for React frontend
-FROM node:20-alpine AS base
+# Nexus Green Production Dockerfile
+# Multi-stage build for optimized production deployment
 
-# Install system dependencies
-RUN apk add --no-cache \
-    python3 \
-    make \
-    g++ \
-    && rm -rf /var/cache/apk/*
+# Stage 1: Build stage
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
-# Development stage
-FROM base AS development
-RUN npm ci
-COPY . .
-EXPOSE 3000
-CMD ["npm", "start"]
+# Install all dependencies (including dev dependencies for build)
+RUN npm ci --silent
 
-# Build stage
-FROM base AS build
-RUN npm ci
+# Copy source code
 COPY . .
 
-# Build the React app with environment variables
-ARG VITE_API_URL=https://nexus.gonxt.tech/api
-ARG VITE_WS_URL=wss://nexus.gonxt.tech/ws
-ENV VITE_API_URL=$VITE_API_URL
-ENV VITE_WS_URL=$VITE_WS_URL
-ENV GENERATE_SOURCEMAP=false
+# Set production environment
+ENV NODE_ENV=production
+ENV VITE_ENVIRONMENT=production
 
+# Build the application
 RUN npm run build
 
-# Production stage - Simple HTTP server
-FROM node:20-alpine AS production
+# Stage 2: Production stage
+FROM nginx:alpine AS production
 
-# Install serve globally
-RUN npm install -g serve
+# Install curl for health checks
+RUN apk add --no-cache curl
 
-# Create app directory
-WORKDIR /app
+# Copy custom nginx configuration
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+COPY docker/default.conf /etc/nginx/conf.d/default.conf
 
-# Copy built application
-COPY --from=build /app/dist ./dist
+# Copy built application from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Create non-root user
-RUN addgroup -g 1001 -S appuser && \
-    adduser -S appuser -u 1001 -G appuser && \
-    chown -R appuser:appuser /app
+# Copy environment template
+COPY --from=builder /app/.env.production /usr/share/nginx/html/.env
 
-# Switch to non-root user
-USER appuser
+# Set permissions for nginx user
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx && \
+    chown -R nginx:nginx /etc/nginx/conf.d && \
+    touch /var/run/nginx.pid && \
+    chown -R nginx:nginx /var/run/nginx.pid
 
-EXPOSE 8080
+# Switch to nginx user
+USER nginx
+
+# Expose port
+EXPOSE 80
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost/health || exit 1
 
-# Serve the application
-CMD ["serve", "-s", "dist", "-l", "8080"]
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

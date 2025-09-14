@@ -1,167 +1,76 @@
+# Nexus Green Production Docker Compose
 version: '3.8'
 
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
-    container_name: solarnexus-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: solarnexus
-      POSTGRES_USER: solarnexus
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-solarnexus_secure_password_2024}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database/init:/docker-entrypoint-initdb.d
-    ports:
-      - "5432:5432"
-    networks:
-      - solarnexus-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U solarnexus -d solarnexus"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # Redis for caching and sessions
-  redis:
-    image: redis:7-alpine
-    container_name: solarnexus-redis
-    restart: unless-stopped
-    command: redis-server --requirepass ${REDIS_PASSWORD:-redis_secure_password_2024}
-    volumes:
-      - redis_data:/data
-    ports:
-      - "6379:6379"
-    networks:
-      - solarnexus-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # Backend API
-  backend:
-    build:
-      context: ./solarnexus-backend
-      dockerfile: Dockerfile
-      target: production
-    container_name: solarnexus-backend
-    restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      PORT: 5000
-      DATABASE_URL: postgresql://solarnexus:${POSTGRES_PASSWORD:-solarnexus_secure_password_2024}@postgres:5432/solarnexus
-      REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secure_password_2024}@redis:6379
-      JWT_SECRET: ${JWT_SECRET:-your_super_secure_jwt_secret_key_2024}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your_super_secure_jwt_refresh_secret_key_2024}
-      EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
-      EMAIL_PORT: ${EMAIL_PORT:-587}
-      EMAIL_USER: ${EMAIL_USER}
-      EMAIL_PASS: ${EMAIL_PASS}
-      EMAIL_FROM: ${EMAIL_FROM:-noreply@solarnexus.com}
-      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-SolarNexus}
-      SOLAX_API_TOKEN: ${SOLAX_API_TOKEN}
-      SOLAX_API_URL: ${SOLAX_API_URL:-https://www.solaxcloud.com:9443/proxy/api/getRealtimeInfo.do}
-      FRONTEND_URL: ${FRONTEND_URL:-https://nexus.gonxt.tech}
-      SERVER_IP: ${SERVER_IP:-13.247.192.38}
-    volumes:
-      - ./uploads:/app/uploads
-      - ./logs:/app/logs
-    ports:
-      - "0.0.0.0:5000:5000"
-    networks:
-      - solarnexus-network
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # Frontend (React)
-  frontend:
+  nexus-green:
     build:
       context: .
       dockerfile: Dockerfile
       target: production
-    container_name: solarnexus-frontend
+    container_name: nexus-green-prod
     restart: unless-stopped
-    environment:
-      VITE_API_URL: ${VITE_API_URL:-https://nexus.gonxt.tech/api}
-      VITE_WS_URL: ${VITE_WS_URL:-wss://nexus.gonxt.tech/ws}
-      VITE_ENVIRONMENT: production
     ports:
-      - "0.0.0.0:3000:8080"
+      - "80:80"
+      - "443:443"
+    environment:
+      - VITE_APP_NAME=Nexus Green
+      - VITE_APP_VERSION=4.0.0
+      - VITE_API_URL=http://localhost:3001
+      - VITE_ENVIRONMENT=production
+      - VITE_COMPANY_NAME=SolarTech Solutions (Pty) Ltd
+      - VITE_COMPANY_REG=2019/123456/07
+      - VITE_PPA_RATE=1.20
+    volumes:
+      - ./docker/ssl:/etc/nginx/ssl:ro
+      - ./docker/logs:/var/log/nginx
     networks:
-      - solarnexus-network
-    depends_on:
-      - backend
+      - nexus-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "com.nexusgreen.service=frontend"
+      - "com.nexusgreen.version=4.0.0"
 
-  # Nginx Reverse Proxy - DISABLED (Using system nginx instead)
-  # The system nginx service is already configured with SSL and reverse proxy
-  # This avoids port conflicts and follows production best practices
-  # nginx:
-  #   image: nginx:alpine
-  #   container_name: solarnexus-nginx
+  # Optional: API backend service (uncomment when ready)
+  # nexus-api:
+  #   build:
+  #     context: ./api
+  #     dockerfile: Dockerfile
+  #   container_name: nexus-green-api
   #   restart: unless-stopped
   #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-  #     - ./nginx/conf.d:/etc/nginx/conf.d:ro
-  #     - ./ssl:/etc/nginx/ssl:ro
-  #     - frontend_build:/var/www/html:ro
-  #     - ./logs/nginx:/var/log/nginx
+  #     - "3001:3001"
+  #   environment:
+  #     - NODE_ENV=production
+  #     - PORT=3001
   #   networks:
-  #     - solarnexus-network
+  #     - nexus-network
   #   depends_on:
-  #     - backend
-  #     - frontend
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost/health"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
+  #     - nexus-db
 
-  # ML/AI Service (Optional - for predictions)
-  # ml-service:
-  #   build:
-  #     context: ./ml-service
-  #     dockerfile: Dockerfile
-  #   container_name: solarnexus-ml
+  # Optional: Database service (uncomment when ready)
+  # nexus-db:
+  #   image: postgres:15-alpine
+  #   container_name: nexus-green-db
   #   restart: unless-stopped
   #   environment:
-  #     REDIS_URL: redis://:${REDIS_PASSWORD:-redis_secure_password_2024}@redis:6379
-  #     DATABASE_URL: postgresql://solarnexus:${POSTGRES_PASSWORD:-solarnexus_secure_password_2024}@postgres:5432/solarnexus
+  #     - POSTGRES_DB=nexusgreen
+  #     - POSTGRES_USER=nexususer
+  #     - POSTGRES_PASSWORD=nexuspass123
   #   volumes:
-  #     - ./ml-models:/app/models
-  #     - ./logs/ml:/app/logs
+  #     - nexus-db-data:/var/lib/postgresql/data
   #   networks:
-  #     - solarnexus-network
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
-
-volumes:
-  postgres_data:
-    driver: local
-  redis_data:
-    driver: local
-  frontend_build:
-    driver: local
+  #     - nexus-network
 
 networks:
-  solarnexus-network:
+  nexus-network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
+    name: nexus-green-network
+
+volumes:
+  nexus-db-data:
+    name: nexus-green-db-data
