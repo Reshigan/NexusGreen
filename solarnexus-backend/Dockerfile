@@ -52,8 +52,7 @@ WORKDIR /app
 
 # Copy package files and install dependencies with limited cache
 COPY --from=base /app/package*.json ./
-RUN npm install --omit=dev --no-audit --no-fund && \
-    npm install -g ts-node tsconfig-paths typescript && \
+RUN npm install --no-audit --no-fund && \
     npm cache clean --force && \
     rm -rf /tmp/* /var/tmp/* /root/.npm
 
