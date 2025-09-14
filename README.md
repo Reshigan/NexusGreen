@@ -40,14 +40,14 @@ SolarNexus provides real-time monitoring, predictive analytics, and financial op
 - **[🔧 Technical Specifications](docs/technical/TECHNICAL_SPECIFICATIONS.md)** - Detailed technical documentation
 - **[🏗️ System Design](docs/design/SYSTEM_DESIGN.md)** - Architecture and design patterns
 - **[📡 API Documentation](docs/api/API_DOCUMENTATION.md)** - Complete API reference
-- **[🚀 Deployment Guide](DEPLOYMENT.md)** - Production deployment instructions
+- **[🚀 Deployment Guide](DEPLOYMENT_GUIDE.md)** - Production deployment instructions
 - **[📖 User Guide](docs/user/USER_GUIDE.md)** - End-user documentation
 - **[🔄 Handover Documentation](docs/handover/HANDOVER_DOCUMENTATION.md)** - Operations and maintenance
 
 ### Quick Links
 - **[All Documentation](docs/README.md)** - Documentation index
 - **[Requirements](REQUIREMENTS.md)** - System requirements
-- **[Deployment Instructions](DEPLOYMENT.md)** - Step-by-step deployment
+- **[Deployment Instructions](DEPLOYMENT_GUIDE.md)** - Step-by-step deployment
 
 ## 🚀 Quick Start
 
@@ -73,16 +73,28 @@ cd solarnexus-backend && npm run dev  # Backend (port 3000)
 
 ### Production Deployment
 
-**One-Command Deployment** on AWS server:
+**Clean One-Command Deployment**:
 
 ```bash
-# Deploy to production server (13.247.192.38)
-ssh root@13.247.192.38
-git clone https://github.com/Reshigan/SolarNexus.git /opt/solarnexus
-cd /opt/solarnexus && ./deploy.sh
+# Basic deployment
+sudo ./deploy.sh
+
+# Clean installation (recommended for first-time)
+sudo ./deploy.sh --clean
+
+# Custom domain deployment
+sudo ./deploy.sh --domain yourdomain.com --ip 1.2.3.4
 ```
 
-**Result**: Fully configured production environment at https://nexus.gonxt.tech
+**Features**:
+- ✅ Automated server cleanup and dependency installation
+- ✅ Docker containerization with health monitoring
+- ✅ SSL certificate setup with auto-renewal
+- ✅ Nginx optimization and security headers
+- ✅ Database migrations and monitoring setup
+- ✅ Comprehensive logging and error handling
+
+**Result**: Production-ready environment with monitoring and security
 
 ## 🏗️ Project Structure
 
@@ -109,11 +121,9 @@ SolarNexus/
 │   ├── api/                     # API documentation
 │   ├── handover/                # Operations documentation
 │   └── user/                    # User guides
-├── 📁 dist/                     # Frontend production build
 ├── 🐳 docker-compose.yml        # Container orchestration
-├── 🚀 deploy.sh                 # Automated deployment script
-├── ✅ validate-build.sh         # Build validation script
-└── 📋 DEPLOYMENT.md             # Deployment instructions
+├── 🚀 deploy.sh                 # Clean automated deployment script
+└── 📋 DEPLOYMENT_GUIDE.md       # Comprehensive deployment guide
 ```
 
 ## 🔌 API Overview
