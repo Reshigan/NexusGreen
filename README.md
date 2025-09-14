@@ -1,6 +1,6 @@
-# SolarNexus
+# Nexus Green
 
-A comprehensive solar energy management platform for monitoring, analytics, and optimization of solar installations.
+Next-Generation Solar Energy Intelligence Platform - A cutting-edge, multi-tenant solar energy management platform with advanced analytics, real-time monitoring, and comprehensive license management.
 
 ## 🚀 Quick Production Deployment
 

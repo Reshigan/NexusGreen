@@ -28,6 +28,7 @@ import PlantOverviewChart from "@/components/PlantOverviewChart";
 import PlantListView from "@/components/PlantListView";
 import TimeFilter from "@/components/TimeFilter";
 import PlantsMap from "@/components/PlantsMap";
+import NexusGreenLogo from "@/components/NexusGreenLogo";
 
 // Enhanced mock data for solar energy management platform
 const mockStats = {
@@ -408,11 +409,15 @@ const Dashboard = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-              <Sun className="h-8 w-8 text-yellow-500" />
-              SolarNexus Dashboard
-            </h1>
-            <p className="text-muted-foreground">Real-time solar energy monitoring and management</p>
+            <div className="flex items-center gap-4">
+              <NexusGreenLogo size="lg" variant="full" />
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-green-400 via-emerald-500 to-teal-600 bg-clip-text text-transparent">
+                  Dashboard
+                </h1>
+              </div>
+            </div>
+            <p className="text-muted-foreground font-medium">Next-Generation Solar Energy Intelligence Platform</p>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="text-green-600 border-green-200">
@@ -430,72 +435,100 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Key Performance Metrics */}
+        {/* Key Performance Metrics - Edgy Design */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="border-l-4 border-l-green-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Today's Generation</CardTitle>
-              <Zap className="h-4 w-4 text-green-600" />
+          <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-400/10 via-emerald-500/10 to-teal-600/10"></div>
+            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-green-400/20 to-emerald-500/20 rounded-full -translate-y-10 translate-x-10 group-hover:scale-110 transition-transform duration-300"></div>
+            <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-semibold text-gray-700">Today's Generation</CardTitle>
+              <div className="relative">
+                <div className="absolute inset-0 bg-green-400 rounded-full blur-sm opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+                <Zap className="relative h-5 w-5 text-green-600" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
+            <CardContent className="relative">
+              <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                 {formatNumber(realTimeData.totalGeneration)} kWh
               </div>
-              <p className="text-xs text-muted-foreground">
-                +12.5% from yesterday
+              <p className="text-xs text-green-600 font-medium mt-1">
+                ↗ +12.5% from yesterday
               </p>
-              <Progress value={75} className="mt-2" />
+              <div className="mt-3 relative">
+                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div className="bg-gradient-to-r from-green-400 to-emerald-500 h-2 rounded-full transition-all duration-1000 ease-out" style={{width: '75%'}}></div>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-blue-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Sites</CardTitle>
-              <MapPin className="h-4 w-4 text-blue-600" />
+          <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-blue-50 via-cyan-50 to-sky-50 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 via-cyan-500/10 to-sky-600/10"></div>
+            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-400/20 to-cyan-500/20 rounded-full -translate-y-10 translate-x-10 group-hover:scale-110 transition-transform duration-300"></div>
+            <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-semibold text-gray-700">Active Sites</CardTitle>
+              <div className="relative">
+                <div className="absolute inset-0 bg-blue-400 rounded-full blur-sm opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+                <MapPin className="relative h-5 w-5 text-blue-600" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
+            <CardContent className="relative">
+              <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                 {realTimeData.activeSites}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-blue-600 font-medium mt-1">
                 {realTimeData.totalCapacity} kW total capacity
               </p>
-              <div className="flex items-center mt-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                <span className="text-xs">All systems operational</span>
+              <div className="flex items-center mt-3">
+                <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full mr-2 animate-pulse"></div>
+                <span className="text-xs font-medium text-green-600">All systems operational</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-yellow-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">System Performance</CardTitle>
-              <TrendingUp className="h-4 w-4 text-yellow-600" />
+          <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-400/10 via-yellow-500/10 to-orange-600/10"></div>
+            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-amber-400/20 to-yellow-500/20 rounded-full -translate-y-10 translate-x-10 group-hover:scale-110 transition-transform duration-300"></div>
+            <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-semibold text-gray-700">System Performance</CardTitle>
+              <div className="relative">
+                <div className="absolute inset-0 bg-amber-400 rounded-full blur-sm opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+                <TrendingUp className="relative h-5 w-5 text-amber-600" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">
+            <CardContent className="relative">
+              <div className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
                 {formatNumber(realTimeData.performance)}%
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-amber-600 font-medium mt-1">
                 Efficiency rating
               </p>
-              <Progress value={realTimeData.performance} className="mt-2" />
+              <div className="mt-3 relative">
+                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <div className="bg-gradient-to-r from-amber-400 to-yellow-500 h-2 rounded-full transition-all duration-1000 ease-out" style={{width: `${realTimeData.performance}%`}}></div>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-red-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Alerts</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-red-600" />
+          <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-red-50 via-rose-50 to-pink-50 shadow-lg hover:shadow-xl transition-all duration-300 group">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-400/10 via-rose-500/10 to-pink-600/10"></div>
+            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-red-400/20 to-rose-500/20 rounded-full -translate-y-10 translate-x-10 group-hover:scale-110 transition-transform duration-300"></div>
+            <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-semibold text-gray-700">Active Alerts</CardTitle>
+              <div className="relative">
+                <div className="absolute inset-0 bg-red-400 rounded-full blur-sm opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+                <AlertTriangle className="relative h-5 w-5 text-red-600" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
+            <CardContent className="relative">
+              <div className="text-3xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
                 {realTimeData.activeAlerts}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-red-600 font-medium mt-1">
                 Requires attention
               </p>
-              <Button variant="outline" size="sm" className="mt-2 w-full">
+              <Button className="mt-3 w-full bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 border-0 shadow-md hover:shadow-lg transition-all duration-300">
                 <Bell className="h-3 w-3 mr-1" />
                 View Alerts
               </Button>
