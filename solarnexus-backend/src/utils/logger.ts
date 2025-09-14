@@ -23,7 +23,7 @@ const logFormat = winston.format.combine(
 export const logger = winston.createLogger({
   level: config.logLevel,
   format: logFormat,
-  defaultMeta: { service: 'solarnexus-backend' },
+  defaultMeta: { service: 'nexusgreen-backend' },
   transports: [
     new winston.transports.Console({
       format: winston.format.combine(

@@ -1,4 +1,4 @@
-# 🚀 SolarNexus Production Deployment Guide
+# 🚀 NexusGreen Production Deployment Guide
 
 ## ✅ **COMPLETED TASKS**
 
@@ -65,7 +65,7 @@ All production preparation tasks have been completed:
 ### **Step 1: Push Changes to GitHub**
 ```bash
 # On your local machine or server
-cd /path/to/SolarNexus
+cd /path/to/NexusGreen
 git push origin main
 ```
 
@@ -74,7 +74,7 @@ On your Ubuntu server:
 
 ```bash
 # Download the production deployment script
-curl -o production-deploy.sh https://raw.githubusercontent.com/Reshigan/SolarNexus/main/production-deploy.sh
+curl -o production-deploy.sh https://raw.githubusercontent.com/Reshigan/NexusGreen/main/production-deploy.sh
 
 # Make it executable
 chmod +x production-deploy.sh
@@ -214,7 +214,7 @@ cd ~/solarnexus && git pull && sudo docker-compose up -d --build
 
 ## 🎉 **READY FOR PRODUCTION!**
 
-Your SolarNexus application is now fully prepared for production deployment with:
+Your NexusGreen application is now fully prepared for production deployment with:
 
 ✅ **Complete automation** - One script deploys everything  
 ✅ **SSL security** - Automatic HTTPS with Let's Encrypt  

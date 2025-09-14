@@ -1,4 +1,4 @@
-# SolarNexus System Requirements
+# NexusGreen System Requirements
 
 ## Server Requirements
 

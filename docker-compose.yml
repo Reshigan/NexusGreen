@@ -48,6 +48,7 @@ services:
       - PORT=3001
       - DATABASE_URL=postgresql://nexususer:nexuspass123@nexus-green-db:5432/nexusgreen
       - JWT_SECRET=nexus-green-jwt-secret-2024
+      - SOLAX_SYNC_INTERVAL_MINUTES=60
     networks:
       - nexus-network
     depends_on:

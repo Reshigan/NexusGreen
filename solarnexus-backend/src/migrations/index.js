@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * SolarNexus Database Migration Runner
+ * NexusGreen Database Migration Runner
  * Handles database schema initialization and migrations
  */
 
@@ -11,7 +11,7 @@ const path = require('path');
 
 // Database configuration
 const dbConfig = {
-  connectionString: process.env.DATABASE_URL || 'postgresql://solarnexus:solarnexus@localhost:5432/solarnexus',
+  connectionString: process.env.DATABASE_URL || 'postgresql://nexusgreen:nexusgreen@localhost:5432/nexusgreen',
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 };
 
@@ -55,7 +55,7 @@ async function checkDatabase() {
  * Run all migrations
  */
 async function runMigrations() {
-  console.log('🚀 Starting SolarNexus database migrations...');
+  console.log('🚀 Starting NexusGreen database migrations...');
   
   // Check database connection
   const isConnected = await checkDatabase();
@@ -75,7 +75,7 @@ async function runMigrations() {
       
       // Create basic schema if no migration file exists
       const basicSchema = `
-        -- SolarNexus Basic Schema
+        -- NexusGreen Basic Schema
         CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
         
         -- Users table

@@ -8,13 +8,13 @@ Next-Generation Solar Energy Intelligence Platform - A cutting-edge, multi-tenan
 
 ### One-Command Deployment
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Reshigan/SolarNexus/main/deploy-production.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Reshigan/NexusGreen/main/deploy-production.sh | bash
 ```
 
 ### Manual Deployment
 ```bash
-git clone https://github.com/Reshigan/SolarNexus.git
-cd SolarNexus
+git clone https://github.com/Reshigan/NexusGreen.git
+cd NexusGreen
 chmod +x deploy-production.sh
 ./deploy-production.sh
 ```
@@ -79,8 +79,8 @@ SolarNexus provides real-time monitoring, predictive analytics, and financial op
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/Reshigan/SolarNexus.git
-cd SolarNexus
+git clone https://github.com/Reshigan/NexusGreen.git
+cd NexusGreen
 
 # 2. Install dependencies
 npm install
@@ -101,7 +101,7 @@ cd solarnexus-backend && npm run dev  # Backend (port 3000)
 
 ```bash
 # Download and run the production deployment script
-curl -o production-deploy.sh https://raw.githubusercontent.com/Reshigan/SolarNexus/main/production-deploy.sh
+curl -o production-deploy.sh https://raw.githubusercontent.com/Reshigan/NexusGreen/main/production-deploy.sh
 chmod +x production-deploy.sh
 sudo ./production-deploy.sh
 ```

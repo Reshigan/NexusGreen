@@ -24,11 +24,28 @@ export class DataSyncService {
   };
 
   constructor() {
-    // Default to hourly sync, configurable via environment
-    const intervalHours = parseInt(process.env.SOLAX_SYNC_INTERVAL_HOURS || '1');
-    this.syncInterval = `0 */${intervalHours} * * *`; // Every N hours
+    // Default to 60 minutes, configurable via environment (60-90 minutes recommended)
+    const intervalMinutes = parseInt(process.env.SOLAX_SYNC_INTERVAL_MINUTES || '60');
     
-    logger.info(`Data sync service initialized with interval: every ${intervalHours} hour(s)`);
+    // Validate interval is between 30-120 minutes for optimal performance
+    const validInterval = Math.max(30, Math.min(120, intervalMinutes));
+    
+    if (validInterval >= 60) {
+      // For intervals >= 60 minutes, use hourly cron pattern
+      const hours = Math.floor(validInterval / 60);
+      const minutes = validInterval % 60;
+      if (minutes === 0) {
+        this.syncInterval = `0 */${hours} * * *`; // Every N hours
+      } else {
+        // For non-hour intervals, use minute-based pattern
+        this.syncInterval = `*/${validInterval} * * * *`; // Every N minutes
+      }
+    } else {
+      this.syncInterval = `*/${validInterval} * * * *`; // Every N minutes
+    }
+    
+    logger.info(`NexusGreen data sync service initialized with interval: every ${validInterval} minutes`);
+    logger.info(`Cron pattern: ${this.syncInterval}`);
   }
 
   /**
@@ -65,6 +82,60 @@ export class DataSyncService {
    */
   getStats(): SyncStats {
     return { ...this.stats };
+  }
+
+  /**
+   * Manually trigger a data refresh (useful for on-demand updates)
+   */
+  async manualRefresh(): Promise<{ success: boolean; message: string; stats?: SyncStats }> {
+    if (this.isRunning) {
+      return {
+        success: false,
+        message: 'Data sync already in progress. Please wait for current sync to complete.'
+      };
+    }
+
+    try {
+      logger.info('Manual data refresh triggered');
+      await this.performSync();
+      return {
+        success: true,
+        message: 'Data refresh completed successfully',
+        stats: this.getStats()
+      };
+    } catch (error) {
+      logger.error('Manual refresh failed:', error);
+      return {
+        success: false,
+        message: `Manual refresh failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      };
+    }
+  }
+
+  /**
+   * Update sync interval dynamically (60-90 minutes recommended)
+   */
+  updateSyncInterval(minutes: number): { success: boolean; message: string } {
+    const validInterval = Math.max(30, Math.min(120, minutes));
+    
+    if (validInterval >= 60) {
+      const hours = Math.floor(validInterval / 60);
+      const mins = validInterval % 60;
+      if (mins === 0) {
+        this.syncInterval = `0 */${hours} * * *`;
+      } else {
+        this.syncInterval = `*/${validInterval} * * * *`;
+      }
+    } else {
+      this.syncInterval = `*/${validInterval} * * * *`;
+    }
+
+    logger.info(`Sync interval updated to every ${validInterval} minutes (${this.syncInterval})`);
+    
+    return {
+      success: true,
+      message: `Sync interval updated to every ${validInterval} minutes. Restart required for changes to take effect.`
+    };
   }
 
   /**

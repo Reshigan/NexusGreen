@@ -9,7 +9,7 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
 
   // Database
-  databaseUrl: process.env.DATABASE_URL || 'postgresql://localhost:5432/solarnexus',
+  databaseUrl: process.env.DATABASE_URL || 'postgresql://localhost:5432/nexusgreen',
 
   // JWT
   jwt: {
@@ -28,8 +28,8 @@ export const config = {
     port: parseInt(process.env.SMTP_PORT || '587', 10),
     user: process.env.SMTP_USER || '',
     pass: process.env.SMTP_PASS || '',
-    from: process.env.FROM_EMAIL || 'noreply@solarnexus.com',
-    fromName: process.env.FROM_NAME || 'SolarNexus',
+    from: process.env.FROM_EMAIL || 'noreply@nexusgreen.com',
+    fromName: process.env.FROM_NAME || 'NexusGreen',
   },
 
   // SolaX API
@@ -63,7 +63,7 @@ export const config = {
   // Production
   productionServerIp: process.env.PRODUCTION_SERVER_IP || '13.244.63.26',
   ssl: {
-    certPath: process.env.SSL_CERT_PATH || '/etc/ssl/certs/solarnexus.crt',
-    keyPath: process.env.SSL_KEY_PATH || '/etc/ssl/private/solarnexus.key',
+    certPath: process.env.SSL_CERT_PATH || '/etc/ssl/certs/nexusgreen.crt',
+    keyPath: process.env.SSL_KEY_PATH || '/etc/ssl/private/nexusgreen.key',
   },
 };

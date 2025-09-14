@@ -37,7 +37,7 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: {
     origin: process.env.NODE_ENV === 'production' 
-      ? ['https://solarnexus.com', 'https://www.solarnexus.com']
+      ? ['https://nexusgreen.com', 'https://www.nexusgreen.com', 'https://nexus.gonxt.tech']
       : ['http://localhost:3000', 'http://localhost:5173'],
     credentials: true
   }
@@ -60,7 +60,7 @@ app.use(helmet({
 // CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://solarnexus.com', 'https://www.solarnexus.com']
+    ? ['https://nexusgreen.com', 'https://www.nexusgreen.com', 'https://nexus.gonxt.tech']
     : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:12000', 'http://localhost:12001'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -146,7 +146,7 @@ const PORT = config.port || 3000;
 const HOST = config.host || '0.0.0.0';
 
 server.listen(PORT, HOST, () => {
-  logger.info(`🚀 SolarNexus server running on ${HOST}:${PORT}`);
+  logger.info(`🚀 NexusGreen server running on ${HOST}:${PORT}`);
   logger.info(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   logger.info(`🔗 Health check: http://${HOST}:${PORT}/health`);
   

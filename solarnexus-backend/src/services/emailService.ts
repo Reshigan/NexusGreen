@@ -41,13 +41,13 @@ class EmailService {
   }
 
   async sendVerificationEmail(email: string, firstName: string) {
-    const subject = 'Welcome to SolarNexus - Verify Your Email';
+    const subject = 'Welcome to NexusGreen - Verify Your Email';
     const html = `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
-          <title>Welcome to SolarNexus</title>
+          <title>Welcome to NexusGreen</title>
           <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -60,19 +60,19 @@ class EmailService {
         <body>
           <div class="container">
             <div class="header">
-              <h1>Welcome to SolarNexus!</h1>
-              <p>Smart Solar Analytics Platform</p>
+              <h1>Welcome to NexusGreen!</h1>
+              <p>Advanced Solar Energy Management Platform</p>
             </div>
             <div class="content">
               <h2>Hello ${firstName},</h2>
-              <p>Thank you for joining SolarNexus! We're excited to help you optimize your solar energy management.</p>
+              <p>Thank you for joining NexusGreen! We're excited to help you optimize your solar energy management.</p>
               <p>To get started, please verify your email address by clicking the button below:</p>
               <a href="#" class="button">Verify Email Address</a>
               <p>If you didn't create this account, please ignore this email.</p>
-              <p>Best regards,<br>The SolarNexus Team</p>
+              <p>Best regards,<br>The NexusGreen Team</p>
             </div>
             <div class="footer">
-              <p>© 2024 SolarNexus. All rights reserved.</p>
+              <p>© 2024 NexusGreen. All rights reserved.</p>
             </div>
           </div>
         </body>
@@ -83,7 +83,7 @@ class EmailService {
   }
 
   async sendPasswordResetEmail(email: string, firstName: string, resetToken: string) {
-    const subject = 'Reset Your SolarNexus Password';
+    const subject = 'Reset Your NexusGreen Password';
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
     
     const html = `
@@ -109,16 +109,16 @@ class EmailService {
             </div>
             <div class="content">
               <h2>Hello ${firstName},</h2>
-              <p>We received a request to reset your SolarNexus password.</p>
+              <p>We received a request to reset your NexusGreen password.</p>
               <p>Click the button below to reset your password:</p>
               <a href="${resetUrl}" class="button">Reset Password</a>
               <div class="warning">
                 <strong>Security Notice:</strong> This link will expire in 1 hour. If you didn't request this password reset, please ignore this email.
               </div>
-              <p>Best regards,<br>The SolarNexus Team</p>
+              <p>Best regards,<br>The NexusGreen Team</p>
             </div>
             <div class="footer">
-              <p>© 2024 SolarNexus. All rights reserved.</p>
+              <p>© 2024 NexusGreen. All rights reserved.</p>
             </div>
           </div>
         </body>
@@ -129,14 +129,14 @@ class EmailService {
   }
 
   async sendAlertNotification(email: string, firstName: string, alertTitle: string, alertDescription: string, siteName: string) {
-    const subject = `SolarNexus Alert: ${alertTitle}`;
+    const subject = `NexusGreen Alert: ${alertTitle}`;
     
     const html = `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8">
-          <title>SolarNexus Alert</title>
+          <title>NexusGreen Alert</title>
           <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -159,12 +159,12 @@ class EmailService {
                 <h3>${alertTitle}</h3>
                 <p>${alertDescription}</p>
               </div>
-              <p>Please review this alert in your SolarNexus dashboard:</p>
+              <p>Please review this alert in your NexusGreen dashboard:</p>
               <a href="#" class="button">View Dashboard</a>
-              <p>Best regards,<br>The SolarNexus Team</p>
+              <p>Best regards,<br>The NexusGreen Team</p>
             </div>
             <div class="footer">
-              <p>© 2024 SolarNexus. All rights reserved.</p>
+              <p>© 2024 NexusGreen. All rights reserved.</p>
             </div>
           </div>
         </body>

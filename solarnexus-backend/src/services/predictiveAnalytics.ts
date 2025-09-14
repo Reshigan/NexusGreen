@@ -354,7 +354,7 @@ export class PredictiveAnalyticsService {
       });
 
       for (const user of omUsers) {
-        const subject = `SolarNexus Alert: Critical Issues Detected`;
+        const subject = `NexusGreen Alert: Critical Issues Detected`;
         const html = this.generateAlertEmail(criticalPredictions);
         
         await emailService.sendEmail(user.email, subject, html);
@@ -453,7 +453,7 @@ export class PredictiveAnalyticsService {
 
   private generateAlertEmail(predictions: PredictionResult[]): string {
     let html = `
-      <h2>SolarNexus System Alert</h2>
+      <h2>NexusGreen System Alert</h2>
       <p>Critical issues have been detected that require immediate attention:</p>
       <ul>
     `;
@@ -471,7 +471,7 @@ export class PredictiveAnalyticsService {
 
     html += `
       </ul>
-      <p>Please log into the SolarNexus portal for detailed analysis and recommendations.</p>
+      <p>Please log into the NexusGreen portal for detailed analysis and recommendations.</p>
     `;
 
     return html;

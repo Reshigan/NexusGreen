@@ -1,20 +1,20 @@
-# 🌞 SolarNexus Production Installation Guide
+# 🌞 NexusGreen Production Installation Guide
 
-Complete guide for installing SolarNexus in production with SSL, demo data, and full automation.
+Complete guide for installing NexusGreen in production with SSL, demo data, and full automation.
 
 ## 🚀 Quick Installation
 
 ### One-Command Installation
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Reshigan/SolarNexus/main/install-solarnexus.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Reshigan/NexusGreen/main/install-solarnexus.sh | bash
 ```
 
 This will:
 - ✅ Install all dependencies (Docker, nginx, certbot)
 - ✅ Configure SSL certificate with Let's Encrypt
 - ✅ Set up South African timezone (SAST)
-- ✅ Deploy complete SolarNexus application
+- ✅ Deploy complete NexusGreen application
 - ✅ Seed demo data with GonXT Solar Solutions
 - ✅ Configure production-grade security
 
@@ -43,7 +43,7 @@ If you prefer manual installation or need to customize the process:
 ### Step 1: Download Deployment Script
 
 ```bash
-wget https://raw.githubusercontent.com/Reshigan/SolarNexus/main/production-deploy.sh
+wget https://raw.githubusercontent.com/Reshigan/NexusGreen/main/production-deploy.sh
 chmod +x production-deploy.sh
 ```
 
@@ -264,7 +264,7 @@ Content-Security-Policy: [Comprehensive CSP policy]
 # Update system packages
 sudo apt update && sudo apt upgrade -y
 
-# Update SolarNexus application
+# Update NexusGreen application
 cd /opt/solarnexus
 git pull
 sudo docker compose up -d --build
@@ -303,11 +303,11 @@ When reporting issues, please include:
 
 ## 🎉 Success!
 
-Your SolarNexus installation should now be running at:
+Your NexusGreen installation should now be running at:
 **https://your-domain.com**
 
 Login with:
 - **Admin**: admin@gonxt.tech / Demo2024!
 - **User**: user@gonxt.tech / Demo2024!
 
-Welcome to SolarNexus! 🌞
+Welcome to NexusGreen! 🌞
