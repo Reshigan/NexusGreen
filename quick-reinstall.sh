@@ -76,7 +76,8 @@ if [ -f "nginx.conf" ]; then
 fi
 
 print_status "Building and starting services..."
-sudo docker compose up -d --build
+# Remove any orphaned containers (like nginx) to avoid port conflicts
+sudo docker compose up -d --build --remove-orphans
 
 print_status "Waiting for services to start..."
 sleep 30

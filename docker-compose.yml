@@ -103,30 +103,32 @@ services:
     depends_on:
       - backend
 
-  # Nginx Reverse Proxy
-  nginx:
-    image: nginx:alpine
-    container_name: solarnexus-nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./ssl:/etc/nginx/ssl:ro
-      - frontend_build:/var/www/html:ro
-      - ./logs/nginx:/var/log/nginx
-    networks:
-      - solarnexus-network
-    depends_on:
-      - backend
-      - frontend
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+  # Nginx Reverse Proxy - DISABLED (Using system nginx instead)
+  # The system nginx service is already configured with SSL and reverse proxy
+  # This avoids port conflicts and follows production best practices
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: solarnexus-nginx
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./nginx/conf.d:/etc/nginx/conf.d:ro
+  #     - ./ssl:/etc/nginx/ssl:ro
+  #     - frontend_build:/var/www/html:ro
+  #     - ./logs/nginx:/var/log/nginx
+  #   networks:
+  #     - solarnexus-network
+  #   depends_on:
+  #     - backend
+  #     - frontend
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
 
   # ML/AI Service (Optional - for predictions)
   # ml-service:
