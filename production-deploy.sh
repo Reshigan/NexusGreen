@@ -64,11 +64,51 @@ print_success "Timezone set to $CURRENT_TZ - Current time: $(date)"
 # Step 2: Update system and install required packages
 print_status "Step 2: Installing required packages..."
 $SUDO apt update
-$SUDO apt install -y nginx certbot python3-certbot-nginx curl wget git docker.io docker-compose-plugin
+$SUDO apt install -y nginx certbot python3-certbot-nginx curl wget git
+
+# Install Docker with proper repository setup
+print_status "Installing Docker with official repository..."
+# Add Docker's official GPG key
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | $SUDO gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+# Add Docker repository
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | $SUDO tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Update package index
+$SUDO apt update
+
+# Try to install docker-compose-plugin, fallback to standalone if it fails
+if $SUDO apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin; then
+    print_success "Docker with Compose Plugin installed"
+    COMPOSE_CMD="docker compose"
+else
+    print_warning "docker-compose-plugin failed, installing standalone docker-compose..."
+    $SUDO apt install -y docker-ce docker-ce-cli containerd.io
+    
+    # Install docker-compose as standalone binary
+    COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
+    $SUDO curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    $SUDO chmod +x /usr/local/bin/docker-compose
+    $SUDO ln -sf /usr/local/bin/docker-compose /usr/bin/docker-compose
+    COMPOSE_CMD="docker-compose"
+    print_success "Docker with standalone Compose installed"
+fi
+
 $SUDO systemctl enable nginx
 $SUDO systemctl enable docker
+$SUDO systemctl start docker
 $SUDO usermod -aG docker $USER
-print_success "Required packages installed"
+
+# Detect which compose command to use for the rest of the script
+if command -v docker-compose &> /dev/null; then
+    COMPOSE_CMD="docker-compose"
+elif docker compose version &> /dev/null 2>&1; then
+    COMPOSE_CMD="docker compose"
+else
+    COMPOSE_CMD="docker-compose"
+fi
+
+print_success "Required packages installed - Using: $COMPOSE_CMD"
 
 # Step 3: Clean deployment
 print_status "Step 3: Performing clean deployment..."
@@ -639,8 +679,8 @@ print_success "Docker Compose configuration created"
 
 # Step 8: Build and start services
 print_status "Step 8: Building and starting services..."
-$SUDO docker-compose build --no-cache
-$SUDO docker-compose up -d
+$SUDO $COMPOSE_CMD build --no-cache
+$SUDO $COMPOSE_CMD up -d
 
 # Wait for services to start
 print_status "Waiting for services to initialize..."
@@ -650,7 +690,7 @@ print_success "Services started"
 
 # Step 9: Seed demo data
 print_status "Step 9: Seeding demo data..."
-$SUDO docker-compose exec -T backend npm run seed || print_warning "Demo data seeding may have failed"
+$SUDO $COMPOSE_CMD exec -T backend npm run seed || print_warning "Demo data seeding may have failed"
 print_success "Demo data seeded"
 
 # Step 10: Setup SSL certificate
@@ -683,7 +723,7 @@ sleep 30
 
 echo ""
 echo "=== Container Status ==="
-$SUDO docker-compose ps
+$SUDO $COMPOSE_CMD ps
 
 echo ""
 echo "=== Service Health Checks ==="
@@ -709,9 +749,9 @@ echo "• Admin: ${DEMO_ADMIN_EMAIL:-admin@gonxt.tech} / ${DEMO_ADMIN_PASSWORD:-
 echo "• User:  ${DEMO_USER_EMAIL:-user@gonxt.tech} / ${DEMO_USER_PASSWORD:-Demo2024!}"
 echo ""
 echo "🛠️  Management Commands:"
-echo "• View logs: cd $DEPLOY_DIR && sudo docker-compose logs"
-echo "• Restart: cd $DEPLOY_DIR && sudo docker-compose restart"
-echo "• Update: cd $DEPLOY_DIR && git pull && sudo docker-compose up -d --build"
+echo "• View logs: cd $DEPLOY_DIR && sudo $COMPOSE_CMD logs"
+echo "• Restart: cd $DEPLOY_DIR && sudo $COMPOSE_CMD restart"
+echo "• Update: cd $DEPLOY_DIR && git pull && sudo $COMPOSE_CMD up -d --build"
 echo "• SSL renewal: sudo certbot renew"
 echo ""
 echo "Deployment completed at: $(date)"
