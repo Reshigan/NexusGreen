@@ -90,29 +90,53 @@ echo ""
 print_header "📋 Configuration Setup"
 echo ""
 
-# Domain configuration
-read -p "Enter your domain name (default: nexus.gonxt.tech): " DOMAIN
-DOMAIN=${DOMAIN:-nexus.gonxt.tech}
-
-# Email for SSL certificate
-read -p "Enter email for SSL certificate (default: reshigan@gonxt.tech): " EMAIL
-EMAIL=${EMAIL:-reshigan@gonxt.tech}
-
-# Confirm configuration
-echo ""
-print_status "Configuration Summary:"
-echo "  - Domain: $DOMAIN"
-echo "  - SSL Email: $EMAIL"
-echo "  - Timezone: Africa/Johannesburg (SAST)"
-echo "  - Demo Company: GonXT Solar Solutions"
-echo "  - Admin Login: admin@gonxt.tech / Demo2024!"
-echo "  - User Login: user@gonxt.tech / Demo2024!"
-echo ""
-
-read -p "Continue with installation? (y/N): " CONFIRM
-if [[ ! $CONFIRM =~ ^[Yy]$ ]]; then
-    print_status "Installation cancelled."
-    exit 0
+# Check if running in interactive mode
+if [[ -t 0 ]]; then
+    # Interactive mode - prompt for input
+    read -p "Enter your domain name (default: nexus.gonxt.tech): " DOMAIN
+    DOMAIN=${DOMAIN:-nexus.gonxt.tech}
+    
+    read -p "Enter email for SSL certificate (default: reshigan@gonxt.tech): " EMAIL
+    EMAIL=${EMAIL:-reshigan@gonxt.tech}
+    
+    # Confirm configuration
+    echo ""
+    print_status "Configuration Summary:"
+    echo "  - Domain: $DOMAIN"
+    echo "  - SSL Email: $EMAIL"
+    echo "  - Timezone: Africa/Johannesburg (SAST)"
+    echo "  - Demo Company: GonXT Solar Solutions"
+    echo "  - Admin Login: admin@gonxt.tech / Demo2024!"
+    echo "  - User Login: user@gonxt.tech / Demo2024!"
+    echo ""
+    
+    read -p "Continue with installation? (y/N): " CONFIRM
+    if [[ ! $CONFIRM =~ ^[Yy]$ ]]; then
+        print_status "Installation cancelled."
+        exit 0
+    fi
+else
+    # Non-interactive mode (piped from curl) - use defaults
+    DOMAIN=${DOMAIN:-nexus.gonxt.tech}
+    EMAIL=${EMAIL:-reshigan@gonxt.tech}
+    
+    print_status "Running in non-interactive mode with default configuration:"
+    echo "  - Domain: $DOMAIN"
+    echo "  - SSL Email: $EMAIL"
+    echo "  - Timezone: Africa/Johannesburg (SAST)"
+    echo "  - Demo Company: GonXT Solar Solutions"
+    echo "  - Admin Login: admin@gonxt.tech / Demo2024!"
+    echo "  - User Login: user@gonxt.tech / Demo2024!"
+    echo ""
+    
+    print_status "To use custom settings, download the script and run it directly:"
+    print_status "wget https://raw.githubusercontent.com/Reshigan/SolarNexus/main/install-solarnexus.sh"
+    print_status "chmod +x install-solarnexus.sh"
+    print_status "./install-solarnexus.sh"
+    echo ""
+    
+    print_status "Continuing with default configuration in 5 seconds..."
+    sleep 5
 fi
 
 echo ""
