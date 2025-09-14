@@ -77,10 +77,10 @@ services:
       - nexus-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U nexususer -d nexusgreen"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
     ports:
       - "5432:5432"
 
