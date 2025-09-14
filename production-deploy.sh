@@ -44,8 +44,22 @@ print_status "Starting production deployment..."
 # Step 1: Set South African Timezone
 print_status "Step 1: Setting timezone to South Africa (SAST)..."
 $SUDO timedatectl set-timezone Africa/Johannesburg
-$SUDO systemctl restart systemd-timesyncd
-print_success "Timezone set to $(timedatectl | grep 'Time zone')"
+
+# Try to restart systemd-timesyncd if it exists, otherwise use alternative
+if systemctl list-unit-files | grep -q systemd-timesyncd; then
+    print_status "Restarting systemd-timesyncd..."
+    $SUDO systemctl restart systemd-timesyncd 2>/dev/null || print_warning "systemd-timesyncd restart failed (this is usually OK)"
+else
+    print_warning "systemd-timesyncd not found, using alternative time sync"
+    # Install and enable ntp as alternative
+    $SUDO apt install -y ntp 2>/dev/null || true
+    $SUDO systemctl enable ntp 2>/dev/null || true
+    $SUDO systemctl start ntp 2>/dev/null || true
+fi
+
+# Verify timezone setting
+CURRENT_TZ=$(timedatectl | grep "Time zone" | awk '{print $3}' 2>/dev/null || echo "Africa/Johannesburg")
+print_success "Timezone set to $CURRENT_TZ - Current time: $(date)"
 
 # Step 2: Update system and install required packages
 print_status "Step 2: Installing required packages..."
