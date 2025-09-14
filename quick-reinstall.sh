@@ -82,6 +82,24 @@ sudo docker compose up -d --build --remove-orphans
 print_status "Waiting for services to start..."
 sleep 30
 
+print_status "Testing connectivity..."
+# Test backend connectivity
+if curl -s -f http://localhost:5000/health > /dev/null 2>&1; then
+    echo "✅ Backend is accessible on port 5000"
+else
+    echo "⚠️  Backend not accessible on port 5000"
+fi
+
+# Test frontend connectivity  
+if curl -s -f http://localhost:3000 > /dev/null 2>&1; then
+    echo "✅ Frontend is accessible on port 3000"
+else
+    echo "⚠️  Frontend not accessible on port 3000"
+fi
+
+print_status "Making troubleshooting script executable..."
+chmod +x troubleshoot-deployment.sh
+
 print_status "Running database migrations and seeding..."
 sudo docker compose exec -T backend npx prisma migrate deploy || true
 sudo docker compose exec -T backend npm run db:seed || true
@@ -91,6 +109,9 @@ print_status "✅ SolarNexus reinstalled successfully!"
 echo ""
 echo "🌐 Application URL: https://$DOMAIN"
 echo "📁 Installation Directory: $DEPLOY_DIR"
+echo ""
+echo "🔧 If you experience connectivity issues:"
+echo "  Troubleshoot: cd $DEPLOY_DIR && ./troubleshoot-deployment.sh"
 echo ""
 echo "🛠️ Management Commands:"
 echo "  View logs:    cd $DEPLOY_DIR && sudo docker compose logs"

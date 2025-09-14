@@ -70,7 +70,7 @@ services:
       - ./uploads:/app/uploads
       - ./logs:/app/logs
     ports:
-      - "5000:5000"
+      - "0.0.0.0:5000:5000"
     networks:
       - solarnexus-network
     depends_on:
@@ -97,7 +97,7 @@ services:
       VITE_WS_URL: ${VITE_WS_URL:-wss://nexus.gonxt.tech/ws}
       VITE_ENVIRONMENT: production
     ports:
-      - "3000:8080"
+      - "0.0.0.0:3000:8080"
     networks:
       - solarnexus-network
     depends_on:
