@@ -1,1 +1,0 @@
-{"version":3,"file":"solarDataService.js","sourceRoot":"","sources":["../../src/services/solarDataService.ts"],"names":[],"mappings":";;;AAAA,MAAa,gBAAgB;IAC3B,4CAA4C;IAC5C,KAAK,CAAC,OAAO;QACX,OAAO,EAAE,CAAC;IACZ,CAAC;IAED,KAAK,CAAC,aAAa,CAAC,MAAc,EAAE,SAAe,EAAE,OAAa;QAChE,OAAO;YACL,eAAe,EAAE,CAAC;YAClB,gBAAgB,EAAE,CAAC;YACnB,UAAU,EAAE,EAAE;SACf,CAAC;IACJ,CAAC;CACF;AAbD,4CAaC"}

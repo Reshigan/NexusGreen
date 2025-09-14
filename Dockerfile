@@ -25,37 +25,40 @@ FROM base AS build
 RUN npm ci
 COPY . .
 
-# Build the React app with SolarNexus branding
-ENV REACT_APP_NAME="SolarNexus"
-ENV REACT_APP_VERSION="1.0.0"
+# Build the React app with environment variables
+ARG VITE_API_URL=https://nexus.gonxt.tech/api
+ARG VITE_WS_URL=wss://nexus.gonxt.tech/ws
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_WS_URL=$VITE_WS_URL
 ENV GENERATE_SOURCEMAP=false
 
 RUN npm run build
 
-# Production stage - serve with nginx
-FROM nginx:alpine AS production
+# Production stage - Simple HTTP server
+FROM node:20-alpine AS production
 
-# Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Install serve globally
+RUN npm install -g serve
 
-# Copy built React app
-COPY --from=build /app/dist /usr/share/nginx/html
+# Create app directory
+WORKDIR /app
+
+# Copy built application
+COPY --from=build /app/dist ./dist
 
 # Create non-root user
-RUN addgroup -g 1001 -S nginx-user
-RUN adduser -S nginx-user -u 1001 -G nginx-user
-
-# Set permissions
-RUN chown -R nginx-user:nginx-user /usr/share/nginx/html
-RUN chown -R nginx-user:nginx-user /var/cache/nginx
-RUN chown -R nginx-user:nginx-user /var/log/nginx
-RUN chown -R nginx-user:nginx-user /etc/nginx/conf.d
-RUN touch /var/run/nginx.pid
-RUN chown -R nginx-user:nginx-user /var/run/nginx.pid
+RUN addgroup -g 1001 -S appuser && \
+    adduser -S appuser -u 1001 -G appuser && \
+    chown -R appuser:appuser /app
 
 # Switch to non-root user
-USER nginx-user
+USER appuser
 
-EXPOSE 80
+EXPOSE 8080
 
-CMD ["nginx", "-g", "daemon off;"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1
+
+# Serve the application
+CMD ["serve", "-s", "dist", "-l", "8080"]

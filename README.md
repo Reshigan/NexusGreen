@@ -2,6 +2,30 @@
 
 A comprehensive solar energy management platform for monitoring, analytics, and optimization of solar installations.
 
+## 🚀 Quick Production Deployment
+
+**Server**: 13.247.192.38 | **Domain**: nexus.gonxt.tech | **SSL**: reshigan@gonxt.tech
+
+### One-Command Deployment
+```bash
+curl -fsSL https://raw.githubusercontent.com/Reshigan/SolarNexus/main/deploy-production.sh | bash
+```
+
+### Manual Deployment
+```bash
+git clone https://github.com/Reshigan/SolarNexus.git
+cd SolarNexus
+chmod +x deploy-production.sh
+./deploy-production.sh
+```
+
+### Test Deployment
+```bash
+./test-production.sh
+```
+
+📖 **Full deployment guide**: [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
+
 ## 🌟 Overview
 
 SolarNexus provides real-time monitoring, predictive analytics, and financial optimization for solar installations across multiple stakeholders including solar installers, O&M providers, asset owners, and end customers.
