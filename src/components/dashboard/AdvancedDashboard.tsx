@@ -41,9 +41,10 @@ interface AdvancedDashboardProps {
   onLogout?: () => void;
   onNavigateToSites?: () => void;
   onNavigateToUsers?: () => void;
+  onNavigateToAlerts?: () => void;
 }
 
-const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ user, organization, onLogout, onNavigateToSites, onNavigateToUsers }) => {
+const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ user, organization, onLogout, onNavigateToSites, onNavigateToUsers, onNavigateToAlerts }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedTimeRange, setSelectedTimeRange] = useState('today');
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -281,7 +282,11 @@ const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ user, organizatio
                   Settings
                 </Button>
                 <div className="relative">
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={onNavigateToAlerts}
+                  >
                     <Bell className="w-4 h-4" />
                   </Button>
                   {dashboardMetrics.totalAlerts > 0 && (

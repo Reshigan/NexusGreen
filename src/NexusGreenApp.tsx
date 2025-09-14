@@ -5,9 +5,10 @@ import ModernLogin from '@/components/auth/ModernLogin';
 import AdvancedDashboard from '@/components/dashboard/AdvancedDashboard';
 import SiteManagement from '@/components/sites/SiteManagement';
 import UserManagement from '@/components/users/UserManagement';
+import AlertsManagement from '@/components/alerts/AlertsManagement';
 import { nexusApi, type User, type Organization } from '@/services/nexusApi';
 
-type AppState = 'login' | 'signup' | 'forgot-password' | 'dashboard' | 'sites' | 'users';
+type AppState = 'login' | 'signup' | 'forgot-password' | 'dashboard' | 'sites' | 'users' | 'alerts';
 
 const NexusGreenApp: React.FC = () => {
   const [appState, setAppState] = useState<AppState>('login');
@@ -70,6 +71,10 @@ const NexusGreenApp: React.FC = () => {
 
   const handleNavigateToUsers = () => {
     setAppState('users');
+  };
+
+  const handleNavigateToAlerts = () => {
+    setAppState('alerts');
   };
 
   const handleBackToDashboard = () => {
@@ -196,6 +201,7 @@ const NexusGreenApp: React.FC = () => {
               onLogout={handleLogout}
               onNavigateToSites={handleNavigateToSites}
               onNavigateToUsers={handleNavigateToUsers}
+              onNavigateToAlerts={handleNavigateToAlerts}
             />
             
             {/* Logout button - floating */}
@@ -236,6 +242,22 @@ const NexusGreenApp: React.FC = () => {
             transition={{ duration: 0.5 }}
           >
             <UserManagement
+              user={currentUser}
+              organization={currentOrganization}
+              onBack={handleBackToDashboard}
+            />
+          </motion.div>
+        )}
+
+        {appState === 'alerts' && currentUser && currentOrganization && (
+          <motion.div
+            key="alerts"
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ duration: 0.5 }}
+          >
+            <AlertsManagement
               user={currentUser}
               organization={currentOrganization}
               onBack={handleBackToDashboard}
