@@ -1,4 +1,4 @@
-# Nexus Green Production Docker Compose with SSL
+# Nexus Green Production Docker Compose
 
 services:
   nexus-green:
@@ -9,33 +9,30 @@ services:
     container_name: nexus-green
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "80:8080"
       - "443:443"
     environment:
       - VITE_APP_NAME=NexusGreen
       - VITE_APP_VERSION=6.1.0
-      - VITE_API_URL=https://nexus.gonxt.tech/api
+      - VITE_API_URL=http://nexus.gonxt.tech/api
       - VITE_ENVIRONMENT=production
       - VITE_COMPANY_NAME=SolarTech Solutions (Pty) Ltd
       - VITE_COMPANY_REG=2019/123456/07
       - VITE_PPA_RATE=1.20
     volumes:
       - ./docker/ssl:/etc/nginx/ssl:ro
-      - ./docker/ssl.conf:/etc/nginx/conf.d/default.conf:ro
       - ./docker/logs:/var/log/nginx
     networks:
       - nexus-network
-    depends_on:
-      - nexus-api
     healthcheck:
-      test: ["CMD", "curl", "-f", "-k", "https://localhost/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
     labels:
       - "com.nexusgreen.service=frontend"
-      - "com.nexusgreen.version=6.1.0"
+      - "com.nexusgreen.version=4.0.0"
 
   # API backend service
   nexus-api:
@@ -52,7 +49,6 @@ services:
       - DATABASE_URL=postgresql://nexususer:nexuspass123@nexus-db:5432/nexusgreen
       - JWT_SECRET=nexus-green-jwt-secret-2024
       - SOLAX_SYNC_INTERVAL_MINUTES=60
-      - CORS_ORIGIN=https://nexus.gonxt.tech
     networks:
       - nexus-network
     depends_on:

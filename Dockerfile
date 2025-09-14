@@ -26,33 +26,35 @@ RUN npm run build
 # Stage 2: Production stage
 FROM nginx:alpine AS production
 
-# Install curl for health checks
-RUN apk add --no-cache curl
+# Install curl and openssl for health checks and SSL
+RUN apk add --no-cache curl openssl
 
 # Copy custom nginx configuration
-COPY nginx-custom.conf /etc/nginx/nginx.conf
-# Remove default config to prevent conflicts
-RUN rm -f /etc/nginx/conf.d/default.conf
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+
+# Create SSL directory
+RUN mkdir -p /etc/nginx/ssl
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy environment template
-COPY --from=builder /app/.env.production /usr/share/nginx/html/.env
-
 # Create temp directories and set permissions
 RUN mkdir -p /tmp/client_temp /tmp/proxy_temp /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp && \
-    chown -R nginx:nginx /usr/share/nginx/html /tmp
+    mkdir -p /var/log/nginx && \
+    chown -R nginx:nginx /usr/share/nginx/html /tmp /var/log/nginx /etc/nginx/ssl
 
-# Switch to nginx user
-USER nginx
+# Create a default health check page
+RUN echo "healthy" > /usr/share/nginx/html/health.txt
 
-# Expose port
-EXPOSE 8080
+# Switch back to root for nginx to bind to privileged ports
+USER root
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+# Expose ports for HTTP and HTTPS
+EXPOSE 80 443
+
+# Health check (try HTTPS first, fallback to HTTP)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f -k https://localhost/health || curl -f http://localhost/health || exit 1
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
