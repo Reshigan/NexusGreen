@@ -1,7 +1,7 @@
 # SolarNexus AWS Deployment Guide
 
 ## Server Information
-- **IP Address**: 13.245.249.110
+- **IP Address**: 13.247.174.75
 - **Domain**: nexus.gonxt.tech
 - **OS**: Ubuntu 20.04+ (recommended)
 
@@ -9,7 +9,7 @@
 
 ### 1. Connect to Server
 ```bash
-ssh root@13.245.249.110
+ssh root@13.247.174.75
 # or
 ssh root@nexus.gonxt.tech
 ```

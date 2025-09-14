@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # SolarNexus Deployment Script
-# For AWS server deployment at 13.245.249.110 (nexus.gonxt.tech)
+# For AWS server deployment at 13.247.174.75 (nexus.gonxt.tech)
 
 set -e
 
@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 DOMAIN="nexus.gonxt.tech"
-SERVER_IP="13.245.249.110"
+SERVER_IP="13.247.174.75"
 PROJECT_DIR="/opt/solarnexus"
 BACKUP_DIR="/opt/solarnexus-backup"
 

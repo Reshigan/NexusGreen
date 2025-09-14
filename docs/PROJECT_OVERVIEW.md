@@ -10,7 +10,7 @@ SolarNexus is a comprehensive solar energy management platform designed to provi
 - **Version**: 1.0.0
 - **Repository**: https://github.com/Reshigan/SolarNexus
 - **Deployment URL**: https://nexus.gonxt.tech
-- **Server IP**: 13.245.249.110
+- **Server IP**: 13.247.174.75
 - **Technology Stack**: React, Node.js, PostgreSQL, Redis, Docker
 - **Development Period**: 2024
 - **Status**: Production Ready

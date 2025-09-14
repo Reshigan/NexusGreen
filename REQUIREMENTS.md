@@ -129,7 +129,7 @@ ufw deny everything else
 ```
 
 ### DNS Configuration
-- **A Record**: nexus.gonxt.tech → 13.245.249.110
+- **A Record**: nexus.gonxt.tech → 13.247.174.75
 - **CNAME Record**: www.nexus.gonxt.tech → nexus.gonxt.tech (optional)
 
 ## SSL/TLS Requirements
