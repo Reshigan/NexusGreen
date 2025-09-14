@@ -29,8 +29,9 @@ import PlantListView from "@/components/PlantListView";
 import TimeFilter from "@/components/TimeFilter";
 import PlantsMap from "@/components/PlantsMap";
 import NexusGreenLogo from "@/components/NexusGreenLogo";
+import { smartDataService, type DashboardMetrics, type SiteData } from "@/services/api";
 
-// Enhanced mock data for solar energy management platform
+// Enhanced mock data for solar energy management platform (fallback only)
 const mockStats = {
   totalGeneration: 1247.8, // kWh today
   totalSavings: 48560, // USD
@@ -106,22 +107,53 @@ const Dashboard = () => {
     startDate: new Date(new Date().setHours(0, 0, 0, 0)),
     endDate: new Date()
   });
-  const [realTimeData, setRealTimeData] = useState(mockStats);
-  const [isLoading, setIsLoading] = useState(false);
+  const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null);
+  const [sites, setSites] = useState<SiteData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [apiConnected, setApiConnected] = useState(false);
 
-  // Simulate real-time data updates
+  // Load real data from API or fallback to demo data
   useEffect(() => {
-    const interval = setInterval(() => {
-      setRealTimeData(prev => ({
-        ...prev,
-        totalGeneration: prev.totalGeneration + Math.random() * 5,
-        performance: Math.max(85, Math.min(98, prev.performance + (Math.random() - 0.5) * 2)),
-        batteryLevel: Math.max(20, Math.min(100, prev.batteryLevel + (Math.random() - 0.5) * 3))
-      }));
-    }, 5000);
+    const loadDashboardData = async () => {
+      setIsLoading(true);
+      try {
+        // Check API health first
+        const isApiHealthy = await smartDataService.checkApiHealth();
+        setApiConnected(isApiHealthy);
 
+        // Load dashboard metrics and sites data
+        const [metricsData, sitesData] = await Promise.all([
+          smartDataService.getDashboardMetrics(),
+          smartDataService.getSites()
+        ]);
+
+        setDashboardMetrics(metricsData);
+        setSites(sitesData);
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+        // Fallback to mock data if API fails
+        setDashboardMetrics({
+          totalGeneration: mockStats.totalGeneration,
+          activeSites: mockStats.activeSites,
+          totalCapacity: mockStats.totalCapacity,
+          performance: mockStats.performance,
+          activeAlerts: mockStats.activeAlerts,
+          totalRevenue: mockStats.totalSavings,
+          co2Saved: mockStats.co2Saved,
+          batteryLevel: mockStats.batteryLevel,
+          lastUpdated: new Date().toISOString()
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadDashboardData();
+
+    // Set up real-time updates every 30 seconds
+    const interval = setInterval(loadDashboardData, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [timeFilter]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -420,9 +452,9 @@ const Dashboard = () => {
             <p className="text-muted-foreground font-medium">Next-Generation Solar Energy Intelligence Platform</p>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-green-600 border-green-200">
+            <Badge variant="outline" className={apiConnected ? "text-green-600 border-green-200" : "text-amber-600 border-amber-200"}>
               <Activity className="h-3 w-3 mr-1" />
-              Live Data
+              {apiConnected ? "Live Data" : "Demo Data"}
             </Badge>
             <Button variant="outline" size="sm" onClick={() => handleExportCSV("overview")}>
               <Download className="h-4 w-4 mr-2" />
@@ -449,7 +481,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent className="relative">
               <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                {formatNumber(realTimeData.totalGeneration)} kWh
+                {formatNumber(dashboardMetrics?.totalGeneration || 0)} kWh
               </div>
               <p className="text-xs text-green-600 font-medium mt-1">
                 ↗ +12.5% from yesterday
@@ -474,10 +506,10 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent className="relative">
               <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                {realTimeData.activeSites}
+                {dashboardMetrics?.activeSites || 0}
               </div>
               <p className="text-xs text-blue-600 font-medium mt-1">
-                {realTimeData.totalCapacity} kW total capacity
+                {dashboardMetrics?.totalCapacity || 0} kW total capacity
               </p>
               <div className="flex items-center mt-3">
                 <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full mr-2 animate-pulse"></div>
@@ -498,14 +530,14 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent className="relative">
               <div className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
-                {formatNumber(realTimeData.performance)}%
+                {formatNumber(dashboardMetrics?.performance || 0)}%
               </div>
               <p className="text-xs text-amber-600 font-medium mt-1">
                 Efficiency rating
               </p>
               <div className="mt-3 relative">
                 <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                  <div className="bg-gradient-to-r from-amber-400 to-yellow-500 h-2 rounded-full transition-all duration-1000 ease-out" style={{width: `${realTimeData.performance}%`}}></div>
+                  <div className="bg-gradient-to-r from-amber-400 to-yellow-500 h-2 rounded-full transition-all duration-1000 ease-out" style={{width: `${dashboardMetrics?.performance || 0}%`}}></div>
                 </div>
               </div>
             </CardContent>
@@ -523,7 +555,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent className="relative">
               <div className="text-3xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
-                {realTimeData.activeAlerts}
+                {dashboardMetrics?.activeAlerts || 0}
               </div>
               <p className="text-xs text-red-600 font-medium mt-1">
                 Requires attention
@@ -544,7 +576,7 @@ const Dashboard = () => {
               <DollarSign className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${formatNumber(realTimeData.totalSavings)}</div>
+              <div className="text-2xl font-bold">R{formatNumber(dashboardMetrics?.totalRevenue || 0)}</div>
               <p className="text-xs text-muted-foreground">Total lifetime savings</p>
             </CardContent>
           </Card>
@@ -555,7 +587,7 @@ const Dashboard = () => {
               <Leaf className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{formatNumber(realTimeData.co2Saved)} kg</div>
+              <div className="text-2xl font-bold text-green-600">{formatNumber(dashboardMetrics?.co2Saved || 0)} kg</div>
               <p className="text-xs text-muted-foreground">Carbon footprint reduced</p>
             </CardContent>
           </Card>
@@ -566,9 +598,9 @@ const Dashboard = () => {
               <Battery className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{formatNumber(realTimeData.batteryLevel)}%</div>
+              <div className="text-2xl font-bold text-blue-600">{formatNumber(dashboardMetrics?.batteryLevel || 0)}%</div>
               <p className="text-xs text-muted-foreground">Current charge level</p>
-              <Progress value={realTimeData.batteryLevel} className="mt-2" />
+              <Progress value={dashboardMetrics?.batteryLevel || 0} className="mt-2" />
             </CardContent>
           </Card>
         </div>

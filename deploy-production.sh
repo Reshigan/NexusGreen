@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# SolarNexus Production Deployment Script
+# Nexus Green Production Deployment Script
 # Server: 13.247.192.38
 # Domain: nexus.gonxt.tech
 # SSL Email: reshigan@gonxt.tech
