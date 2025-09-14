@@ -66,8 +66,14 @@ TZ=Africa/Johannesburg
 EOF
 
 print_status "Creating required directories..."
-mkdir -p uploads logs database/init
-sudo chown -R $USER:$USER uploads logs database
+mkdir -p uploads logs database/init nginx/conf.d ssl logs/nginx
+sudo chown -R $USER:$USER uploads logs database nginx ssl
+
+print_status "Setting up nginx configuration..."
+# Copy nginx config if it exists in root
+if [ -f "nginx.conf" ]; then
+    cp nginx.conf nginx/nginx.conf
+fi
 
 print_status "Building and starting services..."
 sudo docker compose up -d --build
