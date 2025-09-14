@@ -481,84 +481,13 @@ EOF
 
 print_success "Backend configuration completed"
 
-# Step 6: Create production nginx configuration
-print_status "Step 6: Creating production nginx configuration..."
+# Step 6: Skip nginx configuration for now (will be created after SSL)
+print_status "Step 6: Preparing nginx setup (SSL configuration will be created later)..."
 
 # Remove default nginx config
 $SUDO rm -f /etc/nginx/sites-enabled/default
 
-# Create SolarNexus nginx config
-$SUDO tee /etc/nginx/sites-available/solarnexus << EOF
-server {
-    listen 80;
-    server_name $DOMAIN www.$DOMAIN;
-    
-    # Redirect HTTP to HTTPS
-    return 301 https://\$server_name\$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    server_name $DOMAIN www.$DOMAIN;
-    
-    # SSL Configuration (will be updated by certbot)
-    ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
-    
-    # Security headers
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header X-XSS-Protection "1; mode=block" always;
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-    
-    # Gzip compression
-    gzip on;
-    gzip_vary on;
-    gzip_min_length 1024;
-    gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
-    
-    # Frontend
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_connect_timeout 60s;
-        proxy_send_timeout 60s;
-        proxy_read_timeout 60s;
-    }
-    
-    # API Backend
-    location /api/ {
-        proxy_pass http://localhost:5000/;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_connect_timeout 60s;
-        proxy_send_timeout 60s;
-        proxy_read_timeout 60s;
-        
-        # CORS headers for API
-        add_header Access-Control-Allow-Origin "https://$DOMAIN" always;
-        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
-        add_header Access-Control-Allow-Headers "Authorization, Content-Type" always;
-    }
-    
-    # Health check endpoint
-    location /health {
-        proxy_pass http://localhost:5000/health;
-        access_log off;
-    }
-}
-EOF
-
-# Enable the site
-$SUDO ln -sf /etc/nginx/sites-available/solarnexus /etc/nginx/sites-enabled/
-$SUDO nginx -t
-print_success "Nginx configuration created"
+print_success "Nginx preparation completed"
 
 # Step 7: Create production docker-compose.yml
 print_status "Step 7: Creating production Docker Compose configuration..."
@@ -693,28 +622,158 @@ print_status "Step 9: Seeding demo data..."
 $SUDO $COMPOSE_CMD exec -T backend npm run seed || print_warning "Demo data seeding may have failed"
 print_success "Demo data seeded"
 
-# Step 10: Setup SSL certificate
-print_status "Step 10: Setting up SSL certificate..."
+# Step 10: Setup SSL certificate and nginx
+print_status "Step 10: Setting up SSL certificate and nginx..."
 
-# Stop nginx temporarily
-$SUDO systemctl stop nginx
+# Create temporary nginx config without SSL first
+print_status "Creating temporary nginx configuration..."
+$SUDO tee /etc/nginx/sites-available/solarnexus-temp << EOF
+server {
+    listen 80;
+    server_name $DOMAIN;
+    
+    # Allow Let's Encrypt challenges
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+        allow all;
+    }
+    
+    # Temporary message
+    location / {
+        return 200 'SolarNexus is being configured. Please wait...';
+        add_header Content-Type text/plain;
+    }
+}
+EOF
 
-# Get SSL certificate
-$SUDO certbot certonly --standalone \
+# Enable temporary config
+$SUDO rm -f /etc/nginx/sites-enabled/default
+$SUDO rm -f /etc/nginx/sites-enabled/solarnexus
+$SUDO ln -sf /etc/nginx/sites-available/solarnexus-temp /etc/nginx/sites-enabled/
+
+# Create webroot directory
+$SUDO mkdir -p /var/www/html/.well-known/acme-challenge
+$SUDO chown -R www-data:www-data /var/www/html
+
+# Start nginx with temporary config
+$SUDO systemctl restart nginx
+
+# Get SSL certificate using webroot
+print_status "Obtaining SSL certificate..."
+$SUDO certbot certonly \
+  --webroot \
+  --webroot-path=/var/www/html \
   --email $EMAIL \
   --agree-tos \
   --no-eff-email \
-  -d $DOMAIN \
-  -d www.$DOMAIN || print_warning "SSL certificate setup may have failed"
-
-# Start nginx
-$SUDO systemctl start nginx
+  -d $DOMAIN || print_warning "SSL certificate setup may have failed"
 
 # Setup auto-renewal
 $SUDO systemctl enable certbot.timer
 $SUDO systemctl start certbot.timer
 
 print_success "SSL certificate configured"
+
+# Now create the production nginx configuration with SSL
+print_status "Creating production nginx configuration with SSL..."
+$SUDO tee /etc/nginx/sites-available/solarnexus << EOF
+server {
+    listen 80;
+    server_name $DOMAIN;
+    
+    # Allow Let's Encrypt challenges
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+        allow all;
+    }
+    
+    # Redirect HTTP to HTTPS
+    location / {
+        return 301 https://\$server_name\$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    server_name $DOMAIN;
+    
+    # SSL Configuration
+    ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:MozTLS:10m;
+    ssl_session_tickets off;
+    
+    # Modern SSL configuration
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+    
+    # HSTS
+    add_header Strict-Transport-Security "max-age=63072000" always;
+    
+    # Security headers
+    add_header X-Frame-Options DENY always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none';" always;
+    
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
+    
+    # Frontend
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+    
+    # API Backend
+    location /api/ {
+        proxy_pass http://localhost:5000/;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+        
+        # CORS headers for API
+        add_header Access-Control-Allow-Origin "https://$DOMAIN" always;
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Authorization, Content-Type" always;
+    }
+    
+    # Health check endpoint
+    location /health {
+        proxy_pass http://localhost:5000/health;
+        access_log off;
+    }
+}
+EOF
+
+# Enable the production site
+$SUDO rm -f /etc/nginx/sites-enabled/solarnexus-temp
+$SUDO ln -sf /etc/nginx/sites-available/solarnexus /etc/nginx/sites-enabled/
+
+# Test and reload nginx
+if $SUDO nginx -t; then
+    $SUDO systemctl reload nginx
+    print_success "Production nginx configuration with SSL enabled"
+else
+    print_error "Nginx configuration test failed"
+    exit 1
+fi
 
 # Step 11: Final verification
 print_status "Step 11: Verifying deployment..."
