@@ -240,10 +240,36 @@ cd /opt/solarnexus && docker-compose up -d
 
 ### Automated Tasks
 
-- SSL certificate renewal (daily check)
-- Log rotation (daily)
-- Service health monitoring (every 5 minutes)
-- System cleanup (weekly)
+- **Auto-startup**: Services start automatically on boot
+- **Auto-upgrade**: Monitors GitHub for updates every 5 minutes
+- **Webhook support**: Instant deployments via GitHub webhooks
+- **SSL certificate renewal**: Daily check with auto-renewal
+- **Log rotation**: Daily log cleanup and archiving
+- **Service health monitoring**: Every 5 minutes with auto-restart
+- **System cleanup**: Weekly Docker cleanup and optimization
+- **Backup creation**: Automatic backups before upgrades
+
+### Auto-Management Commands
+
+```bash
+# Setup GitHub webhook for instant deployments
+sudo ./setup-github-webhook.sh --server-ip YOUR_IP --token YOUR_GITHUB_TOKEN
+
+# Manual upgrade operations
+sudo ./auto-upgrade.sh --check          # Check for updates
+sudo ./auto-upgrade.sh --upgrade        # Force upgrade
+sudo ./auto-upgrade.sh --upgrade --dry-run  # Preview changes
+
+# Comprehensive management
+sudo ./manage-solarnexus.sh status      # System overview
+sudo ./manage-solarnexus.sh health      # Health check
+sudo ./manage-solarnexus.sh logs updater # View upgrade logs
+
+# Service control
+sudo systemctl status solarnexus        # Main service status
+sudo systemctl status solarnexus-updater # Auto-updater status
+sudo journalctl -u solarnexus-updater -f # Follow upgrade logs
+```
 
 ## Support
 

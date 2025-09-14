@@ -631,7 +631,22 @@ sleep 10
 docker-compose exec -T backend npm run migrate:prod 2>/dev/null || print_warning "Migration failed - database may not be ready yet"
 docker-compose exec -T backend npm run generate 2>/dev/null || print_warning "Prisma generate failed"
 
-print_step "📊 PHASE 10: Monitoring and Logging Setup"
+print_step "📊 PHASE 10: Auto-Startup and Auto-Upgrade Setup"
+
+# Setup systemd services for auto-startup
+print_status "Setting up systemd services for auto-startup..."
+cp $PROJECT_DIR/solarnexus.service /etc/systemd/system/
+cp $PROJECT_DIR/solarnexus-updater.service /etc/systemd/system/
+
+# Make auto-upgrade script executable
+chmod +x $PROJECT_DIR/auto-upgrade.sh
+
+# Reload systemd and enable services
+systemctl daemon-reload
+systemctl enable solarnexus.service
+systemctl enable solarnexus-updater.service
+
+print_success "Auto-startup services configured"
 
 # Create log rotation
 print_status "Setting up log rotation..."
@@ -707,7 +722,14 @@ cat > /etc/cron.d/solarnexus-monitor << 'EOF'
 */5 * * * * root /usr/local/bin/solarnexus-monitor
 EOF
 
-print_step "🔍 PHASE 11: Final Health Checks"
+print_step "🔍 PHASE 11: Start Auto-Services and Final Health Checks"
+
+# Start the auto-updater service
+print_status "Starting auto-updater service..."
+systemctl start solarnexus-updater.service
+systemctl status solarnexus-updater.service --no-pager -l || print_warning "Auto-updater service may need manual check"
+
+print_success "Auto-updater service started"
 
 # Final health check
 print_status "Performing comprehensive health check..."
@@ -753,14 +775,24 @@ echo "  • SSL Certificate: $PROJECT_DIR/ssl/"
 echo ""
 echo "🔧 Management Commands:"
 echo "  • View logs: cd $PROJECT_DIR && docker-compose logs -f"
-echo "  • Restart services: cd $PROJECT_DIR && docker-compose restart"
-echo "  • Update deployment: cd $PROJECT_DIR && git pull && docker-compose up -d --build"
-echo "  • Stop services: cd $PROJECT_DIR && docker-compose down"
+echo "  • Restart services: systemctl restart solarnexus"
+echo "  • Manual update: $PROJECT_DIR/auto-upgrade.sh --upgrade"
+echo "  • Check for updates: $PROJECT_DIR/auto-upgrade.sh --check"
+echo "  • Stop services: systemctl stop solarnexus"
 echo "  • Monitor status: tail -f $LOG_DIR/monitor.log"
+echo "  • Auto-updater logs: journalctl -u solarnexus-updater -f"
 echo ""
 echo "🔍 Current Service Status:"
 cd $PROJECT_DIR
 docker-compose ps
+
+echo ""
+echo "🚀 Auto-Startup & Auto-Upgrade Features:"
+echo "  • Auto-startup on boot: ✅ Enabled (systemctl status solarnexus)"
+echo "  • Auto-upgrade daemon: ✅ Running (systemctl status solarnexus-updater)"
+echo "  • Update check interval: 5 minutes"
+echo "  • Webhook endpoint: http://$(hostname -I | awk '{print $1}'):9876"
+echo "  • Upgrade logs: /var/log/solarnexus/updater.log"
 
 echo ""
 echo "🚀 Deployment completed successfully!"

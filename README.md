@@ -92,9 +92,12 @@ sudo ./deploy.sh --domain yourdomain.com --ip 1.2.3.4
 - ✅ SSL certificate setup with auto-renewal
 - ✅ Nginx optimization and security headers
 - ✅ Database migrations and monitoring setup
+- ✅ **Auto-startup on boot** with systemd services
+- ✅ **Auto-upgrade system** with git monitoring
+- ✅ **GitHub webhook integration** for instant deployments
 - ✅ Comprehensive logging and error handling
 
-**Result**: Production-ready environment with monitoring and security
+**Result**: Production-ready environment with auto-management and zero-downtime updates
 
 ## 🏗️ Project Structure
 
@@ -123,6 +126,11 @@ SolarNexus/
 │   └── user/                    # User guides
 ├── 🐳 docker-compose.yml        # Container orchestration
 ├── 🚀 deploy.sh                 # Clean automated deployment script
+├── 🔄 auto-upgrade.sh           # Auto-upgrade system with webhook support
+├── 🎛️ manage-solarnexus.sh      # Comprehensive management tool
+├── 🔗 setup-github-webhook.sh   # GitHub webhook configuration
+├── ⚙️ solarnexus.service        # Systemd service for auto-startup
+├── 🔄 solarnexus-updater.service # Systemd service for auto-updates
 └── 📋 DEPLOYMENT_GUIDE.md       # Comprehensive deployment guide
 ```
 
@@ -149,6 +157,76 @@ curl -H "Authorization: Bearer <token>" \
 ```
 
 **📡 [Complete API Documentation](docs/api/API_DOCUMENTATION.md)**
+
+## 🤖 Auto-Management Features
+
+### 🚀 Auto-Startup on Boot
+SolarNexus automatically starts when the server boots using systemd services:
+
+```bash
+# Check service status
+systemctl status solarnexus
+systemctl status solarnexus-updater
+
+# Manual service control
+sudo systemctl start solarnexus      # Start services
+sudo systemctl stop solarnexus       # Stop services
+sudo systemctl restart solarnexus    # Restart services
+```
+
+### 🔄 Auto-Upgrade System
+Automatically monitors GitHub repository and upgrades when new commits are pushed:
+
+**Features:**
+- 🔍 **Polling**: Checks for updates every 5 minutes
+- 🎣 **Webhooks**: Instant updates via GitHub webhooks
+- 🛡️ **Safe Upgrades**: Automatic backups before upgrades
+- 📊 **Health Monitoring**: Validates services after upgrades
+- 📝 **Comprehensive Logging**: Detailed upgrade logs
+
+**Setup GitHub Webhook:**
+```bash
+# Setup automatic webhook (requires GitHub token)
+sudo ./setup-github-webhook.sh --server-ip YOUR_SERVER_IP --token YOUR_GITHUB_TOKEN
+
+# Manual webhook URL: http://YOUR_SERVER_IP:9876
+```
+
+**Manual Operations:**
+```bash
+# Check for updates
+sudo ./auto-upgrade.sh --check
+
+# Force upgrade
+sudo ./auto-upgrade.sh --upgrade
+
+# Dry run (see what would be upgraded)
+sudo ./auto-upgrade.sh --upgrade --dry-run
+
+# View upgrade logs
+sudo journalctl -u solarnexus-updater -f
+```
+
+### 🎛️ Management Tool
+Comprehensive management with a single command:
+
+```bash
+# System overview
+sudo ./manage-solarnexus.sh status
+
+# Service management
+sudo ./manage-solarnexus.sh start|stop|restart
+
+# View logs
+sudo ./manage-solarnexus.sh logs updater
+sudo ./manage-solarnexus.sh logs docker
+
+# Health check
+sudo ./manage-solarnexus.sh health
+
+# Setup webhook
+sudo ./manage-solarnexus.sh webhook YOUR_IP YOUR_TOKEN
+```
 
 ## 🌍 Production Environment
 
