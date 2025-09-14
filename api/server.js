@@ -304,6 +304,212 @@ app.get('/api/maintenance', async (req, res) => {
   }
 });
 
+// Authentication endpoints (v1 API)
+app.post('/api/v1/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    // For demo purposes, accept any email/password combination
+    // In production, you would validate against a users table
+    if (!email || !password) {
+      return res.status(400).json({ 
+        error: 'Email and password are required',
+        message: 'Please provide both email and password' 
+      });
+    }
+
+    // Mock user data - in production, fetch from database
+    const user = {
+      id: '1',
+      email: email,
+      firstName: 'Demo',
+      lastName: 'User',
+      role: 'ADMIN',
+      organizationId: '1',
+      avatar: null,
+      lastLogin: new Date().toISOString(),
+      isActive: true,
+      permissions: ['read', 'write', 'admin'],
+      emailVerified: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    const organization = {
+      id: '1',
+      name: 'NexusGreen Solar',
+      slug: 'nexusgreen-solar',
+      type: 'INSTALLER',
+      logo: null,
+      address: '123 Solar Street, Green City',
+      country: 'USA',
+      timezone: 'America/New_York',
+      settings: {
+        theme: 'light',
+        currency: 'USD',
+        timezone: 'America/New_York'
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    // Mock tokens - in production, use JWT
+    const accessToken = 'demo-access-token-' + Date.now();
+    const refreshToken = 'demo-refresh-token-' + Date.now();
+
+    res.json({
+      accessToken,
+      refreshToken,
+      user,
+      organization,
+      message: 'Login successful'
+    });
+  } catch (error) {
+    console.error('Error during login:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/api/v1/auth/logout', async (req, res) => {
+  try {
+    // In production, invalidate the token
+    res.json({ message: 'Logout successful' });
+  } catch (error) {
+    console.error('Error during logout:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/api/v1/auth/refresh', async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    
+    if (!refreshToken) {
+      return res.status(400).json({ error: 'Refresh token is required' });
+    }
+
+    // Mock token refresh - in production, validate and generate new tokens
+    const accessToken = 'demo-access-token-' + Date.now();
+    const newRefreshToken = 'demo-refresh-token-' + Date.now();
+
+    res.json({
+      accessToken,
+      refreshToken: newRefreshToken
+    });
+  } catch (error) {
+    console.error('Error during token refresh:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/api/v1/auth/me', async (req, res) => {
+  try {
+    // Mock user profile - in production, get from token and database
+    const user = {
+      id: '1',
+      email: 'demo@nexusgreen.com',
+      firstName: 'Demo',
+      lastName: 'User',
+      role: 'ADMIN',
+      organizationId: '1',
+      avatar: null,
+      lastLogin: new Date().toISOString(),
+      isActive: true,
+      permissions: ['read', 'write', 'admin'],
+      emailVerified: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    res.json(user);
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Dashboard analytics endpoint (v1 API)
+app.get('/api/v1/analytics/dashboard/:organizationId', async (req, res) => {
+  try {
+    const { organizationId } = req.params;
+    
+    // Get dashboard metrics from existing endpoints
+    const [installationsResult, capacityResult, todayResult, revenueResult, alertsResult] = await Promise.all([
+      pool.query('SELECT COUNT(*) as count FROM installations'),
+      pool.query('SELECT COALESCE(SUM(capacity_kw), 0) as total FROM installations'),
+      pool.query('SELECT COALESCE(SUM(energy_kwh), 0) as total FROM energy_generation WHERE date = CURRENT_DATE'),
+      pool.query('SELECT COALESCE(SUM(revenue), 0) as total FROM financial_data WHERE date >= DATE_TRUNC(\'month\', CURRENT_DATE)'),
+      pool.query('SELECT COUNT(*) as count FROM alerts WHERE is_resolved = false')
+    ]);
+
+    const metrics = {
+      totalSites: parseInt(installationsResult.rows[0].count),
+      totalCapacity: parseFloat(capacityResult.rows[0].total),
+      totalGeneration: parseFloat(todayResult.rows[0].total),
+      totalRevenue: parseFloat(revenueResult.rows[0].total),
+      activeAlerts: parseInt(alertsResult.rows[0].count),
+      systemHealth: 98.5,
+      co2Saved: parseFloat(todayResult.rows[0].total) * 0.0004, // Rough calculation
+      lastUpdated: new Date().toISOString()
+    };
+
+    res.json(metrics);
+  } catch (error) {
+    console.error('Error fetching dashboard metrics:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Sites endpoint (v1 API)
+app.get('/api/v1/sites', async (req, res) => {
+  try {
+    const { organizationId } = req.query;
+    
+    const result = await pool.query(`
+      SELECT i.*, 
+             COALESCE(SUM(eg.energy_kwh), 0) as total_generation,
+             COALESCE(AVG(eg.energy_kwh), 0) as avg_daily_generation
+      FROM installations i
+      LEFT JOIN energy_generation eg ON i.id = eg.installation_id 
+        AND eg.date >= CURRENT_DATE - INTERVAL '30 days'
+      GROUP BY i.id
+      ORDER BY i.created_at DESC
+    `);
+    
+    // Transform to match frontend expectations
+    const sites = result.rows.map(row => ({
+      id: row.id.toString(),
+      name: row.name,
+      organizationId: organizationId || '1',
+      location: {
+        address: row.location || 'Unknown Location',
+        latitude: row.latitude || 0,
+        longitude: row.longitude || 0,
+        timezone: 'America/New_York'
+      },
+      capacity: parseFloat(row.capacity_kw || 0),
+      status: row.status || 'ACTIVE',
+      installationDate: row.created_at,
+      lastMaintenance: null,
+      nextMaintenance: null,
+      performance: {
+        currentGeneration: parseFloat(row.avg_daily_generation || 0),
+        totalGeneration: parseFloat(row.total_generation || 0),
+        efficiency: 95.2,
+        uptime: 99.1
+      },
+      alerts: [],
+      createdAt: row.created_at,
+      updatedAt: row.updated_at || row.created_at
+    }));
+
+    res.json(sites);
+  } catch (error) {
+    console.error('Error fetching sites:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
