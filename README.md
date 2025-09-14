@@ -1,493 +1,229 @@
-# 🌞 SolarNexus - Unified Solar Energy Management Platform
+# SolarNexus
 
-<div align="center">
-  <img src="public/nexus-green-logo.svg" alt="SolarNexus Logo" width="300"/>
-  
-  **⚡ Complete Solar Energy Management Solution ⚡**
-  
-  [![Production Ready](https://img.shields.io/badge/Production-Ready-00FF88.svg)](https://github.com/Reshigan/SolarNexus)
-  [![Docker](https://img.shields.io/badge/Docker-Enabled-00D4FF.svg)](https://docker.com)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-00FF88.svg)](https://typescriptlang.org)
-  [![React](https://img.shields.io/badge/React-18.0-00D4FF.svg)](https://reactjs.org)
-  [![Node.js](https://img.shields.io/badge/Node.js-20.0-00FF88.svg)](https://nodejs.org)
-  [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15.0-00D4FF.svg)](https://postgresql.org)
-</div>
-
-## 🚀 Quick Installation
-
-### 🔒 Option 1: SSL Production Install (Recommended)
-
-```bash
-curl -o quick-ssl-install.sh https://raw.githubusercontent.com/Reshigan/SolarNexus/main/quick-ssl-install.sh
-chmod +x quick-ssl-install.sh
-sudo ./quick-ssl-install.sh your-domain.com your-email@domain.com
-```
-
-**Features:**
-- 🔐 **Automatic SSL certificates** with Let's Encrypt
-- 🛡️ **Security hardening** with firewall and fail2ban
-- 🚀 **HTTP/2 and modern TLS** support
-- 🔄 **Auto-renewal** of certificates
-- ⚡ **Production-ready** configuration
-
-### 🏠 Option 2: Local Development Install
-
-```bash
-curl -sSL https://raw.githubusercontent.com/Reshigan/SolarNexus/main/quick-install.sh | bash
-```
-
-### 🔧 Option 3: Manual Install
-
-```bash
-git clone https://github.com/Reshigan/SolarNexus.git
-cd SolarNexus
-./install.sh
-```
-
-**What this does:**
-- ✅ Automatically sets up Docker containers
-- ✅ Builds and starts all services (Frontend, Backend, Database, Cache)
-- ✅ Creates secure default configuration
-- ✅ Provides health checks and monitoring
-- ✅ Ready to use in under 2 minutes!
-
-**Access your application:**
-- **SSL Production**: https://your-domain.com
-- **Local Development**: http://localhost:80
-- **API**: http://localhost:3000
-- **Health Check**: http://localhost:3000/health
-
-📖 **Need help?** See [SSL-INSTALL.md](SSL-INSTALL.md) for SSL setup or [SIMPLE-INSTALL.md](SIMPLE-INSTALL.md) for local installation.
+A comprehensive solar energy management platform for monitoring, analytics, and optimization of solar installations.
 
 ## 🌟 Overview
 
-**SolarNexus** is a comprehensive, production-ready solar energy management platform that combines frontend and backend components in a single, unified repository. Built with modern technologies and designed for scalability, it provides real-time analytics, multi-tenant architecture, and comprehensive solar installation management.
+SolarNexus provides real-time monitoring, predictive analytics, and financial optimization for solar installations across multiple stakeholders including solar installers, O&M providers, asset owners, and end customers.
 
-### 🎯 Key Features
+**🚀 Production Ready**: https://nexus.gonxt.tech
 
-- **🏢 Multi-Tenant Architecture** - Organization-based access control with role-based permissions
-- **📊 Real-Time Analytics** - Live solar generation, consumption, and performance monitoring
-- **🤖 AI-Powered Predictions** - Machine learning for predictive maintenance and issue detection
-- **💰 Financial Analytics** - Time-of-use tariff calculations and savings optimization
-- **🌍 SDG Impact Tracking** - UN Sustainable Development Goals metrics and ESG reporting
-- **⚡ SolaX Integration** - Direct API integration with SolaX solar monitoring systems
-- **📧 Smart Notifications** - Automated alerts and email notifications
-- **🔒 Enterprise Security** - JWT authentication with comprehensive role-based access
+## ✨ Key Features
 
-## 🏗️ Architecture
+- **Real-time Monitoring**: Live solar energy production and system health
+- **Multi-tenant Architecture**: Organization and site management
+- **Predictive Analytics**: AI-powered performance forecasting
+- **Financial Tracking**: ROI analysis and cost optimization
+- **Alert System**: Proactive notifications and issue detection
+- **Comprehensive Reporting**: Performance, financial, and sustainability reports
+- **SDG Tracking**: UN Sustainable Development Goals alignment
 
-### 🏗️ Unified Repository Structure
+## 🏗️ Technology Stack
 
-This repository contains both frontend and backend components:
+| Component | Technology | Version |
+|-----------|------------|---------|
+| **Frontend** | React + TypeScript | 18.2.0 |
+| **Build Tool** | Vite | 4.4.5 |
+| **Styling** | Tailwind CSS | 3.3.0 |
+| **Backend** | Node.js + Express | 20.x |
+| **Database** | PostgreSQL | 15 |
+| **Cache** | Redis | 7 |
+| **ORM** | Prisma | 5.0.0 |
+| **Infrastructure** | Docker Compose | - |
+| **Web Server** | Nginx | Alpine |
+| **SSL** | Let's Encrypt | Auto-renewal |
 
-```
-SolarNexus/
-├── 📱 Frontend (React + TypeScript + Vite)
-│   ├── src/                    # React application source
-│   ├── public/                 # Static assets
-│   ├── package.json           # Frontend dependencies
-│   └── Dockerfile             # Frontend container
-│
-├── 🔧 Backend (Node.js + Express + Prisma)
-│   └── solarnexus-backend/
-│       ├── src/               # Backend API source
-│       ├── prisma/            # Database schema
-│       ├── package.json       # Backend dependencies
-│       └── Dockerfile         # Backend container
-│
-├── 🐳 Infrastructure
-│   ├── deploy/                # Deployment scripts
-│   ├── docker-compose.yml     # Service orchestration
-│   └── nginx/                 # Reverse proxy config
-│
-└── 📚 Documentation
-    ├── README.md              # This file
-    ├── PROJECT_STRUCTURE.md   # Detailed structure
-    └── DEPLOYMENT_INSTRUCTIONS.md
-```
+## 📚 Documentation
 
-### System Architecture
+### Complete Documentation Suite
+- **[📋 Project Overview](docs/PROJECT_OVERVIEW.md)** - Executive summary and business value
+- **[🔧 Technical Specifications](docs/technical/TECHNICAL_SPECIFICATIONS.md)** - Detailed technical documentation
+- **[🏗️ System Design](docs/design/SYSTEM_DESIGN.md)** - Architecture and design patterns
+- **[📡 API Documentation](docs/api/API_DOCUMENTATION.md)** - Complete API reference
+- **[🚀 Deployment Guide](DEPLOYMENT.md)** - Production deployment instructions
+- **[📖 User Guide](docs/user/USER_GUIDE.md)** - End-user documentation
+- **[🔄 Handover Documentation](docs/handover/HANDOVER_DOCUMENTATION.md)** - Operations and maintenance
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   React Frontend │    │  Node.js Backend │    │   PostgreSQL    │
-│   (Port 80)     │◄──►│   (Port 3000)   │◄──►│   (Port 5432)   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│      Nginx      │    │  Prisma ORM     │    │   Redis Cache   │
-│   (Port 80/443) │    │   Type Safety   │    │   (Port 6379)   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
-
-### Technology Stack
-
-**Frontend:**
-- React 18 with TypeScript
-- Vite for fast development and building
-- Tailwind CSS + shadcn/ui components
-- React Router for navigation
-- Recharts for data visualization
-
-**Backend:**
-- Node.js 20 with Express.js
-- TypeScript for type safety
-- Prisma ORM for database management
-- JWT for authentication
-- Redis for caching and sessions
-
-**Database:**
-- PostgreSQL 15 for primary data storage
-- Prisma migrations for schema management
-- Multi-tenant data isolation
-
-**Infrastructure:**
-- Docker & Docker Compose
-- Nginx reverse proxy with SSL
-- Production-ready containerization
+### Quick Links
+- **[All Documentation](docs/README.md)** - Documentation index
+- **[Requirements](REQUIREMENTS.md)** - System requirements
+- **[Deployment Instructions](DEPLOYMENT.md)** - Step-by-step deployment
 
 ## 🚀 Quick Start
 
+### Development Setup
+
+```bash
+# 1. Clone repository
+git clone https://github.com/Reshigan/SolarNexus.git
+cd SolarNexus
+
+# 2. Install dependencies
+npm install
+cd solarnexus-backend && npm install && cd ..
+
+# 3. Configure environment
+cp .env.production.template .env
+# Edit .env with your configuration
+
+# 4. Start development servers
+npm run dev                    # Frontend (port 5173)
+cd solarnexus-backend && npm run dev  # Backend (port 3000)
+```
+
+### Production Deployment
+
+**One-Command Deployment** on AWS server:
+
+```bash
+# Deploy to production server (13.245.249.110)
+ssh root@13.245.249.110
+git clone https://github.com/Reshigan/SolarNexus.git /opt/solarnexus
+cd /opt/solarnexus && ./deploy.sh
+```
+
+**Result**: Fully configured production environment at https://nexus.gonxt.tech
+
+## 🏗️ Project Structure
+
+```
+SolarNexus/
+├── 📁 src/                      # Frontend React application
+│   ├── components/              # Reusable UI components
+│   ├── pages/                   # Page components and routing
+│   ├── hooks/                   # Custom React hooks
+│   ├── utils/                   # Frontend utilities
+│   └── types/                   # TypeScript definitions
+├── 📁 solarnexus-backend/       # Backend Node.js application
+│   ├── src/
+│   │   ├── controllers/         # API request handlers
+│   │   ├── routes/              # API route definitions
+│   │   ├── services/            # Business logic layer
+│   │   ├── middleware/          # Express middleware
+│   │   ├── utils/               # Backend utilities
+│   │   └── types/               # TypeScript definitions
+│   └── prisma/                  # Database schema and migrations
+├── 📁 docs/                     # Comprehensive documentation
+│   ├── technical/               # Technical specifications
+│   ├── design/                  # System design documents
+│   ├── api/                     # API documentation
+│   ├── handover/                # Operations documentation
+│   └── user/                    # User guides
+├── 📁 dist/                     # Frontend production build
+├── 🐳 docker-compose.yml        # Container orchestration
+├── 🚀 deploy.sh                 # Automated deployment script
+├── ✅ validate-build.sh         # Build validation script
+└── 📋 DEPLOYMENT.md             # Deployment instructions
+```
+
+## 🔌 API Overview
+
+### Base URLs
+- **Production**: `https://nexus.gonxt.tech/api/v1`
+- **Development**: `http://localhost:3000/api/v1`
+
+### Quick API Example
+```bash
+# Authenticate
+curl -X POST https://nexus.gonxt.tech/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"password"}'
+
+# Get sites (using returned JWT token)
+curl -H "Authorization: Bearer <token>" \
+  https://nexus.gonxt.tech/api/v1/sites
+
+# Get energy data
+curl -H "Authorization: Bearer <token>" \
+  "https://nexus.gonxt.tech/api/v1/sites/site-id/energy?startDate=2024-01-01&endDate=2024-01-31"
+```
+
+**📡 [Complete API Documentation](docs/api/API_DOCUMENTATION.md)**
+
+## 🌍 Production Environment
+
+### Deployment Status
+| Component | Status | Details |
+|-----------|--------|---------|
+| **Application** | ✅ Live | https://nexus.gonxt.tech |
+| **SSL Certificate** | ✅ Active | Let's Encrypt auto-renewal |
+| **Database** | ✅ Running | PostgreSQL 15 with backups |
+| **Monitoring** | ✅ Active | Health checks and logging |
+| **Backups** | ✅ Automated | Daily database and file backups |
+
+### Server Information
+- **Server**: AWS EC2 Instance
+- **IP Address**: 13.245.249.110
+- **Domain**: nexus.gonxt.tech
+- **OS**: Ubuntu 22.04 LTS
+- **Resources**: 4 vCPUs, 8GB RAM, 50GB SSD
+
+## 🔧 Development
+
 ### Prerequisites
+- Node.js 20+
+- npm 10+
+- Docker 24+
+- Git 2.30+
 
-- Docker & Docker Compose
-- Node.js 20+ (for development)
-- Git
-
-### 🚀 Production Deployment (Recommended)
-
-**One-Command Installation:**
-
+### Build Process
 ```bash
-# Clone the repository
-git clone https://github.com/Reshigan/SolarNexus.git
-cd SolarNexus
+# Frontend build
+npm run build                    # Creates dist/ directory
 
-# Run the complete installation script
-sudo ./deploy/clean-install.sh
-```
-
-This script will:
-- ✅ Clean up any existing installations
-- ✅ Install in current directory (`$(pwd)/SolarNexus`)
-- ✅ Set up all services with Docker Compose
-- ✅ Initialize database with sample data
-- ✅ Configure Nginx reverse proxy
-- ✅ Test all services
-
-### 🛠️ Development Setup
-
-**Backend Services Only:**
-
-```bash
-# Clone and start backend services
-git clone https://github.com/Reshigan/SolarNexus.git
-cd SolarNexus
-
-# Start PostgreSQL, Redis, and Backend API
-./deploy/quick-backend-start.sh
-```
-
-**Full Development Environment:**
-
-```bash
-# Start all services
-docker-compose up -d
-
-# Or start specific services
-docker-compose up -d postgres redis backend
-
-# View logs
-docker-compose logs -f
-
-# Check service status
-docker-compose ps
-```
-
-**Frontend Development Server:**
-
-```bash
-# Install frontend dependencies
-npm install
-
-# Start development server (with hot reload)
-npm run dev
-
-# Build for production
-npm run build
-```
-
-### 🌐 Access Points
-
-After successful deployment:
-
-- **Frontend Application:** http://localhost/
-- **Backend API:** http://localhost:3000/
-- **API Health Check:** http://localhost:3000/health
-- **Database:** localhost:5432 (user: solarnexus, db: solarnexus)
-- **Redis:** localhost:6379
-
-## 👥 User Roles & Permissions
-
-### 🏢 Customer
-- View solar generation and consumption analytics
-- Track energy savings across multiple sites
-- Monitor performance by project groupings
-- Access environmental impact metrics
-
-### 💰 Funder
-- Monitor solar generation KPIs
-- Track earnings and ROI metrics
-- View performance against targets
-- Access detailed financial analytics
-
-### 🔧 O&M Provider
-- System health monitoring
-- Predictive maintenance alerts
-- Performance trend analysis
-- Automated issue notifications
-
-### 👑 Super Admin
-- Full system access and management
-- User and organization administration
-- System-wide analytics and reporting
-- SDG impact across all organizations
-
-## 📊 Analytics Modules
-
-### Customer Analytics
-- **Overview Dashboard:** Multi-site summary with key metrics
-- **Site Details:** Drill-down analytics for individual sites
-- **Savings Analysis:** Time-of-use tariff calculations
-- **Project Grouping:** Sites organized by project
-
-### Funder Analytics
-- **Generation KPIs:** Performance metrics and targets
-- **Earnings Tracking:** Revenue and ROI calculations
-- **Performance Monitoring:** Capacity factor and availability
-- **Comparative Analysis:** Multi-site performance comparison
-
-### O&M Analytics
-- **System Health:** Real-time component status
-- **Predictive Maintenance:** AI-powered issue prediction
-- **Performance Trends:** Historical analysis and forecasting
-- **Alert Management:** Automated notification system
-
-### SDG Impact Tracking
-- **Goal 7:** Affordable and Clean Energy metrics
-- **Goal 13:** Climate Action and CO2 reduction
-- **Goal 11:** Sustainable Cities impact
-- **Goal 8:** Economic Growth and job creation
-
-## 🔌 API Integration
-
-### SolaX Solar Systems
-
-The platform integrates directly with SolaX monitoring systems:
-
-```typescript
-// Example API call
-const energyData = await solarDataService.getEnergyData(
-  clientId,
-  clientSecret,
-  plantId,
-  startDate,
-  endDate
-);
-```
-
-### Supported Endpoints
-- Real-time generation data
-- Historical energy production
-- System performance metrics
-- Equipment status monitoring
-
-## 🛠️ Development Guide
-
-### Frontend Development
-
-```bash
-# Install dependencies
-npm install
-
-# Start development server (with hot reload)
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
-
-# Run linting
-npm run lint
-```
-
-### Backend Development
-
-```bash
+# Backend build  
 cd solarnexus-backend
-
-# Install dependencies
-npm install
-
-# Generate Prisma client
-npx prisma generate
-
-# Run database migrations
-npx prisma migrate dev
-
-# Start development server
-npm run dev
-
-# View database in browser
-npx prisma studio
+npm run build                    # Creates dist/ directory with compiled TypeScript
 ```
 
-### Database Management
-
+### Validation
 ```bash
-# Create new migration
-npx prisma migrate dev --name your_migration_name
-
-# Deploy migrations to production
-npx prisma migrate deploy
-
-# Reset database (development only)
-npx prisma migrate reset
-
-# Seed database with sample data
-npx prisma db seed
+# Validate build artifacts
+./validate-build.sh             # Comprehensive build validation
 ```
-
-### Docker Development
-
-```bash
-# Start all services
-docker-compose up -d
-
-# Start specific services
-docker-compose up -d postgres redis
-
-# View logs
-docker-compose logs -f backend
-
-# Rebuild services
-docker-compose up -d --build
-
-# Stop all services
-docker-compose down
-```
-
-### API Documentation
-
-The backend provides comprehensive API documentation:
-
-- **Authentication:** `/api/auth/*`
-- **Analytics:** `/api/analytics/*`
-- **Solar Data:** `/api/solar/*`
-- **SDG Tracking:** `/api/analytics/sdg/*`
-- **Organizations:** `/api/organizations/*`
-
-## 🔒 Security Features
-
-- **JWT Authentication** with secure token management
-- **Role-Based Access Control** (RBAC) for all endpoints
-- **Multi-Tenant Data Isolation** at the database level
-- **Rate Limiting** to prevent API abuse
-- **Input Validation** and sanitization
-- **HTTPS/SSL** encryption in production
-
-## 📈 Performance & Scalability
-
-- **Docker Containerization** for easy scaling
-- **Database Indexing** for optimal query performance
-- **Caching Strategies** for frequently accessed data
-- **Async Processing** for heavy computational tasks
-- **Load Balancing** ready with Nginx
-
-## 🌍 Environmental Impact
-
-SolarNexus helps track and maximize environmental benefits:
-
-- **CO2 Reduction Tracking:** Monitor carbon footprint reduction
-- **Renewable Energy Metrics:** Track clean energy generation
-- **SDG Alignment:** Measure progress against UN goals
-- **ESG Reporting:** Generate sustainability reports
-
-## 📋 Production Deployment
-
-### Server Requirements
-
-- **CPU:** 2+ cores recommended
-- **RAM:** 4GB+ recommended
-- **Storage:** 20GB+ for database and logs
-- **Network:** Stable internet for API integrations
-
-### SSL Configuration
-
-The platform includes automatic SSL setup:
-
-```bash
-# Generate SSL certificates (included in docker-compose)
-docker-compose exec nginx certbot --nginx -d yourdomain.com
-```
-
-### Monitoring & Logging
-
-- Application logs via Docker logging driver
-- Database performance monitoring
-- API endpoint monitoring
-- Error tracking and alerting
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
 
-### Development Workflow
+### Development Guidelines
+- Follow TypeScript best practices
+- Write comprehensive tests
+- Update documentation
+- Follow conventional commit messages
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+## 📞 Support
+
+### Getting Help
+- **📧 Email**: support@solarnexus.com
+- **📚 Documentation**: [Complete Documentation Suite](docs/README.md)
+- **🐛 Issues**: GitHub Issues for bug reports
+- **💬 Discussions**: GitHub Discussions for questions
+
+### System Status
+- **Status Page**: https://status.nexus.gonxt.tech
+- **Uptime Target**: 99.9%
+- **Maintenance Window**: First Sunday of each month, 2-6 AM UTC
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is proprietary and confidential. All rights reserved.
 
-## 🆘 Support
+## 🏆 Project Status
 
-For support and questions:
+**✅ Production Ready** - Fully deployed and operational
 
-- **Documentation:** Check this README and inline code comments
-- **Issues:** Create a GitHub issue for bugs or feature requests
-- **Email:** Contact the development team
-
-## 🎉 Acknowledgments
-
-- **SolaX Power** for API integration support
-- **UN SDG Framework** for sustainability metrics
-- **Open Source Community** for the amazing tools and libraries
-
-## 📁 Repository Structure
-
-For detailed information about the repository structure, see [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md).
-
-## 📋 Additional Documentation
-
-- **[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)** - Detailed repository structure and architecture
-- **[DEPLOYMENT_INSTRUCTIONS.md](DEPLOYMENT_INSTRUCTIONS.md)** - Comprehensive deployment guide
-- **[SYSTEM_DESIGN.md](SYSTEM_DESIGN.md)** - System architecture and design decisions
-- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Common issues and solutions
+- **Version**: 1.0.0
+- **Last Updated**: January 15, 2024
+- **Deployment**: Automated with Docker Compose
+- **Security**: SSL/TLS, JWT authentication, role-based access
+- **Monitoring**: Health checks, logging, automated backups
+- **Documentation**: Comprehensive technical and user documentation
 
 ---
 
-<div align="center">
-  <strong>🌞 SolarNexus - Unified Solar Energy Management Platform 🌞</strong>
-  
-  <p><em>Built with ❤️ for a sustainable future</em></p>
-  
-  **This repository serves as the single source of truth for the entire SolarNexus application.**
-</div>
+*For detailed information about any aspect of the system, please refer to the [complete documentation suite](docs/README.md).*
