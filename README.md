@@ -40,14 +40,14 @@ SolarNexus provides real-time monitoring, predictive analytics, and financial op
 - **[🔧 Technical Specifications](docs/technical/TECHNICAL_SPECIFICATIONS.md)** - Detailed technical documentation
 - **[🏗️ System Design](docs/design/SYSTEM_DESIGN.md)** - Architecture and design patterns
 - **[📡 API Documentation](docs/api/API_DOCUMENTATION.md)** - Complete API reference
-- **[🚀 Deployment Guide](DEPLOYMENT_GUIDE.md)** - Production deployment instructions
+- **[🚀 Production Deployment Guide](PRODUCTION_DEPLOYMENT_GUIDE.md)** - Complete production setup
 - **[📖 User Guide](docs/user/USER_GUIDE.md)** - End-user documentation
 - **[🔄 Handover Documentation](docs/handover/HANDOVER_DOCUMENTATION.md)** - Operations and maintenance
 
 ### Quick Links
 - **[All Documentation](docs/README.md)** - Documentation index
-- **[Requirements](REQUIREMENTS.md)** - System requirements
-- **[Deployment Instructions](DEPLOYMENT_GUIDE.md)** - Step-by-step deployment
+- **[System Requirements](REQUIREMENTS.md)** - Production requirements and dependencies
+- **[Production Deployment](PRODUCTION_DEPLOYMENT_GUIDE.md)** - One-command production setup
 
 ## 🚀 Quick Start
 
@@ -73,31 +73,29 @@ cd solarnexus-backend && npm run dev  # Backend (port 3000)
 
 ### Production Deployment
 
-**Clean One-Command Deployment**:
+**🚀 Complete Production Setup**:
 
 ```bash
-# Basic deployment
-sudo ./deploy.sh
-
-# Clean installation (recommended for first-time)
-sudo ./deploy.sh --clean
-
-# Custom domain deployment
-sudo ./deploy.sh --domain yourdomain.com --ip 1.2.3.4
+# Download and run the production deployment script
+curl -o production-deploy.sh https://raw.githubusercontent.com/Reshigan/SolarNexus/main/production-deploy.sh
+chmod +x production-deploy.sh
+sudo ./production-deploy.sh
 ```
 
-**Features**:
-- ✅ Automated server cleanup and dependency installation
-- ✅ Docker containerization with health monitoring
-- ✅ SSL certificate setup with auto-renewal
-- ✅ Nginx optimization and security headers
-- ✅ Database migrations and monitoring setup
-- ✅ **Auto-startup on boot** with systemd services
-- ✅ **Auto-upgrade system** with git monitoring
-- ✅ **GitHub webhook integration** for instant deployments
-- ✅ Comprehensive logging and error handling
+**✨ Production Features**:
+- ✅ **SSL Certificate**: Let's Encrypt with auto-renewal
+- ✅ **South African Timezone**: SAST (Africa/Johannesburg)
+- ✅ **Demo Data**: GonXT Solar Solutions with test users
+- ✅ **Security**: Firewall, security headers, rate limiting
+- ✅ **Monitoring**: Health checks, logging, backups
+- ✅ **Performance**: Nginx optimization, Redis caching
+- ✅ **Automation**: Container orchestration with Docker Compose
 
-**Result**: Production-ready environment with auto-management and zero-downtime updates
+**🎯 Demo Credentials**:
+- **Admin**: admin@gonxt.tech / Demo2024!
+- **User**: user@gonxt.tech / Demo2024!
+
+**📋 Complete Guide**: [Production Deployment Guide](PRODUCTION_DEPLOYMENT_GUIDE.md)
 
 ## 🏗️ Project Structure
 
@@ -303,14 +301,15 @@ This project is proprietary and confidential. All rights reserved.
 
 ## 🏆 Project Status
 
-**✅ Production Ready** - Fully deployed and operational
+**✅ Production Ready** - Complete production deployment ready
 
-- **Version**: 1.0.0
-- **Last Updated**: January 15, 2024
-- **Deployment**: Automated with Docker Compose
-- **Security**: SSL/TLS, JWT authentication, role-based access
+- **Version**: 1.0.0-production
+- **Last Updated**: December 2024
+- **Deployment**: One-command automated production setup
+- **Security**: SSL/TLS, JWT authentication, role-based access, firewall
+- **Demo Data**: GonXT Solar Solutions with realistic test data
 - **Monitoring**: Health checks, logging, automated backups
-- **Documentation**: Comprehensive technical and user documentation
+- **Documentation**: Complete production deployment guide
 
 ---
 
