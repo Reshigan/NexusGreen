@@ -510,6 +510,562 @@ app.get('/api/v1/sites', async (req, res) => {
   }
 });
 
+// Individual site endpoint (v1 API)
+app.get('/api/v1/sites/:siteId', async (req, res) => {
+  try {
+    const { siteId } = req.params;
+    
+    const result = await pool.query(`
+      SELECT i.*, 
+             COALESCE(SUM(eg.energy_kwh), 0) as total_generation,
+             COALESCE(AVG(eg.energy_kwh), 0) as avg_daily_generation
+      FROM installations i
+      LEFT JOIN energy_generation eg ON i.id = eg.installation_id 
+        AND eg.date >= CURRENT_DATE - INTERVAL '30 days'
+      WHERE i.id = $1
+      GROUP BY i.id
+    `, [siteId]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Site not found' });
+    }
+
+    const row = result.rows[0];
+    const site = {
+      id: row.id.toString(),
+      name: row.name,
+      organizationId: '1',
+      location: {
+        address: row.location || 'Unknown Location',
+        latitude: row.latitude || 0,
+        longitude: row.longitude || 0,
+        timezone: 'America/New_York'
+      },
+      capacity: parseFloat(row.capacity_kw || 0),
+      status: row.status || 'ACTIVE',
+      installationDate: row.created_at,
+      lastMaintenance: null,
+      nextMaintenance: null,
+      performance: {
+        currentGeneration: parseFloat(row.avg_daily_generation || 0),
+        totalGeneration: parseFloat(row.total_generation || 0),
+        efficiency: 95.2,
+        uptime: 99.1
+      },
+      alerts: [],
+      createdAt: row.created_at,
+      updatedAt: row.updated_at || row.created_at
+    };
+
+    res.json(site);
+  } catch (error) {
+    console.error('Error fetching site:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Create site endpoint (v1 API)
+app.post('/api/v1/sites', async (req, res) => {
+  try {
+    const { name, location, capacity, organizationId } = req.body;
+    
+    if (!name || !location || !capacity) {
+      return res.status(400).json({ error: 'Name, location, and capacity are required' });
+    }
+
+    // For demo purposes, create a mock site
+    const site = {
+      id: Date.now().toString(),
+      name,
+      organizationId: organizationId || '1',
+      location: {
+        address: location.address || 'Unknown Location',
+        latitude: location.latitude || 0,
+        longitude: location.longitude || 0,
+        timezone: location.timezone || 'America/New_York'
+      },
+      capacity: parseFloat(capacity),
+      status: 'ACTIVE',
+      installationDate: new Date().toISOString(),
+      lastMaintenance: null,
+      nextMaintenance: null,
+      performance: {
+        currentGeneration: 0,
+        totalGeneration: 0,
+        efficiency: 95.2,
+        uptime: 99.1
+      },
+      alerts: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    res.status(201).json(site);
+  } catch (error) {
+    console.error('Error creating site:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update site endpoint (v1 API)
+app.put('/api/v1/sites/:siteId', async (req, res) => {
+  try {
+    const { siteId } = req.params;
+    const updateData = req.body;
+    
+    // For demo purposes, return updated mock data
+    const site = {
+      id: siteId,
+      ...updateData,
+      updatedAt: new Date().toISOString()
+    };
+
+    res.json(site);
+  } catch (error) {
+    console.error('Error updating site:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Delete site endpoint (v1 API)
+app.delete('/api/v1/sites/:siteId', async (req, res) => {
+  try {
+    const { siteId } = req.params;
+    
+    // For demo purposes, just return success
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting site:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Alerts endpoint (v1 API)
+app.get('/api/v1/alerts', async (req, res) => {
+  try {
+    const { organizationId, status } = req.query;
+    
+    let query = `
+      SELECT a.*, i.name as installation_name
+      FROM alerts a
+      JOIN installations i ON a.installation_id = i.id
+    `;
+    
+    const params = [];
+    const conditions = [];
+    
+    if (status) {
+      if (status === 'ACTIVE') {
+        conditions.push('is_resolved = false');
+      } else if (status === 'RESOLVED') {
+        conditions.push('is_resolved = true');
+      }
+    }
+    
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+    
+    query += ' ORDER BY created_at DESC LIMIT 50';
+    
+    const result = await pool.query(query, params);
+    
+    // Transform to match frontend expectations
+    const alerts = result.rows.map(row => ({
+      id: row.id.toString(),
+      siteId: row.installation_id.toString(),
+      siteName: row.installation_name,
+      type: row.alert_type || 'PERFORMANCE',
+      severity: row.severity || 'MEDIUM',
+      title: row.message || 'Alert',
+      description: row.description || row.message || 'System alert',
+      status: row.is_resolved ? 'RESOLVED' : 'ACTIVE',
+      createdAt: row.created_at,
+      acknowledgedAt: row.acknowledged_at,
+      resolvedAt: row.resolved_at,
+      organizationId: organizationId || '1'
+    }));
+
+    res.json(alerts);
+  } catch (error) {
+    console.error('Error fetching alerts:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Acknowledge alert endpoint (v1 API)
+app.put('/api/v1/alerts/:alertId/acknowledge', async (req, res) => {
+  try {
+    const { alertId } = req.params;
+    
+    // For demo purposes, return mock acknowledged alert
+    const alert = {
+      id: alertId,
+      status: 'ACKNOWLEDGED',
+      acknowledgedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    res.json(alert);
+  } catch (error) {
+    console.error('Error acknowledging alert:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Resolve alert endpoint (v1 API)
+app.put('/api/v1/alerts/:alertId/resolve', async (req, res) => {
+  try {
+    const { alertId } = req.params;
+    const { resolution } = req.body;
+    
+    // For demo purposes, return mock resolved alert
+    const alert = {
+      id: alertId,
+      status: 'RESOLVED',
+      resolution: resolution || 'Resolved by user',
+      resolvedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    res.json(alert);
+  } catch (error) {
+    console.error('Error resolving alert:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Energy data endpoint (v1 API)
+app.get('/api/v1/energy/:siteId', async (req, res) => {
+  try {
+    const { siteId } = req.params;
+    const { startDate, endDate, interval = 'hour' } = req.query;
+    
+    let dateFilter = "date >= CURRENT_DATE - INTERVAL '7 days'";
+    const params = [siteId];
+    
+    if (startDate && endDate) {
+      dateFilter = "date >= $2 AND date <= $3";
+      params.push(startDate, endDate);
+    }
+
+    const result = await pool.query(`
+      SELECT 
+        date,
+        energy_kwh,
+        temperature,
+        irradiance,
+        weather_condition
+      FROM energy_generation 
+      WHERE installation_id = $1 AND ${dateFilter}
+      ORDER BY date DESC
+    `, params);
+    
+    // Transform to match frontend expectations
+    const energyData = result.rows.map(row => ({
+      timestamp: row.date,
+      generation: parseFloat(row.energy_kwh || 0),
+      consumption: parseFloat(row.energy_kwh || 0) * 0.8, // Mock consumption
+      temperature: parseFloat(row.temperature || 25),
+      irradiance: parseFloat(row.irradiance || 800),
+      weather: row.weather_condition || 'sunny'
+    }));
+
+    res.json(energyData);
+  } catch (error) {
+    console.error('Error fetching energy data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Real-time energy data endpoint (v1 API)
+app.get('/api/v1/energy/:siteId/realtime', async (req, res) => {
+  try {
+    const { siteId } = req.params;
+    
+    // Mock real-time data
+    const realtimeData = {
+      timestamp: new Date().toISOString(),
+      generation: Math.random() * 100 + 50, // Random generation between 50-150 kW
+      consumption: Math.random() * 80 + 40,  // Random consumption between 40-120 kW
+      temperature: Math.random() * 10 + 20,  // Random temp between 20-30°C
+      irradiance: Math.random() * 200 + 700, // Random irradiance between 700-900 W/m²
+      weather: ['sunny', 'partly_cloudy', 'cloudy'][Math.floor(Math.random() * 3)]
+    };
+
+    res.json(realtimeData);
+  } catch (error) {
+    console.error('Error fetching real-time energy data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Performance analytics endpoint (v1 API)
+app.get('/api/v1/analytics/performance/:siteId', async (req, res) => {
+  try {
+    const { siteId } = req.params;
+    const { startDate, endDate } = req.query;
+    
+    // Mock performance analytics data
+    const analytics = {
+      siteId,
+      period: { startDate, endDate },
+      metrics: {
+        totalGeneration: Math.random() * 10000 + 5000,
+        averageEfficiency: Math.random() * 10 + 90,
+        uptime: Math.random() * 5 + 95,
+        peakGeneration: Math.random() * 200 + 100,
+        co2Saved: Math.random() * 1000 + 500
+      },
+      trends: {
+        generationTrend: Math.random() > 0.5 ? 'increasing' : 'decreasing',
+        efficiencyTrend: Math.random() > 0.5 ? 'improving' : 'declining'
+      }
+    };
+
+    res.json(analytics);
+  } catch (error) {
+    console.error('Error fetching performance analytics:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Financial analytics endpoint (v1 API)
+app.get('/api/v1/analytics/financial/:organizationId', async (req, res) => {
+  try {
+    const { organizationId } = req.params;
+    const { startDate, endDate } = req.query;
+    
+    // Get financial data from existing endpoint
+    const result = await pool.query(`
+      SELECT 
+        date,
+        SUM(energy_sold_kwh) as total_energy_sold,
+        SUM(revenue) as total_revenue,
+        SUM(savings) as total_savings,
+        AVG(ppa_rate) as avg_ppa_rate
+      FROM financial_data 
+      WHERE date >= CURRENT_DATE - INTERVAL '30 days'
+      GROUP BY date
+      ORDER BY date DESC
+    `);
+    
+    const totalRevenue = result.rows.reduce((sum, row) => sum + parseFloat(row.total_revenue || 0), 0);
+    const totalSavings = result.rows.reduce((sum, row) => sum + parseFloat(row.total_savings || 0), 0);
+    
+    const analytics = {
+      organizationId,
+      period: { startDate, endDate },
+      metrics: {
+        totalRevenue,
+        totalSavings,
+        totalProfit: totalRevenue - (totalRevenue * 0.3), // Mock cost calculation
+        averagePpaRate: result.rows.length > 0 ? result.rows[0].avg_ppa_rate : 0.12,
+        roi: ((totalRevenue - (totalRevenue * 0.3)) / (totalRevenue * 0.3)) * 100
+      },
+      trends: result.rows.map(row => ({
+        date: row.date,
+        revenue: parseFloat(row.total_revenue || 0),
+        savings: parseFloat(row.total_savings || 0)
+      }))
+    };
+
+    res.json(analytics);
+  } catch (error) {
+    console.error('Error fetching financial analytics:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Environmental impact endpoint (v1 API)
+app.get('/api/v1/analytics/environmental/:organizationId', async (req, res) => {
+  try {
+    const { organizationId } = req.params;
+    
+    // Calculate environmental impact from energy generation
+    const result = await pool.query(`
+      SELECT COALESCE(SUM(energy_kwh), 0) as total_generation
+      FROM energy_generation 
+      WHERE date >= CURRENT_DATE - INTERVAL '1 year'
+    `);
+    
+    const totalGeneration = parseFloat(result.rows[0].total_generation || 0);
+    const co2Factor = 0.0004; // kg CO2 per kWh saved
+    
+    const impact = {
+      organizationId,
+      metrics: {
+        totalEnergyGenerated: totalGeneration,
+        co2Saved: totalGeneration * co2Factor,
+        treesEquivalent: Math.floor((totalGeneration * co2Factor) / 21), // Rough calculation
+        carsOffRoad: Math.floor((totalGeneration * co2Factor) / 4600), // Rough calculation
+        homesEquivalent: Math.floor(totalGeneration / 10950) // Average home consumption
+      },
+      trends: {
+        monthlyGeneration: [], // Would be populated with monthly data
+        monthlyCo2Saved: []
+      }
+    };
+
+    res.json(impact);
+  } catch (error) {
+    console.error('Error fetching environmental impact:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Users endpoint (v1 API)
+app.get('/api/v1/users', async (req, res) => {
+  try {
+    const { organizationId } = req.query;
+    
+    // Mock users data
+    const users = [
+      {
+        id: '1',
+        email: 'admin@nexusgreen.com',
+        firstName: 'Admin',
+        lastName: 'User',
+        role: 'ADMIN',
+        organizationId: organizationId || '1',
+        avatar: null,
+        lastLogin: new Date().toISOString(),
+        isActive: true,
+        permissions: ['read', 'write', 'admin'],
+        emailVerified: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: '2',
+        email: 'manager@nexusgreen.com',
+        firstName: 'Manager',
+        lastName: 'User',
+        role: 'MANAGER',
+        organizationId: organizationId || '1',
+        avatar: null,
+        lastLogin: new Date().toISOString(),
+        isActive: true,
+        permissions: ['read', 'write'],
+        emailVerified: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    ];
+
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Create user endpoint (v1 API)
+app.post('/api/v1/users', async (req, res) => {
+  try {
+    const userData = req.body;
+    
+    // Mock user creation
+    const user = {
+      id: Date.now().toString(),
+      ...userData,
+      isActive: true,
+      emailVerified: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    res.status(201).json(user);
+  } catch (error) {
+    console.error('Error creating user:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update user endpoint (v1 API)
+app.put('/api/v1/users/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const updateData = req.body;
+    
+    // Mock user update
+    const user = {
+      id: userId,
+      ...updateData,
+      updatedAt: new Date().toISOString()
+    };
+
+    res.json(user);
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Delete user endpoint (v1 API)
+app.delete('/api/v1/users/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Mock user deletion
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Organization endpoint (v1 API)
+app.get('/api/v1/organizations/:organizationId', async (req, res) => {
+  try {
+    const { organizationId } = req.params;
+    
+    // Mock organization data
+    const organization = {
+      id: organizationId,
+      name: 'NexusGreen Solar',
+      slug: 'nexusgreen-solar',
+      type: 'INSTALLER',
+      logo: null,
+      address: '123 Solar Street, Green City',
+      country: 'USA',
+      timezone: 'America/New_York',
+      settings: {
+        theme: 'light',
+        currency: 'USD',
+        timezone: 'America/New_York'
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    res.json(organization);
+  } catch (error) {
+    console.error('Error fetching organization:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update organization endpoint (v1 API)
+app.put('/api/v1/organizations/:organizationId', async (req, res) => {
+  try {
+    const { organizationId } = req.params;
+    const updateData = req.body;
+    
+    // Mock organization update
+    const organization = {
+      id: organizationId,
+      ...updateData,
+      updatedAt: new Date().toISOString()
+    };
+
+    res.json(organization);
+  } catch (error) {
+    console.error('Error updating organization:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
