@@ -65,9 +65,7 @@ export class SDGTrackingService {
         if (site.solaxClientId && site.solaxClientSecret && site.solaxPlantId) {
           try {
             const energyData = await solarDataService.getEnergyData(
-              site.solaxClientId,
-              site.solaxClientSecret,
-              site.solaxPlantId,
+              site.id,
               startDate,
               endDate
             );
@@ -304,9 +302,7 @@ export class SDGTrackingService {
         if (site.solaxClientId && site.solaxClientSecret && site.solaxPlantId) {
           try {
             const energyData = await solarDataService.getEnergyData(
-              site.solaxClientId,
-              site.solaxClientSecret,
-              site.solaxPlantId,
+              site.id,
               previousStart,
               previousEnd
             );

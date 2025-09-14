@@ -8,9 +8,25 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
 dist-ssr
 *.local
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# SSL certificates
+ssl/
+*.pem
+*.key
+*.crt
+
+# Uploads and user data
+uploads/
+backups/
 
 # Editor directories and files
 .vscode/*

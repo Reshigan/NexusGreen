@@ -186,7 +186,7 @@ class TariffEngine {
       if (energyData.hourlyData && Array.isArray(energyData.hourlyData)) {
         energyData.hourlyData.forEach(hourData => {
           const period = this.getTariffPeriod(hourData.time, timePeriods);
-          const rate = rates[period as keyof TariffRates] * (seasonalAdj[period as keyof SeasonalAdjustments] || 1.0);
+          const rate = rates[period as keyof TariffRates] * ((seasonalAdj as any)[period] || 1.0);
           
           const gridConsumption = hourData.gridConsumption || 0;
           const solarUsage = hourData.solarUsage || 0;

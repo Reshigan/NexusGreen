@@ -1,0 +1,52 @@
+<svg width="300" height="48" viewBox="0 0 300 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Primary Gradient -->
+    <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0D4F3C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00FF88;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Energy Gradient -->
+    <linearGradient id="energyGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00FF88;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00D4FF;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Glow Filter -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Icon Section -->
+  <g transform="translate(4, 4)">
+    <!-- Top row hexagons -->
+    <polygon points="8,3 12,0 16,3 16,9 12,12 8,9" fill="url(#primaryGradient)" stroke="#00FF88" stroke-width="0.3"/>
+    <polygon points="14,3 18,0 22,3 22,9 18,12 14,9" fill="url(#primaryGradient)" stroke="#00FF88" stroke-width="0.3"/>
+    <polygon points="20,3 24,0 28,3 28,9 24,12 20,9" fill="url(#primaryGradient)" stroke="#00FF88" stroke-width="0.3"/>
+    
+    <!-- Middle row hexagons -->
+    <polygon points="5,10 9,7 13,10 13,16 9,19 5,16" fill="url(#primaryGradient)" stroke="#00FF88" stroke-width="0.3"/>
+    <polygon points="11,10 15,7 19,10 19,16 15,19 11,16" fill="#0D4F3C" stroke="#00FF88" stroke-width="0.3"/>
+    <polygon points="17,10 21,7 25,10 25,16 21,19 17,16" fill="url(#primaryGradient)" stroke="#00FF88" stroke-width="0.3"/>
+    <polygon points="23,10 27,7 31,10 31,16 27,19 23,16" fill="url(#primaryGradient)" stroke="#00FF88" stroke-width="0.3"/>
+    
+    <!-- Bottom row hexagons -->
+    <polygon points="8,17 12,14 16,17 16,23 12,26 8,23" fill="url(#primaryGradient)" stroke="#00FF88" stroke-width="0.3"/>
+    <polygon points="14,17 18,14 22,17 22,23 18,26 14,23" fill="url(#primaryGradient)" stroke="#00FF88" stroke-width="0.3"/>
+    <polygon points="20,17 24,14 28,17 28,23 24,26 20,23" fill="url(#primaryGradient)" stroke="#00FF88" stroke-width="0.3"/>
+    
+    <!-- Central Lightning Bolt -->
+    <path d="M15 8 L19 8 L17 13 L21 13 L15 19 L17 14 L13 14 Z" fill="url(#energyGradient)" filter="url(#glow)"/>
+  </g>
+  
+  <!-- Connecting Line -->
+  <line x1="45" y1="24" x2="55" y2="24" stroke="url(#energyGradient)" stroke-width="2" opacity="0.8"/>
+  
+  <!-- Text Section -->
+  <text x="65" y="30" font-family="Inter, sans-serif" font-size="20" font-weight="800" fill="url(#energyGradient)" letter-spacing="3px">NEXUS GREEN</text>
+</svg>

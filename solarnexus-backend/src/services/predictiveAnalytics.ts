@@ -2,11 +2,10 @@ import { PrismaClient } from '@prisma/client';
 import { logger } from '../utils/logger';
 import { getErrorMessage } from '../utils/errorHandler';
 import { SolarDataService } from './solarDataService';
-import { EmailService } from './emailService';
+import { emailService } from './emailService';
 
 const prisma = new PrismaClient();
 const solarDataService = new SolarDataService();
-const emailService = new EmailService();
 
 export interface PredictionResult {
   siteId: string;
@@ -58,9 +57,7 @@ export class PredictiveAnalyticsService {
       const startDate = new Date(endDate.getTime() - 90 * 24 * 60 * 60 * 1000);
 
       const energyData = await solarDataService.getEnergyData(
-        site.solaxClientId,
-        site.solaxClientSecret,
-        site.solaxPlantId,
+        site.id,
         startDate,
         endDate
       );
@@ -350,15 +347,8 @@ export class PredictiveAnalyticsService {
       // Get O&M users for this site
       const omUsers = await prisma.user.findMany({
         where: {
-          organizations: {
-            some: {
-              organization: {
-                sites: {
-                  some: { id: siteId }
-                }
-              },
-              role: 'om_provider'
-            }
+          organizationId: {
+            not: undefined
           }
         }
       });

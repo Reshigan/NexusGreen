@@ -1,0 +1,23 @@
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Solar panel elements -->
+  <rect x="8" y="12" width="16" height="12" rx="2" fill="#0891b2" opacity="0.8"/>
+  <rect x="8" y="28" width="16" height="12" rx="2" fill="#0891b2"/>
+  <rect x="28" y="12" width="16" height="12" rx="2" fill="#f97316" opacity="0.9"/>
+  <rect x="28" y="28" width="16" height="12" rx="2" fill="#f97316"/>
+  
+  <!-- Connection lines representing nexus -->
+  <path d="M24 18 L28 18" stroke="#3b82f6" stroke-width="2" opacity="0.7"/>
+  <path d="M24 34 L28 34" stroke="#3b82f6" stroke-width="2" opacity="0.7"/>
+  <path d="M16 24 L16 28" stroke="#3b82f6" stroke-width="2" opacity="0.7"/>
+  <path d="M36 24 L36 28" stroke="#3b82f6" stroke-width="2" opacity="0.7"/>
+  
+  <!-- Central nexus node -->
+  <circle cx="26" cy="26" r="3" fill="#3b82f6"/>
+  
+  <!-- Brand text -->
+  <text x="56" y="22" font-family="Inter, sans-serif" font-size="18" font-weight="700" fill="#1f2937">Solar</text>
+  <text x="56" y="40" font-family="Inter, sans-serif" font-size="18" font-weight="700" fill="#0891b2">Nexus</text>
+  
+  <!-- Tagline -->
+  <text x="140" y="35" font-family="Inter, sans-serif" font-size="10" font-weight="400" fill="#6b7280">Smart Solar Analytics</text>
+</svg>
