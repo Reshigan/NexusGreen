@@ -68,14 +68,32 @@ fi
 # Install Docker Compose
 echo "🔧 Installing Docker Compose..."
 if ! command -v docker-compose &> /dev/null; then
-    # Use pip for ARM64 compatibility
-    apt install -y python3-pip
-    pip3 install docker-compose
+    # Use system package for Ubuntu 24.04+ compatibility
+    apt install -y docker-compose-v2
+    # Create symlink for backward compatibility
+    if [ ! -f /usr/local/bin/docker-compose ]; then
+        ln -s /usr/bin/docker-compose /usr/local/bin/docker-compose 2>/dev/null || true
+    fi
 fi
 
 # Start Docker service
-systemctl start docker
-systemctl enable docker
+echo "🐳 Starting Docker service..."
+if ! systemctl is-active --quiet docker; then
+    # Try starting Docker daemon directly if systemctl fails
+    if ! systemctl start docker 2>/dev/null; then
+        echo "Starting Docker daemon manually..."
+        sudo dockerd > /tmp/docker.log 2>&1 &
+        sleep 10
+    fi
+fi
+systemctl enable docker 2>/dev/null || true
+
+# Verify Docker is working
+echo "🔍 Verifying Docker installation..."
+if ! docker --version; then
+    echo "[ERROR] Docker installation failed"
+    exit 1
+fi
 
 # Configure firewall
 echo "🔥 Configuring firewall..."
