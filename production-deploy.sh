@@ -36,8 +36,7 @@ fi
 # Configuration
 DOMAIN="nexus.gonxt.tech"
 EMAIL="reshigan@gonxt.tech"
-USER_HOME=$(eval echo ~$USER)
-DEPLOY_DIR="$USER_HOME/solarnexus"
+DEPLOY_DIR="/opt/solarnexus"
 
 print_status "Starting production deployment..."
 
@@ -127,7 +126,8 @@ if [ -d "$DEPLOY_DIR" ]; then
 fi
 
 # Clone fresh repository
-mkdir -p "$DEPLOY_DIR"
+$SUDO mkdir -p "$DEPLOY_DIR"
+$SUDO chown $USER:$USER "$DEPLOY_DIR"
 cd "$(dirname $DEPLOY_DIR)"
 git clone https://github.com/Reshigan/SolarNexus.git "$(basename $DEPLOY_DIR)"
 cd "$DEPLOY_DIR"
