@@ -8,11 +8,38 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Database connection
+// Database connection with retry logic
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: false  // Disable SSL for local Docker deployment
+  ssl: false,  // Disable SSL for local Docker deployment
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 });
+
+// Database connection retry function
+async function connectWithRetry() {
+  const maxRetries = 10;
+  let retries = 0;
+  
+  while (retries < maxRetries) {
+    try {
+      const client = await pool.connect();
+      console.log('✅ Database connected successfully');
+      client.release();
+      return;
+    } catch (err) {
+      retries++;
+      console.log(`❌ Database connection attempt ${retries}/${maxRetries} failed:`, err.message);
+      if (retries === maxRetries) {
+        console.error('💥 Failed to connect to database after maximum retries');
+        process.exit(1);
+      }
+      // Wait before retrying (exponential backoff)
+      await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(2, retries), 10000)));
+    }
+  }
+}
 
 // Middleware
 app.use(helmet());
@@ -25,9 +52,45 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).send('healthy');
+// Health check endpoints
+app.get('/health', async (req, res) => {
+  try {
+    // Test database connection
+    const client = await pool.connect();
+    client.release();
+    res.status(200).json({ 
+      status: 'healthy', 
+      database: 'connected',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(503).json({ 
+      status: 'unhealthy', 
+      database: 'disconnected',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+app.get('/api/health', async (req, res) => {
+  try {
+    // Test database connection
+    const client = await pool.connect();
+    client.release();
+    res.status(200).json({ 
+      status: 'healthy', 
+      database: 'connected',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(503).json({ 
+      status: 'unhealthy', 
+      database: 'disconnected',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // API status endpoint
@@ -253,11 +316,26 @@ app.use((req, res) => {
 });
 
 // Start server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Nexus Green API server running on port ${PORT}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🗄️  Database: ${process.env.DATABASE_URL ? 'Connected' : 'Not configured'}`);
-});
+// Start server with database connection retry
+async function startServer() {
+  try {
+    // Connect to database with retry logic
+    await connectWithRetry();
+    
+    // Start the server
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Nexus Green API server running on port ${PORT}`);
+      console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🗄️  Database: Connected successfully`);
+    });
+  } catch (error) {
+    console.error('💥 Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+// Start the server
+startServer();
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
