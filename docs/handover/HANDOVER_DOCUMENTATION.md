@@ -11,7 +11,7 @@ This document provides comprehensive handover information for the SolarNexus sol
 - **Version**: 1.0.0
 - **Handover Date**: January 15, 2024
 - **Production URL**: https://nexus.gonxt.tech
-- **Server**: AWS EC2 (13.247.174.75)
+- **Server**: AWS EC2 (13.247.192.38)
 - **Repository**: https://github.com/Reshigan/SolarNexus
 
 ### Handover Scope
@@ -585,7 +585,7 @@ docker-compose up -d
 ### Appendix A: Server Specifications
 ```
 Server: AWS EC2 Instance
-IP: 13.247.174.75
+IP: 13.247.192.38
 Domain: nexus.gonxt.tech
 OS: Ubuntu 22.04 LTS
 CPU: 4 vCPUs

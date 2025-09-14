@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# SolarNexus ARM64 Deployment Script for AWS t4g.small
-# Optimized for low-resource ARM64 instances
+# SolarNexus ARM64 Deployment Script for AWS t4g.medium
+# Optimized for ARM64 instances with enhanced performance
 
 set -e
 
@@ -27,7 +27,7 @@ fi
 # Configuration
 PROJECT_DIR="/opt/solarnexus"
 DOMAIN="nexus.gonxt.tech"
-SERVER_IP="13.247.174.75"
+SERVER_IP="13.247.192.38"
 
 echo "📋 Configuration:"
 echo "   - Project Directory: $PROJECT_DIR"
@@ -39,9 +39,11 @@ echo "   - Architecture: $ARCH"
 TOTAL_MEM=$(free -m | awk 'NR==2{printf "%.0f", $2}')
 echo "   - Available Memory: ${TOTAL_MEM}MB"
 
-if [[ $TOTAL_MEM -lt 1800 ]]; then
-    echo "[WARNING] Low memory detected (${TOTAL_MEM}MB). This may cause build issues."
-    echo "Consider adding swap space or using a larger instance."
+if [[ $TOTAL_MEM -lt 3500 ]]; then
+    echo "[WARNING] Lower memory detected (${TOTAL_MEM}MB). Expected 4GB for t4g.medium."
+    echo "Performance may be impacted."
+elif [[ $TOTAL_MEM -ge 3500 ]]; then
+    echo "✅ Good memory allocation detected (${TOTAL_MEM}MB)"
 fi
 
 # Update system
@@ -85,17 +87,16 @@ ufw allow 80/tcp
 ufw allow 443/tcp
 ufw --force enable
 
-# Create swap file for low memory instances
-if [[ $TOTAL_MEM -lt 2000 ]]; then
-    echo "💾 Creating swap file for low memory instance..."
-    if [[ ! -f /swapfile ]]; then
-        fallocate -l 2G /swapfile
-        chmod 600 /swapfile
-        mkswap /swapfile
-        swapon /swapfile
-        echo '/swapfile none swap sw 0 0' | tee -a /etc/fstab
-        echo "vm.swappiness=10" | tee -a /etc/sysctl.conf
-    fi
+# Create swap file for optimal performance
+echo "💾 Creating swap file for optimal performance..."
+if [[ ! -f /swapfile ]]; then
+    fallocate -l 4G /swapfile
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    echo '/swapfile none swap sw 0 0' | tee -a /etc/fstab
+    echo "vm.swappiness=10" | tee -a /etc/sysctl.conf
+    echo "✅ 4GB swap file created"
 fi
 
 # Navigate to project directory
@@ -121,7 +122,7 @@ fi
 
 # Build and start services with ARM64 optimizations
 echo "🏗️ Building and starting services (ARM64 optimized)..."
-echo "⚠️  This may take 15-30 minutes on t4g.small due to limited resources..."
+echo "⚠️  This may take 10-20 minutes on t4g.medium..."
 
 # Use ARM64 optimized compose file
 docker-compose -f docker-compose.arm64.yml down 2>/dev/null || true
@@ -233,6 +234,6 @@ echo "   - Logs: docker-compose -f docker-compose.arm64.yml logs -f"
 echo "   - Restart: docker-compose -f docker-compose.arm64.yml restart"
 echo "   - Stop: docker-compose -f docker-compose.arm64.yml down"
 echo ""
-echo "⚠️  Note: Performance may be limited on t4g.small instances"
-echo "   Consider upgrading to t4g.medium for better performance"
+echo "✅ Running on t4g.medium - Good performance expected"
+echo "   4GB RAM and 100GB storage provide excellent capacity"
 echo ""

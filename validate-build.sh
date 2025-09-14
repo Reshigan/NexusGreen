@@ -241,7 +241,7 @@ if [ $ERRORS -eq 0 ]; then
     echo "Next steps:"
     echo "  1. Commit and push all changes to GitHub"
     echo "  2. Run the deployment script on your AWS server:"
-    echo "     ssh root@13.247.174.75"
+    echo "     ssh root@13.247.192.38"
     echo "     git clone https://github.com/Reshigan/SolarNexus.git /opt/solarnexus"
     echo "     cd /opt/solarnexus && ./deploy.sh"
     echo ""

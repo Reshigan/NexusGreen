@@ -112,7 +112,7 @@ Welcome to the comprehensive documentation for SolarNexus, a solar energy manage
 
 ### Production Environment
 - **URL**: https://nexus.gonxt.tech
-- **Server**: AWS EC2 (13.247.174.75)
+- **Server**: AWS EC2 (13.247.192.38)
 - **SSL**: Let's Encrypt automated certificates
 - **Monitoring**: Health checks and logging
 - **Backups**: Daily automated backups

@@ -76,8 +76,8 @@ cd solarnexus-backend && npm run dev  # Backend (port 3000)
 **One-Command Deployment** on AWS server:
 
 ```bash
-# Deploy to production server (13.247.174.75)
-ssh root@13.247.174.75
+# Deploy to production server (13.247.192.38)
+ssh root@13.247.192.38
 git clone https://github.com/Reshigan/SolarNexus.git /opt/solarnexus
 cd /opt/solarnexus && ./deploy.sh
 ```
@@ -153,7 +153,7 @@ curl -H "Authorization: Bearer <token>" \
 
 ### Server Information
 - **Server**: AWS EC2 Instance
-- **IP Address**: 13.247.174.75
+- **IP Address**: 13.247.192.38
 - **Domain**: nexus.gonxt.tech
 - **OS**: Ubuntu 22.04 LTS
 - **Resources**: 4 vCPUs, 8GB RAM, 50GB SSD
