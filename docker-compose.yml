@@ -45,7 +45,7 @@ services:
   backend:
     build:
       context: ./solarnexus-backend
-      dockerfile: Dockerfile.debian
+      dockerfile: Dockerfile
       target: production
     container_name: solarnexus-backend
     restart: unless-stopped

@@ -17,7 +17,7 @@ COPY prisma ./prisma/
 
 # Development stage
 FROM base AS development
-RUN npm ci --include=dev
+RUN npm install --include=dev
 COPY . .
 RUN npx prisma generate
 EXPOSE 3000
@@ -25,7 +25,7 @@ CMD ["npm", "run", "dev"]
 
 # Build stage
 FROM base AS build
-RUN npm ci --only=production && npm cache clean --force
+RUN npm install --only=production && npm cache clean --force
 COPY . .
 RUN npx prisma generate
 RUN npm run build
@@ -52,7 +52,7 @@ WORKDIR /app
 
 # Copy package files and install dependencies with limited cache
 COPY --from=base /app/package*.json ./
-RUN npm ci --omit=dev --no-audit --no-fund && \
+RUN npm install --omit=dev --no-audit --no-fund && \
     npm install -g ts-node tsconfig-paths typescript && \
     npm cache clean --force && \
     rm -rf /tmp/* /var/tmp/* /root/.npm
