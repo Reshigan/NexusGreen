@@ -1,11 +1,14 @@
 #!/bin/bash
 
-# Nexus Green Production Deployment Script
+# NexusGreen Production Deployment Script
 # Server: 13.247.192.38
 # Domain: nexus.gonxt.tech
 # SSL Email: reshigan@gonxt.tech
 
 set -e
+
+echo "🚀 NexusGreen Production Deployment for nexus.gonxt.tech"
+echo "======================================================="
 
 # Colors for output
 RED='\033[0;31m'

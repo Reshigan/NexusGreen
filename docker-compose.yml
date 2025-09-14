@@ -12,9 +12,9 @@ services:
       - "80:8080"
       - "443:443"
     environment:
-      - VITE_APP_NAME=Nexus Green
-      - VITE_APP_VERSION=4.0.0
-      - VITE_API_URL=http://localhost:3001
+      - VITE_APP_NAME=NexusGreen
+      - VITE_APP_VERSION=6.1.0
+      - VITE_API_URL=http://nexus.gonxt.tech/api
       - VITE_ENVIRONMENT=production
       - VITE_COMPANY_NAME=SolarTech Solutions (Pty) Ltd
       - VITE_COMPANY_REG=2019/123456/07
