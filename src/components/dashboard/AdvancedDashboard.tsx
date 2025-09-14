@@ -33,18 +33,24 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { nexusTheme, getGlassStyle, getGradient } from '@/styles/nexusTheme';
-import { nexusGreenData, type User, type Organization } from '@/data/nexusGreenData';
+import { nexusApi, type User, type Organization, type DashboardMetrics, type Site, type Alert } from '@/services/nexusApi';
 
 interface AdvancedDashboardProps {
   user: User;
   organization: Organization;
+  onLogout?: () => void;
+  onNavigateToSites?: () => void;
+  onNavigateToUsers?: () => void;
 }
 
-const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ user, organization }) => {
+const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ user, organization, onLogout, onNavigateToSites, onNavigateToUsers }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedTimeRange, setSelectedTimeRange] = useState('today');
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [dashboardMetrics, setDashboardMetrics] = useState(nexusGreenData.getDashboardMetrics(organization.id));
+  const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null);
+  const [sites, setSites] = useState<Site[]>([]);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Update time every second
   useEffect(() => {
@@ -52,20 +58,46 @@ const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ user, organizatio
     return () => clearInterval(timer);
   }, []);
 
-  // Simulate real-time data updates
+  // Load initial data
   useEffect(() => {
-    const interval = setInterval(() => {
-      setDashboardMetrics(nexusGreenData.getDashboardMetrics(organization.id));
-    }, 5000);
-    return () => clearInterval(interval);
+    loadDashboardData();
   }, [organization.id]);
 
-  const handleRefresh = () => {
+  // Real-time data updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!isRefreshing) {
+        loadDashboardData();
+      }
+    }, 30000); // Update every 30 seconds
+    return () => clearInterval(interval);
+  }, [organization.id, isRefreshing]);
+
+  const loadDashboardData = async () => {
+    try {
+      const [metricsData, sitesData, alertsData] = await Promise.all([
+        nexusApi.getDashboardMetrics(organization.id),
+        nexusApi.getSites(organization.id),
+        nexusApi.getAlerts(organization.id, 'ACTIVE')
+      ]);
+
+      setDashboardMetrics(metricsData);
+      setSites(sitesData);
+      setAlerts(alertsData);
+    } catch (error) {
+      console.error('Failed to load dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
     setIsRefreshing(true);
-    setTimeout(() => {
-      setDashboardMetrics(nexusGreenData.getDashboardMetrics(organization.id));
+    try {
+      await loadDashboardData();
+    } finally {
       setIsRefreshing(false);
-    }, 1000);
+    }
   };
 
   // Generate sample chart data
@@ -83,11 +115,12 @@ const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ user, organizatio
     weather: ['sunny', 'cloudy', 'sunny', 'rainy', 'sunny', 'sunny', 'cloudy'][i]
   }));
 
-  const siteDistribution = [
+  const siteDistribution = dashboardMetrics ? [
     { name: 'Active', value: dashboardMetrics.activeSites, color: '#22c55e' },
-    { name: 'Maintenance', value: 2, color: '#f59e0b' },
-    { name: 'Offline', value: 1, color: '#ef4444' }
-  ];
+    { name: 'Maintenance', value: sites.filter(s => s.status === 'MAINTENANCE').length, color: '#f59e0b' },
+    { name: 'Offline', value: sites.filter(s => s.status === 'OFFLINE').length, color: '#ef4444' },
+    { name: 'Fault', value: sites.filter(s => s.status === 'FAULT').length, color: '#ef4444' }
+  ] : [];
 
   const MetricCard = ({ title, value, unit, icon: Icon, trend, color, gradient, description }: any) => (
     <motion.div
@@ -139,6 +172,36 @@ const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ user, organizatio
       </Card>
     </motion.div>
   );
+
+  // Loading state
+  if (loading || !dashboardMetrics) {
+    return (
+      <div 
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: getGradient('lightBg') }}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-green-500 to-blue-500 flex items-center justify-center"
+          >
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <div className="w-4 h-4 bg-gradient-to-r from-green-500 to-blue-500 rounded-full" />
+            </div>
+          </motion.div>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+            Loading Dashboard
+          </h2>
+          <p className="text-gray-600 mt-2">Fetching real-time solar data...</p>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div 
@@ -195,6 +258,24 @@ const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ user, organizatio
                   <Download className="w-4 h-4 mr-2" />
                   Export
                 </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={onNavigateToSites}
+                >
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Sites
+                </Button>
+                {(user.role === 'ADMIN' || user.role === 'MANAGER') && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={onNavigateToUsers}
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    Users
+                  </Button>
+                )}
                 <Button variant="outline" size="sm">
                   <Settings className="w-4 h-4 mr-2" />
                   Settings

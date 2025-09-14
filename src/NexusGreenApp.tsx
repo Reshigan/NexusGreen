@@ -3,34 +3,29 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'sonner';
 import ModernLogin from '@/components/auth/ModernLogin';
 import AdvancedDashboard from '@/components/dashboard/AdvancedDashboard';
-import { nexusGreenData, type User, type Organization } from '@/data/nexusGreenData';
+import SiteManagement from '@/components/sites/SiteManagement';
+import UserManagement from '@/components/users/UserManagement';
+import { nexusApi, type User, type Organization } from '@/services/nexusApi';
 
-type AppState = 'login' | 'signup' | 'forgot-password' | 'dashboard';
+type AppState = 'login' | 'signup' | 'forgot-password' | 'dashboard' | 'sites' | 'users';
 
 const NexusGreenApp: React.FC = () => {
   const [appState, setAppState] = useState<AppState>('login');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentOrganization, setCurrentOrganization] = useState<Organization | null>(null);
+
   const [isLoading, setIsLoading] = useState(true);
 
   // Check for existing session on app load
   useEffect(() => {
     const checkSession = () => {
-      const savedUser = localStorage.getItem('nexus-user');
-      const savedOrg = localStorage.getItem('nexus-organization');
+      const user = nexusApi.getCurrentUser();
+      const organization = nexusApi.getCurrentOrganization();
       
-      if (savedUser && savedOrg) {
-        try {
-          const user = JSON.parse(savedUser);
-          const org = JSON.parse(savedOrg);
-          setCurrentUser(user);
-          setCurrentOrganization(org);
-          setAppState('dashboard');
-        } catch (error) {
-          console.error('Error parsing saved session:', error);
-          localStorage.removeItem('nexus-user');
-          localStorage.removeItem('nexus-organization');
-        }
+      if (user && organization && nexusApi.isAuthenticated()) {
+        setCurrentUser(user);
+        setCurrentOrganization(organization);
+        setAppState('dashboard');
       }
       setIsLoading(false);
     };
@@ -39,27 +34,22 @@ const NexusGreenApp: React.FC = () => {
     setTimeout(checkSession, 1000);
   }, []);
 
-  const handleLogin = (user: User) => {
-    const organization = nexusGreenData.organizations.find(org => org.id === user.organization_id);
-    
-    if (organization) {
-      setCurrentUser(user);
-      setCurrentOrganization(organization);
-      
-      // Save session to localStorage
-      localStorage.setItem('nexus-user', JSON.stringify(user));
-      localStorage.setItem('nexus-organization', JSON.stringify(organization));
-      
-      setAppState('dashboard');
-    }
+  const handleLogin = (user: User, organization: Organization) => {
+    setCurrentUser(user);
+    setCurrentOrganization(organization);
+    setAppState('dashboard');
   };
 
-  const handleLogout = () => {
-    setCurrentUser(null);
-    setCurrentOrganization(null);
-    localStorage.removeItem('nexus-user');
-    localStorage.removeItem('nexus-organization');
-    setAppState('login');
+  const handleLogout = async () => {
+    try {
+      await nexusApi.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setCurrentUser(null);
+      setCurrentOrganization(null);
+      setAppState('login');
+    }
   };
 
   const handleSwitchToSignup = () => {
@@ -72,6 +62,18 @@ const NexusGreenApp: React.FC = () => {
 
   const handleForgotPassword = () => {
     setAppState('forgot-password');
+  };
+
+  const handleNavigateToSites = () => {
+    setAppState('sites');
+  };
+
+  const handleNavigateToUsers = () => {
+    setAppState('users');
+  };
+
+  const handleBackToDashboard = () => {
+    setAppState('dashboard');
   };
 
   // Loading screen
@@ -191,6 +193,9 @@ const NexusGreenApp: React.FC = () => {
             <AdvancedDashboard
               user={currentUser}
               organization={currentOrganization}
+              onLogout={handleLogout}
+              onNavigateToSites={handleNavigateToSites}
+              onNavigateToUsers={handleNavigateToUsers}
             />
             
             {/* Logout button - floating */}
@@ -203,6 +208,38 @@ const NexusGreenApp: React.FC = () => {
             >
               Logout
             </motion.button>
+          </motion.div>
+        )}
+
+        {appState === 'sites' && currentUser && currentOrganization && (
+          <motion.div
+            key="sites"
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ duration: 0.5 }}
+          >
+            <SiteManagement
+              user={currentUser}
+              organization={currentOrganization}
+              onBack={handleBackToDashboard}
+            />
+          </motion.div>
+        )}
+
+        {appState === 'users' && currentUser && currentOrganization && (
+          <motion.div
+            key="users"
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -100 }}
+            transition={{ duration: 0.5 }}
+          >
+            <UserManagement
+              user={currentUser}
+              organization={currentOrganization}
+              onBack={handleBackToDashboard}
+            />
           </motion.div>
         )}
       </AnimatePresence>

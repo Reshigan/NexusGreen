@@ -7,10 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { nexusTheme, getGlassStyle, getGradient } from '@/styles/nexusTheme';
-import { nexusGreenData } from '@/data/nexusGreenData';
+import { nexusApi, type User, type Organization } from '@/services/nexusApi';
 
 interface ModernLoginProps {
-  onLogin: (user: any) => void;
+  onLogin: (user: User, organization: Organization) => void;
   onSwitchToSignup: () => void;
   onForgotPassword: () => void;
 }
@@ -27,16 +27,14 @@ const ModernLogin: React.FC<ModernLoginProps> = ({ onLogin, onSwitchToSignup, on
     setIsLoading(true);
     setError('');
 
-    // Simulate API call
-    setTimeout(() => {
-      const user = nexusGreenData.users.find(u => u.email === email);
-      if (user && user.is_active) {
-        onLogin(user);
-      } else {
-        setError('Invalid credentials or inactive account');
-      }
+    try {
+      const response = await nexusApi.login({ email, password });
+      onLogin(response.user, response.organization);
+    } catch (error: any) {
+      setError(error.message || 'Login failed. Please check your credentials.');
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const demoUsers = [
