@@ -8,18 +8,20 @@ WORKDIR /app
 
 # Set memory limits for ARM64 builds
 ENV NODE_OPTIONS="--max-old-space-size=3072"
-ENV NODE_ENV=production
 ENV VITE_ENVIRONMENT=production
 
 # Copy package files first for better caching
 COPY package*.json ./
 
-# Install dependencies (including devDependencies for build)
-# Use npm ci for faster, reliable builds
-RUN npm ci --silent --no-audit --no-fund
+# Install ALL dependencies (including devDependencies for build)
+# Don't set NODE_ENV=production yet as we need devDependencies
+RUN npm ci --include=dev --silent --no-audit --no-fund
 
 # Copy source code
 COPY . .
+
+# Verify vite is available
+RUN npx vite --version
 
 # Build the application with memory optimization
 RUN npm run build
