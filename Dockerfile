@@ -35,28 +35,8 @@ RUN apk add --no-cache curl
 # Copy built application from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Create nginx configuration for SPA
-RUN echo 'server {' > /etc/nginx/conf.d/default.conf && \
-    echo '    listen 80;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    server_name _;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    root /usr/share/nginx/html;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    index index.html;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    location / {' >> /etc/nginx/conf.d/default.conf && \
-    echo '        try_files $uri $uri/ /index.html;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    }' >> /etc/nginx/conf.d/default.conf && \
-    echo '    location /health {' >> /etc/nginx/conf.d/default.conf && \
-    echo '        access_log off;' >> /etc/nginx/conf.d/default.conf && \
-    echo '        return 200 "healthy\n";' >> /etc/nginx/conf.d/default.conf && \
-    echo '        add_header Content-Type text/plain;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    }' >> /etc/nginx/conf.d/default.conf && \
-    echo '    location /api/ {' >> /etc/nginx/conf.d/default.conf && \
-    echo '        proxy_pass http://nexus-api:3001/;' >> /etc/nginx/conf.d/default.conf && \
-    echo '        proxy_set_header Host $host;' >> /etc/nginx/conf.d/default.conf && \
-    echo '        proxy_set_header X-Real-IP $remote_addr;' >> /etc/nginx/conf.d/default.conf && \
-    echo '        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;' >> /etc/nginx/conf.d/default.conf && \
-    echo '        proxy_set_header X-Forwarded-Proto $scheme;' >> /etc/nginx/conf.d/default.conf && \
-    echo '    }' >> /etc/nginx/conf.d/default.conf && \
-    echo '}' >> /etc/nginx/conf.d/default.conf
+# Copy nginx configuration
+COPY nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
 
 # Set proper permissions
 RUN chown -R nginx:nginx /usr/share/nginx/html
