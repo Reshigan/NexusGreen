@@ -29,7 +29,7 @@ print_error() {
 }
 
 # Configuration
-PUBLIC_IP="13.247.192.46"
+PUBLIC_IP="13.245.181.202"
 DOMAIN="$PUBLIC_IP"  # Using IP as domain for now
 
 print_status "🔧 Fixing NexusGreen for public access..."
@@ -98,7 +98,7 @@ services:
     environment:
       - VITE_APP_NAME=NexusGreen
       - VITE_APP_VERSION=6.1.0
-      - VITE_API_URL=http://13.247.192.46/api
+      - VITE_API_URL=http://13.245.181.202/api
       - VITE_ENVIRONMENT=production
       - VITE_COMPANY_NAME=NexusGreen Solar Solutions
       - VITE_COMPANY_REG=2024/123456/07
@@ -135,7 +135,7 @@ services:
       - DATABASE_URL=postgresql://nexususer:nexuspass123@nexus-db:5432/nexusgreen
       - JWT_SECRET=nexus-green-jwt-secret-2024-production
       - SOLAX_SYNC_INTERVAL_MINUTES=60
-      - CORS_ORIGIN=http://13.247.192.46
+      - CORS_ORIGIN=http://13.245.181.202
     networks:
       - nexus-network
     depends_on:
