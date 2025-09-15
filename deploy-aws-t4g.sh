@@ -202,20 +202,39 @@ wait_for_services() {
         return 1
     fi
     
-    # Wait for API
+    # Wait for API with better debugging
     log_info "Waiting for API..."
-    timeout=60
+    timeout=120  # Increased timeout for ARM64 builds
     while [ $timeout -gt 0 ]; do
+        # Check if API container is running
+        if ! docker compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" ps nexus-api | grep -q "Up"; then
+            log_error "API container is not running. Checking logs..."
+            docker compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" logs nexus-api | tail -20
+            return 1
+        fi
+        
+        # Try to connect to API
         if curl -f http://localhost:3001/health &>/dev/null; then
             log_success "API is ready"
             break
         fi
+        
+        # Show progress every 10 seconds
+        if [ $((timeout % 10)) -eq 0 ]; then
+            log_info "Still waiting for API... (${timeout}s remaining)"
+            # Show recent API logs for debugging
+            echo "Recent API logs:"
+            docker compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" logs --tail=5 nexus-api
+        fi
+        
         sleep 2
         timeout=$((timeout - 2))
     done
     
     if [ $timeout -le 0 ]; then
-        log_error "API failed to start within 60 seconds"
+        log_error "API failed to start within 120 seconds"
+        log_error "Final API logs:"
+        docker compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" logs nexus-api | tail -30
         return 1
     fi
     
