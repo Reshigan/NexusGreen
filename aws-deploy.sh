@@ -34,10 +34,17 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Check if running as root
+# Check if we have the necessary privileges
 if [[ $EUID -eq 0 ]]; then
-   print_error "This script should not be run as root. Please run as ubuntu user with sudo privileges."
-   exit 1
+    # Running as root - this is fine
+    SUDO_CMD=""
+else
+    # Not running as root - check if we have $SUDO_CMD access
+    if ! $SUDO_CMD -n true 2>/dev/null; then
+        print_error "This script requires $SUDO_CMD privileges. Please run with: $SUDO_CMD ./aws-deploy.sh"
+        exit 1
+    fi
+    SUDO_CMD="sudo"
 fi
 
 print_status "🚀 Starting NexusGreen AWS Deployment..."
@@ -46,14 +53,14 @@ print_status "Email: $EMAIL"
 
 # Update system
 print_status "📦 Updating system packages..."
-sudo apt update && sudo apt upgrade -y
+$SUDO_CMD apt update && $SUDO_CMD apt upgrade -y
 
 # Install Docker
 print_status "🐳 Installing Docker..."
 if ! command -v docker &> /dev/null; then
     curl -fsSL https://get.docker.com -o get-docker.sh
-    sudo sh get-docker.sh
-    sudo usermod -aG docker ubuntu
+    $SUDO_CMD sh get-docker.sh
+    $SUDO_CMD usermod -aG docker ubuntu
     rm get-docker.sh
     print_success "Docker installed successfully"
 else
@@ -63,8 +70,8 @@ fi
 # Install Docker Compose
 print_status "🔧 Installing Docker Compose..."
 if ! command -v docker-compose &> /dev/null; then
-    sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    sudo chmod +x /usr/local/bin/docker-compose
+    $SUDO_CMD curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    $SUDO_CMD chmod +x /usr/local/bin/docker-compose
     print_success "Docker Compose installed successfully"
 else
     print_success "Docker Compose already installed"
@@ -72,14 +79,14 @@ fi
 
 # Install additional tools
 print_status "🛠️ Installing additional tools..."
-sudo apt install -y git nginx certbot python3-certbot-nginx ufw curl wget
+$SUDO_CMD apt install -y git nginx certbot python3-certbot-nginx ufw curl wget
 
 # Configure firewall
 print_status "🔥 Configuring firewall..."
-sudo ufw allow ssh
-sudo ufw allow http
-sudo ufw allow https
-sudo ufw --force enable
+$SUDO_CMD ufw allow ssh
+$SUDO_CMD ufw allow http
+$SUDO_CMD ufw allow https
+$SUDO_CMD ufw --force enable
 print_success "Firewall configured"
 
 # Clone or update repository
@@ -133,16 +140,16 @@ print_status "🔧 Updating Docker Compose configuration..."
 sed -i "s/nexus.gonxt.tech/${DOMAIN}/g" docker-compose.yml
 
 # Create SSL directory
-sudo mkdir -p /etc/nginx/ssl
-sudo mkdir -p ./docker/ssl
+$SUDO_CMD mkdir -p /etc/nginx/ssl
+$SUDO_CMD mkdir -p ./docker/ssl
 
 # Stop any existing services
 print_status "🛑 Stopping any existing services..."
-sudo docker-compose down 2>/dev/null || true
+$SUDO_CMD docker-compose down 2>/dev/null || true
 
 # Build and start services
 print_status "🏗️ Building and starting services..."
-sudo docker-compose up -d --build
+$SUDO_CMD docker-compose up -d --build
 
 # Wait for services to be ready
 print_status "⏳ Waiting for services to start (this may take a few minutes)..."
@@ -150,11 +157,11 @@ sleep 60
 
 # Check if services are running
 print_status "🔍 Checking service status..."
-if sudo docker-compose ps | grep -q "Up"; then
+if $SUDO_CMD docker-compose ps | grep -q "Up"; then
     print_success "Services are running"
 else
     print_error "Some services failed to start. Checking logs..."
-    sudo docker-compose logs
+    $SUDO_CMD docker-compose logs
     exit 1
 fi
 
@@ -162,24 +169,24 @@ fi
 print_status "🔒 Setting up SSL certificate..."
 if [[ "$DOMAIN" != "nexus.yourdomain.com" ]]; then
     # Stop nginx temporarily
-    sudo systemctl stop nginx 2>/dev/null || true
+    $SUDO_CMD systemctl stop nginx 2>/dev/null || true
     
     # Get SSL certificate
-    sudo certbot certonly --standalone -d ${DOMAIN} --email ${EMAIL} --agree-tos --non-interactive
+    $SUDO_CMD certbot certonly --standalone -d ${DOMAIN} --email ${EMAIL} --agree-tos --non-interactive
     
     if [ $? -eq 0 ]; then
         print_success "SSL certificate obtained successfully"
         
         # Copy certificates to docker directory
-        sudo cp /etc/letsencrypt/live/${DOMAIN}/fullchain.pem ./docker/ssl/
-        sudo cp /etc/letsencrypt/live/${DOMAIN}/privkey.pem ./docker/ssl/
-        sudo chown -R 1000:1000 ./docker/ssl/
+        $SUDO_CMD cp /etc/letsencrypt/live/${DOMAIN}/fullchain.pem ./docker/ssl/
+        $SUDO_CMD cp /etc/letsencrypt/live/${DOMAIN}/privkey.pem ./docker/ssl/
+        $SUDO_CMD chown -R 1000:1000 ./docker/ssl/
         
         # Setup auto-renewal
-        echo "0 12 * * * /usr/bin/certbot renew --quiet && sudo docker-compose restart nexus-green" | sudo crontab -
+        echo "0 12 * * * /usr/bin/certbot renew --quiet && $SUDO_CMD docker-compose restart nexus-green" | $SUDO_CMD crontab -
         
         # Restart services with SSL
-        sudo docker-compose restart
+        $SUDO_CMD docker-compose restart
     else
         print_warning "SSL certificate setup failed. Application will run on HTTP only."
     fi
@@ -190,7 +197,7 @@ fi
 # Run database seeding
 print_status "🌱 Seeding database with demo data..."
 sleep 10
-sudo docker-compose exec -T nexus-api node quick-seed.js 2>/dev/null || print_warning "Database seeding may have failed - check logs"
+$SUDO_CMD docker-compose exec -T nexus-api node quick-seed.js 2>/dev/null || print_warning "Database seeding may have failed - check logs"
 
 # Final health check
 print_status "🏥 Performing final health check..."
@@ -224,10 +231,10 @@ echo "   📧 User: user@gonxt.tech"
 echo "   🔑 Password: Demo2024!"
 echo ""
 echo "🔧 Management Commands:"
-echo "   📋 View logs: sudo docker-compose logs -f"
-echo "   🔄 Restart: sudo docker-compose restart"
-echo "   📊 Status: sudo docker-compose ps"
-echo "   🛑 Stop: sudo docker-compose down"
+echo "   📋 View logs: $SUDO_CMD docker-compose logs -f"
+echo "   🔄 Restart: $SUDO_CMD docker-compose restart"
+echo "   📊 Status: $SUDO_CMD docker-compose ps"
+echo "   🛑 Stop: $SUDO_CMD docker-compose down"
 echo ""
 echo "📁 Application Directory: $(pwd)"
 echo "🔐 Environment File: .env.production"
@@ -251,13 +258,13 @@ Application Directory: $(pwd)
 Environment File: .env.production
 
 Management Commands:
-- View logs: sudo docker-compose logs -f
-- Restart services: sudo docker-compose restart
-- Check status: sudo docker-compose ps
-- Stop services: sudo docker-compose down
+- View logs: $SUDO_CMD docker-compose logs -f
+- Restart services: $SUDO_CMD docker-compose restart
+- Check status: $SUDO_CMD docker-compose ps
+- Stop services: $SUDO_CMD docker-compose down
 
 SSL Certificate: $(if [ -f "./docker/ssl/fullchain.pem" ]; then echo "Configured"; else echo "Not configured"; fi)
-Auto-renewal: $(if sudo crontab -l | grep -q certbot; then echo "Configured"; else echo "Not configured"; fi)
+Auto-renewal: $(if $SUDO_CMD crontab -l | grep -q certbot; then echo "Configured"; else echo "Not configured"; fi)
 EOF
 
 print_success "Deployment information saved to deployment-info.txt"
