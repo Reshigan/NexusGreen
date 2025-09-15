@@ -31,6 +31,7 @@ export const authenticate = async (
         email: true,
         role: true,
         organizationId: true,
+        projectId: true,
         isActive: true,
       },
     });
@@ -39,7 +40,10 @@ export const authenticate = async (
       throw createError('Invalid or inactive user', 401);
     }
 
-    req.user = user;
+    req.user = {
+      ...user,
+      projectId: user.projectId || undefined
+    };
     next();
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
@@ -67,13 +71,15 @@ export const authorize = (...roles: UserRole[]) => {
 export const requireSuperAdmin = authorize(UserRole.SUPER_ADMIN);
 export const requireCustomer = authorize(UserRole.CUSTOMER, UserRole.SUPER_ADMIN);
 export const requireFunder = authorize(UserRole.FUNDER, UserRole.SUPER_ADMIN);
-export const requireOMProvider = authorize(UserRole.OM_PROVIDER, UserRole.SUPER_ADMIN);
+export const requireOperator = authorize(UserRole.OPERATOR, UserRole.SUPER_ADMIN);
+export const requireProjectAdmin = authorize(UserRole.PROJECT_ADMIN, UserRole.SUPER_ADMIN);
 
 export const requireAnyRole = authorize(
   UserRole.SUPER_ADMIN,
   UserRole.CUSTOMER,
   UserRole.FUNDER,
-  UserRole.OM_PROVIDER
+  UserRole.OPERATOR,
+  UserRole.PROJECT_ADMIN
 );
 
 // Aliases for backward compatibility

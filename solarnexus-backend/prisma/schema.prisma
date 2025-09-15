@@ -33,12 +33,13 @@ model Organization {
   @@map("organizations")
 }
 
-// User roles: SUPER_ADMIN, CUSTOMER, FUNDER, OM_PROVIDER
+// User roles: SUPER_ADMIN, CUSTOMER, FUNDER, OPERATOR, PROJECT_ADMIN
 enum UserRole {
   SUPER_ADMIN
   CUSTOMER
   FUNDER
-  OM_PROVIDER
+  OPERATOR
+  PROJECT_ADMIN
 }
 
 model User {
@@ -59,6 +60,10 @@ model User {
   // Multi-tenant
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Project Admin specific
+  projectId      String?
+  project        Project?     @relation(fields: [projectId], references: [id])
 
   // Relations
   refreshTokens  RefreshToken[]
@@ -103,11 +108,19 @@ model Project {
   description    String?
   organizationId String
   isActive       Boolean  @default(true)
+  
+  // Financial settings for funders
+  fundingRate    Float?   // Rate charged by funder per kWh
+  expectedROI    Float?   // Expected return on investment %
+  totalInvestment Float?  // Total investment amount
+  
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  sites        Site[]
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sites          Site[]
+  projectAdmins  User[]
+  financialRecords FinancialRecord[]
 
   @@map("projects")
 }
@@ -149,6 +162,7 @@ model Site {
   maintenanceRecords MaintenanceRecord[]
   weatherData    WeatherData[]
   siteMetrics    SiteMetrics[]
+  financialRecords FinancialRecord[]
 
   @@map("sites")
 }
@@ -305,17 +319,26 @@ model SDGMetric {
 // Financial tracking
 model FinancialRecord {
   id            String   @id @default(cuid())
-  siteId        String
-  recordType    String   // SAVINGS, EARNINGS, COST
+  siteId        String?
+  projectId     String?
+  recordType    String   // SAVINGS, EARNINGS, COST, MUNICIPAL_COMPARISON, FUNDER_RETURN
   amount        Float
-  currency      String   @default("USD")
+  currency      String   @default("ZAR")
   description   String
   periodStart   DateTime
   periodEnd     DateTime
   
+  // South African specific
+  municipalRate Float?   // Municipal rate per kWh for comparison
+  savingsVsMunicipal Float? // Savings compared to municipal rate
+  
   createdAt     DateTime @default(now())
 
+  site          Site?    @relation(fields: [siteId], references: [id])
+  project       Project? @relation(fields: [projectId], references: [id])
+
   @@index([siteId, recordType])
+  @@index([projectId, recordType])
   @@map("financial_records")
 }
 
@@ -450,4 +473,56 @@ model SyncStats {
   createdAt       DateTime @default(now())
 
   @@map("sync_stats")
+}
+
+// Role-specific KPIs and Insights
+model RoleKPI {
+  id            String   @id @default(cuid())
+  role          UserRole
+  kpiName       String   // e.g., "Total Savings", "System Efficiency", "ROI"
+  kpiValue      Float
+  unit          String   // e.g., "ZAR", "%", "kWh"
+  period        String   // e.g., "monthly", "yearly", "daily"
+  organizationId String?
+  projectId     String?
+  siteId        String?
+  calculatedAt  DateTime
+  createdAt     DateTime @default(now())
+
+  @@index([role, organizationId])
+  @@index([role, projectId])
+  @@index([role, siteId])
+  @@map("role_kpis")
+}
+
+// Municipal Rate Tracking for South Africa
+model MunicipalRate {
+  id            String   @id @default(cuid())
+  municipality  String
+  province      String
+  rateType      String   // RESIDENTIAL, COMMERCIAL, INDUSTRIAL
+  rate          Float    // Rate per kWh in ZAR
+  timeOfUse     Json?    // Time-of-use structure
+  effectiveDate DateTime
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([municipality, rateType])
+  @@map("municipal_rates")
+}
+
+// Performance Benchmarks
+model PerformanceBenchmark {
+  id              String   @id @default(cuid())
+  benchmarkType   String   // EFFICIENCY, AVAILABILITY, CAPACITY_FACTOR
+  value           Float
+  unit            String
+  region          String   // South African region
+  systemSize      String   // Small, Medium, Large
+  technology      String   // PV technology type
+  createdAt       DateTime @default(now())
+
+  @@index([benchmarkType, region])
+  @@map("performance_benchmarks")
 }

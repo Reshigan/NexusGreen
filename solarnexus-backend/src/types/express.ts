@@ -6,6 +6,7 @@ export interface AuthenticatedUser {
   email: string;
   role: UserRole;
   organizationId: string;
+  projectId?: string;
   firstName?: string;
   lastName?: string;
 }
