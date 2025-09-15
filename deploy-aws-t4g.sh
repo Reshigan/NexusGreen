@@ -13,6 +13,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
+REPO_URL="https://github.com/Reshigan/NexusGreen.git"
+REPO_DIR="NexusGreen"
 COMPOSE_FILE="docker-compose.yml"
 PROJECT_NAME="nexusgreen"
 BACKUP_DIR="./backups/$(date +%Y%m%d_%H%M%S)"
@@ -48,6 +50,12 @@ check_requirements() {
         exit 1
     fi
     
+    # Check Git
+    if ! command -v git &> /dev/null; then
+        log_error "Git is not installed. Please install Git first."
+        exit 1
+    fi
+    
     # Check Docker Compose
     if ! docker compose version &> /dev/null; then
         log_error "Docker Compose is not installed. Please install Docker Compose first."
@@ -61,6 +69,28 @@ check_requirements() {
     fi
     
     log_success "System requirements check passed"
+}
+
+clone_or_update_repo() {
+    log_info "Setting up NexusGreen repository..."
+    
+    if [ -d "$REPO_DIR" ]; then
+        log_info "Repository exists, updating..."
+        cd "$REPO_DIR"
+        git fetch origin
+        git reset --hard origin/main
+        git clean -fd
+        log_success "Repository updated"
+    else
+        log_info "Cloning repository..."
+        git clone "$REPO_URL" "$REPO_DIR"
+        cd "$REPO_DIR"
+        log_success "Repository cloned"
+    fi
+    
+    # Update compose file path to be relative to repo directory
+    COMPOSE_FILE="$PWD/docker-compose.yml"
+    BACKUP_DIR="$PWD/backups/$(date +%Y%m%d_%H%M%S)"
 }
 
 cleanup_old_containers() {
@@ -194,6 +224,7 @@ main() {
     log_info "Starting NexusGreen deployment for AWS t4g.medium..."
     
     check_requirements
+    clone_or_update_repo
     backup_database
     cleanup_old_containers
     build_and_deploy
