@@ -1,3 +1,13 @@
+// Configure module aliases for production
+import 'module-alias/register';
+import moduleAlias from 'module-alias';
+import path from 'path';
+
+// Set up path aliases
+moduleAlias.addAliases({
+  '@': path.join(__dirname, '.'),
+});
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -28,6 +38,9 @@ import sdgRoutes from '@/routes/sdg';
 import financialRoutes from '@/routes/financial';
 import predictionRoutes from '@/routes/predictions';
 import solarRoutes from '@/routes/solar';
+import dashboardRoutes from '@/routes/dashboard';
+import insightsRoutes from '@/routes/insights';
+import debugRoutes from '@/routes/debug';
 
 // Load environment variables
 dotenv.config();
@@ -107,6 +120,9 @@ app.use('/api/sdg', sdgRoutes);
 app.use('/api/financial', financialRoutes);
 app.use('/api/predictions', predictionRoutes);
 app.use('/api/solar', solarRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/insights', insightsRoutes);
+app.use('/api/debug', debugRoutes);
 
 // Socket.IO for real-time updates
 io.on('connection', (socket) => {

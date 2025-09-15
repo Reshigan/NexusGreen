@@ -74,6 +74,7 @@ class AuthController {
           lastName: true,
           role: true,
           organizationId: true,
+          projectId: true,
           emailVerified: true,
           createdAt: true,
         },
@@ -96,7 +97,11 @@ class AuthController {
 
     // Generate tokens
     const accessToken = jwt.sign(
-      { userId: result.user.id, organizationId: result.user.organizationId },
+      { 
+        userId: result.user.id, 
+        organizationId: result.user.organizationId,
+        projectId: result.user.projectId 
+      },
       config.jwt.secret,
       { expiresIn: '1h' }
     );
@@ -147,7 +152,17 @@ class AuthController {
     // Find user with organization
     const user = await prisma.user.findUnique({
       where: { email },
-      include: {
+      select: {
+        id: true,
+        email: true,
+        password: true,
+        firstName: true,
+        lastName: true,
+        isActive: true,
+        organizationId: true,
+        projectId: true,
+        role: true,
+        emailVerified: true,
         organization: {
           select: {
             id: true,
@@ -175,8 +190,20 @@ class AuthController {
     }
 
     // Generate tokens
+    // Debug: Log the user object to see what fields are available
+    logger.info('DEBUG - Full user object', { user: JSON.stringify(user, null, 2) });
+    logger.info('DEBUG - user.projectId', { projectId: user.projectId });
+    
+    const jwtPayload = { 
+      userId: user.id, 
+      organizationId: user.organizationId,
+      ...(user.projectId && { projectId: user.projectId })
+    };
+    
+    logger.info('DEBUG - JWT payload', { payload: JSON.stringify(jwtPayload, null, 2) });
+    
     const accessToken = jwt.sign(
-      { userId: user.id, organizationId: user.organizationId },
+      jwtPayload,
       config.jwt.secret,
       { expiresIn: '1h' }
     );
