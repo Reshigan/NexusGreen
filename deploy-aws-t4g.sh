@@ -213,8 +213,8 @@ wait_for_services() {
             return 1
         fi
         
-        # Try to connect to API
-        if curl -f http://localhost:3001/health &>/dev/null; then
+        # Try to connect to API via nginx proxy (API is not exposed to host)
+        if curl -f http://localhost/api-health &>/dev/null; then
             log_success "API is ready"
             break
         fi
