@@ -27,27 +27,41 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    // Production optimizations
-    target: 'esnext',
+    // Production optimizations for ARM64
+    target: 'es2020',
     minify: 'terser',
     terserOptions: {
       compress: {
         drop_console: mode === 'production',
         drop_debugger: mode === 'production',
+        passes: 2,
+      },
+      mangle: {
+        safari10: true,
       },
     },
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
-          charts: ['recharts', 'd3-scale', 'd3-array'],
-          utils: ['date-fns', 'clsx', 'tailwind-merge'],
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'ui-vendor';
+            }
+            if (id.includes('recharts') || id.includes('d3-')) {
+              return 'charts-vendor';
+            }
+            return 'vendor';
+          }
         },
       },
     },
     chunkSizeWarningLimit: 1000,
-    sourcemap: mode === 'development',
+    sourcemap: false,
+    // Optimize for ARM64 memory constraints
+    assetsInlineLimit: 4096,
   },
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),

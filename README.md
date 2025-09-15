@@ -1,340 +1,214 @@
-# Nexus Green
+# NexusGreen
 
-Next-Generation Solar Energy Intelligence Platform - A cutting-edge, multi-tenant solar energy management platform with advanced analytics, real-time monitoring, and comprehensive license management.
+A comprehensive solar energy management platform built with React, TypeScript, and Node.js, optimized for AWS t4g.medium ARM64 instances.
 
-## 🚀 Quick Production Deployment
+## Features
 
-**Server**: 13.247.192.38 | **Domain**: nexus.gonxt.tech | **SSL**: reshigan@gonxt.tech
+- **Dashboard**: Real-time solar energy monitoring and analytics
+- **Energy Management**: Track energy production, consumption, and savings
+- **Financial Tracking**: Monitor costs, savings, and ROI
+- **System Monitoring**: Real-time system health and performance metrics
+- **User Management**: Multi-user support with role-based access
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
 
-### One-Command Deployment
-```bash
-curl -fsSL https://raw.githubusercontent.com/Reshigan/NexusGreen/main/deploy-production.sh | bash
-```
+## Tech Stack
 
-### Manual Deployment
+- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS
+- **UI Components**: Radix UI, Lucide React
+- **Charts**: Recharts
+- **Backend**: Node.js, Express
+- **Database**: PostgreSQL
+- **Deployment**: Docker, Docker Compose (ARM64 optimized)
+
+## AWS t4g.medium Deployment
+
+This application is specifically optimized for AWS t4g.medium instances (ARM64 architecture with 4GB RAM).
+
+### Quick Deployment
+
+1. Clone the repository:
 ```bash
 git clone https://github.com/Reshigan/NexusGreen.git
 cd NexusGreen
-chmod +x deploy-production.sh
-./deploy-production.sh
 ```
 
-### Test Deployment
+2. Deploy with the optimized script:
 ```bash
-./test-production.sh
+./deploy-aws-t4g.sh
 ```
 
-📖 **Full deployment guide**: [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
+3. Access the application at `http://your-instance-ip`
 
-## 🌟 Overview
-
-SolarNexus provides real-time monitoring, predictive analytics, and financial optimization for solar installations across multiple stakeholders including solar installers, O&M providers, asset owners, and end customers.
-
-**🚀 Production Ready**: https://nexus.gonxt.tech
-
-## ✨ Key Features
-
-- **Real-time Monitoring**: Live solar energy production and system health
-- **Multi-tenant Architecture**: Organization and site management
-- **Predictive Analytics**: AI-powered performance forecasting
-- **Financial Tracking**: ROI analysis and cost optimization
-- **Alert System**: Proactive notifications and issue detection
-- **Comprehensive Reporting**: Performance, financial, and sustainability reports
-- **SDG Tracking**: UN Sustainable Development Goals alignment
-
-## 🏗️ Technology Stack
-
-| Component | Technology | Version |
-|-----------|------------|---------|
-| **Frontend** | React + TypeScript | 18.2.0 |
-| **Build Tool** | Vite | 4.4.5 |
-| **Styling** | Tailwind CSS | 3.3.0 |
-| **Backend** | Node.js + Express | 20.x |
-| **Database** | PostgreSQL | 15 |
-| **Cache** | Redis | 7 |
-| **ORM** | Prisma | 5.0.0 |
-| **Infrastructure** | Docker Compose | - |
-| **Web Server** | Nginx | Alpine |
-| **SSL** | Let's Encrypt | Auto-renewal |
-
-## 📚 Documentation
-
-### Complete Documentation Suite
-- **[📋 Project Overview](docs/PROJECT_OVERVIEW.md)** - Executive summary and business value
-- **[🔧 Technical Specifications](docs/technical/TECHNICAL_SPECIFICATIONS.md)** - Detailed technical documentation
-- **[🏗️ System Design](docs/design/SYSTEM_DESIGN.md)** - Architecture and design patterns
-- **[📡 API Documentation](docs/api/API_DOCUMENTATION.md)** - Complete API reference
-- **[🚀 Production Deployment Guide](PRODUCTION_DEPLOYMENT_GUIDE.md)** - Complete production setup
-- **[📖 User Guide](docs/user/USER_GUIDE.md)** - End-user documentation
-- **[🔄 Handover Documentation](docs/handover/HANDOVER_DOCUMENTATION.md)** - Operations and maintenance
-
-### Quick Links
-- **[All Documentation](docs/README.md)** - Documentation index
-- **[System Requirements](REQUIREMENTS.md)** - Production requirements and dependencies
-- **[Production Deployment](PRODUCTION_DEPLOYMENT_GUIDE.md)** - One-command production setup
-
-## 🚀 Quick Start
-
-### Development Setup
+### Deployment Script Options
 
 ```bash
-# 1. Clone repository
-git clone https://github.com/Reshigan/NexusGreen.git
-cd NexusGreen
+# Standard deployment
+./deploy-aws-t4g.sh
 
-# 2. Install dependencies
-npm install
-cd solarnexus-backend && npm install && cd ..
-
-# 3. Configure environment
-cp .env.production.template .env
-# Edit .env with your configuration
-
-# 4. Start development servers
-npm run dev                    # Frontend (port 5173)
-cd solarnexus-backend && npm run dev  # Backend (port 3000)
-```
-
-### Production Deployment
-
-**🚀 Complete Production Setup**:
-
-```bash
-# Download and run the production deployment script
-curl -o production-deploy.sh https://raw.githubusercontent.com/Reshigan/NexusGreen/main/production-deploy.sh
-chmod +x production-deploy.sh
-sudo ./production-deploy.sh
-```
-
-**✨ Production Features**:
-- ✅ **SSL Certificate**: Let's Encrypt with auto-renewal
-- ✅ **South African Timezone**: SAST (Africa/Johannesburg)
-- ✅ **Demo Data**: GonXT Solar Solutions with test users
-- ✅ **Security**: Firewall, security headers, rate limiting
-- ✅ **Monitoring**: Health checks, logging, backups
-- ✅ **Performance**: Nginx optimization, Redis caching
-- ✅ **Automation**: Container orchestration with Docker Compose
-
-**🎯 Demo Credentials**:
-- **Admin**: admin@gonxt.tech / Demo2024!
-- **User**: user@gonxt.tech / Demo2024!
-
-**📋 Complete Guide**: [Production Deployment Guide](PRODUCTION_DEPLOYMENT_GUIDE.md)
-
-## 🏗️ Project Structure
-
-```
-SolarNexus/
-├── 📁 src/                      # Frontend React application
-│   ├── components/              # Reusable UI components
-│   ├── pages/                   # Page components and routing
-│   ├── hooks/                   # Custom React hooks
-│   ├── utils/                   # Frontend utilities
-│   └── types/                   # TypeScript definitions
-├── 📁 solarnexus-backend/       # Backend Node.js application
-│   ├── src/
-│   │   ├── controllers/         # API request handlers
-│   │   ├── routes/              # API route definitions
-│   │   ├── services/            # Business logic layer
-│   │   ├── middleware/          # Express middleware
-│   │   ├── utils/               # Backend utilities
-│   │   └── types/               # TypeScript definitions
-│   └── prisma/                  # Database schema and migrations
-├── 📁 docs/                     # Comprehensive documentation
-│   ├── technical/               # Technical specifications
-│   ├── design/                  # System design documents
-│   ├── api/                     # API documentation
-│   ├── handover/                # Operations documentation
-│   └── user/                    # User guides
-├── 🐳 docker-compose.yml        # Container orchestration
-├── 🚀 deploy.sh                 # Clean automated deployment script
-├── 🔄 auto-upgrade.sh           # Auto-upgrade system with webhook support
-├── 🎛️ manage-solarnexus.sh      # Comprehensive management tool
-├── 🔗 setup-github-webhook.sh   # GitHub webhook configuration
-├── ⚙️ solarnexus.service        # Systemd service for auto-startup
-├── 🔄 solarnexus-updater.service # Systemd service for auto-updates
-└── 📋 DEPLOYMENT_GUIDE.md       # Comprehensive deployment guide
-```
-
-## 🔌 API Overview
-
-### Base URLs
-- **Production**: `https://nexus.gonxt.tech/api/v1`
-- **Development**: `http://localhost:3000/api/v1`
-
-### Quick API Example
-```bash
-# Authenticate
-curl -X POST https://nexus.gonxt.tech/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"user@example.com","password":"password"}'
-
-# Get sites (using returned JWT token)
-curl -H "Authorization: Bearer <token>" \
-  https://nexus.gonxt.tech/api/v1/sites
-
-# Get energy data
-curl -H "Authorization: Bearer <token>" \
-  "https://nexus.gonxt.tech/api/v1/sites/site-id/energy?startDate=2024-01-01&endDate=2024-01-31"
-```
-
-**📡 [Complete API Documentation](docs/api/API_DOCUMENTATION.md)**
-
-## 🤖 Auto-Management Features
-
-### 🚀 Auto-Startup on Boot
-SolarNexus automatically starts when the server boots using systemd services:
-
-```bash
-# Check service status
-systemctl status solarnexus
-systemctl status solarnexus-updater
-
-# Manual service control
-sudo systemctl start solarnexus      # Start services
-sudo systemctl stop solarnexus       # Stop services
-sudo systemctl restart solarnexus    # Restart services
-```
-
-### 🔄 Auto-Upgrade System
-Automatically monitors GitHub repository and upgrades when new commits are pushed:
-
-**Features:**
-- 🔍 **Polling**: Checks for updates every 5 minutes
-- 🎣 **Webhooks**: Instant updates via GitHub webhooks
-- 🛡️ **Safe Upgrades**: Automatic backups before upgrades
-- 📊 **Health Monitoring**: Validates services after upgrades
-- 📝 **Comprehensive Logging**: Detailed upgrade logs
-
-**Setup GitHub Webhook:**
-```bash
-# Setup automatic webhook (requires GitHub token)
-sudo ./setup-github-webhook.sh --server-ip YOUR_SERVER_IP --token YOUR_GITHUB_TOKEN
-
-# Manual webhook URL: http://YOUR_SERVER_IP:9876
-```
-
-**Manual Operations:**
-```bash
-# Check for updates
-sudo ./auto-upgrade.sh --check
-
-# Force upgrade
-sudo ./auto-upgrade.sh --upgrade
-
-# Dry run (see what would be upgraded)
-sudo ./auto-upgrade.sh --upgrade --dry-run
-
-# View upgrade logs
-sudo journalctl -u solarnexus-updater -f
-```
-
-### 🎛️ Management Tool
-Comprehensive management with a single command:
-
-```bash
-# System overview
-sudo ./manage-solarnexus.sh status
-
-# Service management
-sudo ./manage-solarnexus.sh start|stop|restart
+# Clean deployment (removes all containers and images)
+./deploy-aws-t4g.sh clean
 
 # View logs
-sudo ./manage-solarnexus.sh logs updater
-sudo ./manage-solarnexus.sh logs docker
+./deploy-aws-t4g.sh logs
 
-# Health check
-sudo ./manage-solarnexus.sh health
+# Check status
+./deploy-aws-t4g.sh status
 
-# Setup webhook
-sudo ./manage-solarnexus.sh webhook YOUR_IP YOUR_TOKEN
+# Stop services
+./deploy-aws-t4g.sh stop
+
+# Restart services
+./deploy-aws-t4g.sh restart
 ```
 
-## 🌍 Production Environment
+## System Requirements
 
-### Deployment Status
-| Component | Status | Details |
-|-----------|--------|---------|
-| **Application** | ✅ Live | https://nexus.gonxt.tech |
-| **SSL Certificate** | ✅ Active | Let's Encrypt auto-renewal |
-| **Database** | ✅ Running | PostgreSQL 15 with backups |
-| **Monitoring** | ✅ Active | Health checks and logging |
-| **Backups** | ✅ Automated | Daily database and file backups |
+### Minimum Requirements (AWS t4g.medium)
+- **CPU**: 2 vCPUs (ARM64)
+- **RAM**: 4GB
+- **Storage**: 20GB SSD
+- **OS**: Ubuntu 22.04 LTS (ARM64)
 
-### Server Information
-- **Server**: AWS EC2 Instance
-- **IP Address**: 13.247.192.38
-- **Domain**: nexus.gonxt.tech
-- **OS**: Ubuntu 22.04 LTS
-- **Resources**: 4 vCPUs, 8GB RAM, 50GB SSD
+### Software Requirements
+- Docker 20.10+
+- Docker Compose 2.0+
+- curl (for health checks)
 
-## 🔧 Development
+## Architecture
+
+The application uses a multi-container architecture optimized for ARM64:
+
+- **Frontend Container**: Nginx serving React SPA (512MB limit)
+- **API Container**: Node.js Express server (256MB limit)
+- **Database Container**: PostgreSQL 15 (512MB limit)
+
+Total memory usage: ~1.3GB (leaving 2.7GB for system and build processes)
+
+## Development
 
 ### Prerequisites
-- Node.js 20+
-- npm 10+
-- Docker 24+
-- Git 2.30+
 
-### Build Process
+- Node.js 18+ (ARM64 compatible)
+- npm or yarn
+- Docker and Docker Compose
+
+### Local Development
+
+1. Install dependencies:
 ```bash
-# Frontend build
-npm run build                    # Creates dist/ directory
-
-# Backend build  
-cd solarnexus-backend
-npm run build                    # Creates dist/ directory with compiled TypeScript
+npm install
 ```
 
-### Validation
+2. Start the development server:
 ```bash
-# Validate build artifacts
-./validate-build.sh             # Comprehensive build validation
+npm run dev
 ```
 
-## 🤝 Contributing
+3. Start the API server:
+```bash
+cd api
+npm install
+npm start
+```
 
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
+4. Start the database:
+```bash
+docker-compose up -d nexus-db
+```
 
-### Development Guidelines
-- Follow TypeScript best practices
-- Write comprehensive tests
-- Update documentation
-- Follow conventional commit messages
+## Configuration
 
-## 📞 Support
+### Environment Variables
 
-### Getting Help
-- **📧 Email**: support@solarnexus.com
-- **📚 Documentation**: [Complete Documentation Suite](docs/README.md)
-- **🐛 Issues**: GitHub Issues for bug reports
-- **💬 Discussions**: GitHub Discussions for questions
+The application uses the following environment variables:
 
-### System Status
-- **Status Page**: https://status.nexus.gonxt.tech
-- **Uptime Target**: 99.9%
-- **Maintenance Window**: First Sunday of each month, 2-6 AM UTC
+```env
+# Production
+NODE_ENV=production
+VITE_ENVIRONMENT=production
 
-## 📄 License
+# Database
+DATABASE_URL=postgresql://nexususer:nexuspass123@nexus-db:5432/nexusgreen
 
-This project is proprietary and confidential. All rights reserved.
+# Security
+JWT_SECRET=nexus-green-jwt-secret-2024
 
-## 🏆 Project Status
+# Application
+VITE_APP_NAME=NexusGreen
+VITE_APP_VERSION=6.1.0
+VITE_API_URL=/api
+VITE_COMPANY_NAME=SolarTech Solutions (Pty) Ltd
+VITE_COMPANY_REG=2019/123456/07
+VITE_PPA_RATE=1.20
 
-**✅ Production Ready** - Complete production deployment ready
+# Sync
+SOLAX_SYNC_INTERVAL_MINUTES=60
+```
 
-- **Version**: 1.0.0-production
-- **Last Updated**: December 2024
-- **Deployment**: One-command automated production setup
-- **Security**: SSL/TLS, JWT authentication, role-based access, firewall
-- **Demo Data**: GonXT Solar Solutions with realistic test data
-- **Monitoring**: Health checks, logging, automated backups
-- **Documentation**: Complete production deployment guide
+## Troubleshooting
 
----
+### Common Issues on AWS t4g.medium
 
-*For detailed information about any aspect of the system, please refer to the [complete documentation suite](docs/README.md).*
+1. **Build fails with out of memory**:
+   - The deployment script sets `NODE_OPTIONS="--max-old-space-size=3072"`
+   - Ensure no other memory-intensive processes are running
+
+2. **Container fails to start**:
+   - Check logs: `./deploy-aws-t4g.sh logs`
+   - Verify memory limits are not exceeded
+
+3. **Database connection issues**:
+   - Ensure PostgreSQL container is healthy
+   - Check network connectivity between containers
+
+### Performance Optimization
+
+- Build process uses memory optimization for ARM64
+- Vite configuration optimized for production builds
+- Docker images use multi-stage builds to reduce size
+- Memory limits prevent OOM kills on t4g.medium
+
+## API Documentation
+
+The API provides endpoints for:
+
+- User authentication and management (`/api/auth/*`)
+- Energy data collection and analysis (`/api/energy/*`)
+- System monitoring and alerts (`/api/system/*`)
+- Financial calculations and reporting (`/api/financial/*`)
+
+Health check endpoint: `/api/health`
+
+## Monitoring
+
+### Health Checks
+
+All services include health checks:
+- Frontend: `http://localhost/health`
+- API: `http://localhost:3001/health`
+- Database: PostgreSQL ready check
+
+### Logs
+
+View service logs:
+```bash
+# All services
+./deploy-aws-t4g.sh logs
+
+# Specific service
+docker-compose logs -f nexus-green
+docker-compose logs -f nexus-api
+docker-compose logs -f nexus-db
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test on ARM64 if possible
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.

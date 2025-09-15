@@ -1,10 +1,13 @@
-FROM node:18-alpine
+FROM --platform=linux/arm64 node:18-alpine
 
 # Install curl for health checks
 RUN apk add --no-cache curl
 
 # Create app directory
 WORKDIR /app
+
+# Set memory limits for ARM64
+ENV NODE_OPTIONS="--max-old-space-size=1024"
 
 # Copy package files
 COPY package*.json ./
@@ -17,11 +20,11 @@ COPY . .
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001 -G nodejs
+    adduser -S nodejs -u 1001 -G nodejs
 
 # Change ownership
-RUN chown -R nextjs:nodejs /app
-USER nextjs
+RUN chown -R nodejs:nodejs /app
+USER nodejs
 
 # Expose port
 EXPOSE 3001
