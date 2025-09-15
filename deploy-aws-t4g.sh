@@ -80,24 +80,33 @@ clone_or_update_repo() {
         git fetch origin
         git reset --hard origin/main
         git clean -fd
-        log_success "Repository updated"
+        log_success "Repository updated to latest version"
     else
-        log_info "Cloning repository..."
+        log_info "Cloning repository from $REPO_URL..."
         git clone "$REPO_URL" "$REPO_DIR"
         cd "$REPO_DIR"
-        log_success "Repository cloned"
+        log_success "Repository cloned successfully"
     fi
     
     # Update compose file path to be relative to repo directory
     COMPOSE_FILE="$PWD/docker-compose.yml"
     BACKUP_DIR="$PWD/backups/$(date +%Y%m%d_%H%M%S)"
+    
+    log_info "Working directory: $PWD"
+    log_info "Compose file: $COMPOSE_FILE"
 }
 
 cleanup_old_containers() {
     log_info "Cleaning up old containers and images..."
     
-    # Stop and remove existing containers
-    docker compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" down --remove-orphans 2>/dev/null || true
+    # Stop and remove existing containers (if compose file exists)
+    if [ -f "$COMPOSE_FILE" ]; then
+        docker compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" down --remove-orphans 2>/dev/null || true
+    else
+        # Fallback: stop containers by name pattern
+        docker stop nexus-green nexus-api nexus-db 2>/dev/null || true
+        docker rm nexus-green nexus-api nexus-db 2>/dev/null || true
+    fi
     
     # Remove unused images to free up space
     docker image prune -f
@@ -111,12 +120,13 @@ cleanup_old_containers() {
 backup_database() {
     log_info "Creating database backup..."
     
-    # Create backup directory
-    mkdir -p "$BACKUP_DIR"
-    
     # Check if database container exists and is running
     if docker ps -q -f name=nexus-db | grep -q .; then
         log_info "Database container found, creating backup..."
+        
+        # Create backup directory
+        mkdir -p "$BACKUP_DIR"
+        
         docker exec nexus-db pg_dump -U nexususer nexusgreen > "$BACKUP_DIR/database_backup.sql" 2>/dev/null || {
             log_warning "Database backup failed or database is empty"
         }
