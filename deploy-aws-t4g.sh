@@ -74,18 +74,44 @@ check_requirements() {
 clone_or_update_repo() {
     log_info "Setting up NexusGreen repository..."
     
-    if [ -d "$REPO_DIR" ]; then
-        log_info "Repository exists, updating..."
-        cd "$REPO_DIR"
-        git fetch origin
-        git reset --hard origin/main
-        git clean -fd
-        log_success "Repository updated to latest version"
+    # If running as root, switch to ubuntu user for git operations
+    if [ "$EUID" -eq 0 ]; then
+        log_info "Running as root, switching to ubuntu user for git operations..."
+        if id "ubuntu" &>/dev/null; then
+            # Create directory as ubuntu user
+            sudo -u ubuntu mkdir -p "$(dirname "$REPO_DIR")"
+            
+            if [ -d "$REPO_DIR" ]; then
+                log_info "Repository exists, updating..."
+                cd "$REPO_DIR"
+                sudo -u ubuntu git fetch origin
+                sudo -u ubuntu git reset --hard origin/main
+                sudo -u ubuntu git clean -fd
+                log_success "Repository updated to latest version"
+            else
+                log_info "Cloning repository from $REPO_URL..."
+                sudo -u ubuntu git clone "$REPO_URL" "$REPO_DIR"
+                cd "$REPO_DIR"
+                log_success "Repository cloned successfully"
+            fi
+        else
+            log_error "Running as root but ubuntu user not found. Please run without sudo."
+            exit 1
+        fi
     else
-        log_info "Cloning repository from $REPO_URL..."
-        git clone "$REPO_URL" "$REPO_DIR"
-        cd "$REPO_DIR"
-        log_success "Repository cloned successfully"
+        if [ -d "$REPO_DIR" ]; then
+            log_info "Repository exists, updating..."
+            cd "$REPO_DIR"
+            git fetch origin
+            git reset --hard origin/main
+            git clean -fd
+            log_success "Repository updated to latest version"
+        else
+            log_info "Cloning repository from $REPO_URL..."
+            git clone "$REPO_URL" "$REPO_DIR"
+            cd "$REPO_DIR"
+            log_success "Repository cloned successfully"
+        fi
     fi
     
     # Update compose file path to be relative to repo directory
@@ -232,6 +258,7 @@ show_status() {
 # Main execution
 main() {
     log_info "Starting NexusGreen deployment for AWS t4g.medium..."
+    log_info "Script version: $(date '+%Y-%m-%d %H:%M:%S')"
     
     check_requirements
     clone_or_update_repo
