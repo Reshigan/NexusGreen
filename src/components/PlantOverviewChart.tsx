@@ -30,6 +30,7 @@ const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
   const [avgDailyYield, setAvgDailyYield] = useState<number | null>(null);
 
   const monthsInRange = useMemo(() => {
+    if (!timeFilter?.startDate || !timeFilter?.endDate) return 1;
     const start = timeFilter.startDate;
     const end = timeFilter.endDate;
     const startY = start.getFullYear();
@@ -38,7 +39,7 @@ const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
     const endM = end.getMonth();
     const diff = (endY - startY) * 12 + (endM - startM) + 1;
     return Math.max(1, Math.min(60, diff));
-  }, [timeFilter.startDate, timeFilter.endDate]);
+  }, [timeFilter?.startDate, timeFilter?.endDate]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -76,6 +77,7 @@ const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
 
   // Fetch device list for filter from backend devices endpoint
   useEffect(() => {
+    if (!timeFilter?.startDate || !timeFilter?.endDate) return;
     const controller = new AbortController();
     const run = async () => {
       try {
@@ -97,10 +99,11 @@ const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
     };
     run();
     return () => controller.abort();
-  }, [timeFilter.startDate, timeFilter.endDate]);
+  }, [timeFilter?.startDate, timeFilter?.endDate]);
 
   // Fetch monthly yield with optional device filter
   useEffect(() => {
+    if (!timeFilter?.startDate || !timeFilter?.endDate) return;
     const controller = new AbortController();
     const run = async () => {
       try {
@@ -126,9 +129,10 @@ const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
     };
     run();
     return () => controller.abort();
-  }, [timeFilter.startDate, timeFilter.endDate, selectedDevice]);
+  }, [timeFilter?.startDate, timeFilter?.endDate, selectedDevice]);
 
   useEffect(() => {
+    if (!timeFilter?.startDate || !timeFilter?.endDate) return;
     const controller = new AbortController();
     const fetchEarnings = async () => {
       try {
@@ -167,10 +171,11 @@ const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
     };
     fetchEarnings();
     return () => controller.abort();
-  }, [timeFilter.startDate, timeFilter.endDate, selectedDevice]);
+  }, [timeFilter?.startDate, timeFilter?.endDate, selectedDevice]);
 
   // Fetch monthly earnings with change (device optional)
   useEffect(() => {
+    if (!timeFilter?.startDate || !timeFilter?.endDate) return;
     const controller = new AbortController();
     const run = async () => {
       try {
@@ -204,7 +209,7 @@ const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
     };
     run();
     return () => controller.abort();
-  }, [timeFilter.startDate, timeFilter.endDate, selectedDevice]);
+  }, [timeFilter?.startDate, timeFilter?.endDate, selectedDevice]);
 
   // Fetch avg daily yield once on mount
   useEffect(() => {
