@@ -210,67 +210,69 @@ cd ~/NexusGreen || {
 print_status "Pulling latest changes from repository..."
 git pull origin main || print_warning "Could not pull latest changes"
 
-# Create completely clean docker-compose.yml with ALL fixes applied
+# Create completely clean docker-compose.yml with ALL fixes applied (NO MULTI-PLATFORM)
 print_status "Creating clean docker-compose.yml with all fixes..."
 cat > docker-compose.yml << 'EOF'
-version: '3.8'
-
 services:
-  nexus-db:
-    image: postgres:15-alpine
-    container_name: nexus-db
+  nexus-green:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: nexus-green
     restart: unless-stopped
+    ports:
+      - "8080:80"
     environment:
-      POSTGRES_DB: nexus_green
-      POSTGRES_USER: nexus_user
-      POSTGRES_PASSWORD: nexus_secure_password_2024
-      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
-    volumes:
-      - nexus_db_data:/var/lib/postgresql/data
-      - ./database/init:/docker-entrypoint-initdb.d
+      NODE_ENV: production
+      VITE_API_BASE_URL: https://nexus.gonxt.tech/api
+      VITE_APP_NAME: NexusGreen
+      VITE_APP_VERSION: 7.0.0
+      VITE_COMPANY_NAME: SolarTech Solutions (Pty) Ltd
+      VITE_COMPANY_REG: 2019/123456/07
+      VITE_ENVIRONMENT: production
+      VITE_PPA_RATE: "1.20"
+    depends_on:
+      nexus-api:
+        condition: service_healthy
     networks:
       - nexus-network
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 384M
         reservations:
-          memory: 256M
+          memory: 192M
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U nexus_user -d nexus_green"]
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 30s
       timeout: 10s
-      retries: 5
-      start_period: 60s
+      retries: 3
+      start_period: 40s
     labels:
-      - "com.nexusgreen.service=database"
-      - "com.nexusgreen.version=7.0.0"
+      com.nexusgreen.service: frontend
+      com.nexusgreen.version: 7.0.0
 
   nexus-api:
     build:
       context: ./api
       dockerfile: Dockerfile
-      platforms:
-        - linux/arm64
-        - linux/amd64
     container_name: nexus-api
     restart: unless-stopped
     ports:
       - "3001:3001"
     environment:
       NODE_ENV: production
-      PORT: 3001
+      PORT: "3001"
       DB_HOST: nexus-db
-      DB_PORT: 5432
-      DB_NAME: nexus_green
-      DB_USER: nexus_user
-      DB_PASSWORD: nexus_secure_password_2024
-      DB_TIMEOUT: 15000
-      DB_MAX_CONNECTIONS: 8
-      DB_ACQUIRE_TIMEOUT: 15000
-      DB_IDLE_TIMEOUT: 30000
-      JWT_SECRET: nexus_jwt_secret_key_2024_production_v7
-      CORS_ORIGIN: https://nexus.gonxt.tech,http://localhost:8080,http://localhost:3000
+      DB_PORT: "5432"
+      DB_NAME: nexusgreen
+      DB_USER: nexususer
+      DB_PASSWORD: nexuspass123
+      DB_TIMEOUT: "15000"
+      DB_MAX_CONNECTIONS: "8"
+      JWT_SECRET: nexus-green-jwt-secret-2024-v7
+      CORS_ORIGIN: https://nexus.gonxt.tech,http://localhost:8080
       API_BASE_URL: https://nexus.gonxt.tech/api
     depends_on:
       nexus-db:
@@ -290,57 +292,50 @@ services:
       retries: 5
       start_period: 60s
     labels:
-      - "com.nexusgreen.service=api"
-      - "com.nexusgreen.version=7.0.0"
+      com.nexusgreen.service: api
+      com.nexusgreen.version: 7.0.0
 
-  nexus-green:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      platforms:
-        - linux/arm64
-        - linux/amd64
-    container_name: nexus-green
+  nexus-db:
+    image: postgres:15-alpine
+    container_name: nexus-db
     restart: unless-stopped
-    ports:
-      - "8080:80"
     environment:
-      VITE_API_BASE_URL: https://nexus.gonxt.tech/api
-      VITE_APP_NAME: NexusGreen
-      VITE_APP_VERSION: 7.0.0
-      NODE_ENV: production
-    depends_on:
-      nexus-api:
-        condition: service_healthy
+      POSTGRES_DB: nexusgreen
+      POSTGRES_USER: nexususer
+      POSTGRES_PASSWORD: nexuspass123
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - nexus-db-data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
     networks:
       - nexus-network
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M
         reservations:
-          memory: 192M
+          memory: 256M
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      test: ["CMD-SHELL", "pg_isready -U nexususer -d nexusgreen"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 40s
+      retries: 5
+      start_period: 60s
     labels:
-      - "com.nexusgreen.service=frontend"
-      - "com.nexusgreen.version=7.0.0"
+      com.nexusgreen.service: database
+      com.nexusgreen.version: 7.0.0
 
 volumes:
-  nexus_db_data:
+  nexus-db-data:
     driver: local
     labels:
-      - "com.nexusgreen.volume=database"
+      com.nexusgreen.volume: database
 
 networks:
   nexus-network:
     driver: bridge
     labels:
-      - "com.nexusgreen.network=main"
+      com.nexusgreen.network: main
 EOF
 
 print_success "Clean docker-compose.yml created"
@@ -548,6 +543,23 @@ else
     exit 1
 fi
 
+# Configure Docker to avoid multi-platform build issues
+print_status "Configuring Docker for optimal build performance..."
+
+# Remove any existing buildx builders that might cause issues
+docker buildx ls | grep -v "default" | awk '{print $1}' | xargs -r docker buildx rm 2>/dev/null || true
+
+# Use default Docker driver to avoid multi-platform issues
+export DOCKER_BUILDKIT=0
+export COMPOSE_DOCKER_CLI_BUILD=0
+
+# Verify Docker configuration
+print_status "Verifying Docker configuration..."
+docker version --format '{{.Server.Version}}' || {
+    print_error "Docker is not running properly"
+    exit 1
+}
+
 # Build Docker images with no cache
 print_status "Building Docker images (this may take several minutes)..."
 docker-compose build --no-cache --parallel
@@ -692,8 +704,32 @@ if [ -f "/etc/letsencrypt/live/nexus.gonxt.tech/fullchain.pem" ]; then
     fi
 else
     print_warning "⚠️  SSL certificate not found"
-    print_status "To install SSL certificate, run:"
-    print_status "sudo certbot --nginx -d nexus.gonxt.tech"
+    print_status "Attempting to install SSL certificate automatically..."
+    
+    # Test nginx configuration first
+    if nginx -t; then
+        print_success "✅ Nginx configuration is valid"
+        
+        # Try to install certificate automatically
+        print_status "Installing SSL certificate with certbot..."
+        if certbot --nginx -d nexus.gonxt.tech --non-interactive --agree-tos --email admin@nexus.gonxt.tech --redirect; then
+            print_success "✅ SSL certificate installed successfully"
+            systemctl reload nginx
+        else
+            print_warning "⚠️  Automatic SSL installation failed"
+            print_status "Manual SSL installation required:"
+            print_status "sudo certbot --nginx -d nexus.gonxt.tech"
+            print_status ""
+            print_status "If you get 'Could not automatically find a matching server block' error:"
+            print_status "1. Check that your domain nexus.gonxt.tech points to this server"
+            print_status "2. Verify the server_name directive in nginx configuration"
+            print_status "3. Run: sudo certbot install --cert-name nexus.gonxt.tech"
+        fi
+    else
+        print_error "❌ Nginx configuration is invalid - SSL installation skipped"
+        print_status "Fix nginx configuration first, then run:"
+        print_status "sudo certbot --nginx -d nexus.gonxt.tech"
+    fi
 fi
 
 # =============================================================================
