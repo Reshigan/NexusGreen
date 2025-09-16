@@ -47,14 +47,21 @@ if [[ -z "$DOMAIN_NAME" ]]; then
     exit 1
 fi
 
-# Validate domain format (basic validation)
-if [[ ! "$DOMAIN_NAME" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]$ ]] || [[ ! "$DOMAIN_NAME" == *.* ]]; then
+# Basic domain validation - just check for dot and reasonable characters
+if [[ ! "$DOMAIN_NAME" == *.* ]]; then
     echo "ERROR: Invalid domain name format: $DOMAIN_NAME"
-    echo "Please provide a valid domain name (e.g., nexus.gonxt.tech)"
+    echo "Domain must contain at least one dot (e.g., nexus.gonxt.tech)"
     exit 1
 fi
 
-# Additional validation - check for valid TLD
+# Check for invalid characters (allow letters, numbers, dots, hyphens)
+if [[ "$DOMAIN_NAME" =~ [^a-zA-Z0-9.-] ]]; then
+    echo "ERROR: Domain contains invalid characters: $DOMAIN_NAME"
+    echo "Only letters, numbers, dots, and hyphens are allowed"
+    exit 1
+fi
+
+# Check length
 if [[ ${#DOMAIN_NAME} -lt 4 ]] || [[ ${#DOMAIN_NAME} -gt 253 ]]; then
     echo "ERROR: Domain name length invalid: $DOMAIN_NAME"
     echo "Domain must be between 4 and 253 characters"
