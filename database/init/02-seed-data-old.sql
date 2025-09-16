@@ -29,7 +29,7 @@ INSERT INTO installations (id, company_id, name, location, latitude, longitude, 
 DO $$
 DECLARE
     installation_record RECORD;
-    current_date DATE;
+    target_date DATE;
     hour_val INTEGER;
     base_generation DECIMAL;
     weather_factor DECIMAL;
@@ -44,7 +44,7 @@ BEGIN
     FOR installation_record IN SELECT id, capacity_kw FROM installations LOOP
         -- Loop through last 30 days
         FOR i IN 0..29 LOOP
-            current_date := CURRENT_DATE - i;
+            target_date := CURRENT_DATE - i;
             
             -- Loop through hours 6-18 (daylight hours)
             FOR hour_val IN 6..18 LOOP
@@ -81,7 +81,7 @@ BEGIN
                 irradiance_val := hour_factor * weather_factor * 1200;
                 
                 INSERT INTO energy_generation (installation_id, date, hour, energy_kwh, irradiance, temperature, weather_condition)
-                VALUES (installation_record.id, current_date, hour_val, final_generation, irradiance_val, temp_val, weather_condition);
+                VALUES (installation_record.id, target_date, hour_val, final_generation, irradiance_val, temp_val, weather_condition);
             END LOOP;
         END LOOP;
     END LOOP;
@@ -91,7 +91,7 @@ END $$;
 DO $$
 DECLARE
     installation_record RECORD;
-    current_date DATE;
+    target_date DATE;
     daily_energy DECIMAL;
     ppa_rate_val DECIMAL := 1.85; -- R1.85 per kWh
     daily_revenue DECIMAL;
@@ -99,18 +99,18 @@ DECLARE
 BEGIN
     FOR installation_record IN SELECT id FROM installations LOOP
         FOR i IN 0..29 LOOP
-            current_date := CURRENT_DATE - i;
+            target_date := CURRENT_DATE - i;
             
             -- Calculate daily energy from hourly data
             SELECT COALESCE(SUM(energy_kwh), 0) INTO daily_energy
             FROM energy_generation 
-            WHERE installation_id = installation_record.id AND date = current_date;
+            WHERE installation_id = installation_record.id AND date = target_date;
             
             daily_revenue := daily_energy * ppa_rate_val;
             daily_savings := daily_energy * (ppa_rate_val * 0.7); -- 30% savings vs grid
             
             INSERT INTO financial_data (installation_id, date, energy_sold_kwh, revenue, ppa_rate, savings)
-            VALUES (installation_record.id, current_date, daily_energy, daily_revenue, ppa_rate_val, daily_savings);
+            VALUES (installation_record.id, target_date, daily_energy, daily_revenue, ppa_rate_val, daily_savings);
         END LOOP;
     END LOOP;
 END $$;
