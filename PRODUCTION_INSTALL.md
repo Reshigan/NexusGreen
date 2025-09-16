@@ -1,6 +1,22 @@
 # NexusGreen Production Installation
 
-## Quick Installation (Recommended)
+## Clean Installation (Recommended for Production Issues)
+
+If you're experiencing port conflicts, Docker issues, or want a completely fresh start:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/Reshigan/NexusGreen/fix-production-deployment/clean-install-production.sh | bash
+```
+
+This will:
+- **Completely remove** existing Docker, nginx, and containers
+- **Free up all ports** (80, 443, 3000, 3001, 5432)
+- **Fresh install** Docker and Docker Compose
+- **Clean deployment** of NexusGreen with all fixes
+- **Configure firewall** and security settings
+- **Install certbot** for SSL certificates
+
+## Quick Installation (For Fresh Servers)
 
 Run this single command on your Ubuntu 22.04 server:
 
