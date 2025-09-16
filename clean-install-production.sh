@@ -6,7 +6,7 @@
 
 set -e
 
-echo "🧹 NexusGreen Clean Production Installation"
+echo "NexusGreen Clean Production Installation"
 echo "=========================================="
 
 # Colors for output
@@ -199,7 +199,7 @@ print_status "Final deployment status check..."
 docker-compose ps
 
 echo ""
-print_success "🎉 Clean NexusGreen installation completed successfully!"
+print_success "Clean NexusGreen installation completed successfully!"
 echo ""
 echo "Next steps:"
 echo "1. Configure SSL certificate:"
@@ -223,11 +223,11 @@ echo "- View logs: docker-compose logs [service-name]"
 echo "- Restart: docker-compose restart"
 echo "- Test: ./test-deployment.sh"
 echo ""
-print_success "Your NexusGreen solar platform is ready! 🚀"
+print_success "Your NexusGreen solar platform is ready!"
 
 # Show test credentials
 echo ""
-print_status "📋 Quick Reference - Test Credentials:"
+print_status "Quick Reference - Test Credentials:"
 echo "Email: admin@nexusgreen.energy"
 echo "Password: NexusGreen2024!"
 echo ""
