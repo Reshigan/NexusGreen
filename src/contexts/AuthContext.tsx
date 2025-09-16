@@ -38,16 +38,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Check for existing token on mount
     const token = localStorage.getItem('token');
     if (token) {
-      // Verify token with backend
-      fetch('/api/auth/verify', {
+      // Verify token with backend using /me endpoint
+      fetch('/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       })
       .then(response => response.json())
       .then(data => {
-        if (data.success) {
-          setUser(data.user);
+        if (data.id) {
+          // Convert API response to our User format
+          setUser({
+            id: data.id,
+            email: data.email,
+            name: `${data.firstName} ${data.lastName}`,
+            role: data.role as 'SUPER_ADMIN' | 'CUSTOMER' | 'OPERATOR' | 'FUNDER' | 'PROJECT_ADMIN',
+            companyId: data.organizationId
+          });
         } else {
           localStorage.removeItem('token');
         }
@@ -74,11 +81,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const data = await response.json();
     
-    if (data.success) {
-      localStorage.setItem('token', data.token);
-      setUser(data.user);
+    if (data.accessToken) {
+      localStorage.setItem('token', data.accessToken);
+      // Convert API response to our User format
+      setUser({
+        id: data.user.id,
+        email: data.user.email,
+        name: `${data.user.firstName} ${data.user.lastName}`,
+        role: data.user.role as 'SUPER_ADMIN' | 'CUSTOMER' | 'OPERATOR' | 'FUNDER' | 'PROJECT_ADMIN',
+        companyId: data.user.organizationId
+      });
     } else {
-      throw new Error(data.message || 'Login failed');
+      throw new Error(data.message || data.error || 'Login failed');
     }
   };
 

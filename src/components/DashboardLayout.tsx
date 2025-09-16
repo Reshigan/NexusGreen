@@ -23,6 +23,7 @@ import {
   LogOut,
   Settings
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -52,16 +53,18 @@ function AppSidebar() {
   const { theme, setTheme } = useTheme();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const { logout } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
 
   const handleLogout = async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+      logout(); // Clear auth context
     } catch (_) {
       // ignore
     } finally {
-      navigate("/");
+      navigate("/login");
     }
   };
 

@@ -25,7 +25,10 @@ interface TimeFilterProps {
 }
 
 const TimeFilter = ({ value, onChange, embedded = false }: TimeFilterProps) => {
-  
+  // Safety check: return null if value is not properly defined
+  if (!value || !value.startDate || !value.endDate) {
+    return null;
+  }
 
   const periods = [
     { id: "month", label: "Monthly", description: "Last 30 days" },
@@ -43,8 +46,8 @@ const TimeFilter = ({ value, onChange, embedded = false }: TimeFilterProps) => {
       case "custom":
         onChange({
           period: "custom",
-          startDate: value.startDate,
-          endDate: value.endDate
+          startDate: value?.startDate || new Date(),
+          endDate: value?.endDate || new Date()
         });
         return;
       default:
@@ -59,6 +62,7 @@ const TimeFilter = ({ value, onChange, embedded = false }: TimeFilterProps) => {
   };
 
   const navigatePeriod = (direction: "prev" | "next") => {
+    if (!value) return;
     const { period, startDate, endDate } = value;
     const duration = endDate.getTime() - startDate.getTime();
     
@@ -84,7 +88,7 @@ const TimeFilter = ({ value, onChange, embedded = false }: TimeFilterProps) => {
         <div className={`flex flex-col lg:flex-row gap-4 ${embedded ? '' : 'items-start lg:items-center'}`}>
           {/* Period Selection */}
           <div className="flex-1">
-            <Select value={value.period} onValueChange={handlePeriodChange}>
+            <Select value={value?.period} onValueChange={handlePeriodChange}>
               <SelectTrigger className="w-full lg:w-48">
                 <SelectValue placeholder="Select period" />
               </SelectTrigger>
@@ -102,7 +106,7 @@ const TimeFilter = ({ value, onChange, embedded = false }: TimeFilterProps) => {
           </div>
 
           {/* Date Range Display & Navigation */}
-          {value.period !== "custom" && (
+          {value?.period !== "custom" && (
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
@@ -113,14 +117,17 @@ const TimeFilter = ({ value, onChange, embedded = false }: TimeFilterProps) => {
               </Button>
               
               <Badge variant="outline" className="px-3 py-1">
-                {format(value.startDate, "MMM dd")} - {format(value.endDate, "MMM dd, yyyy")}
+                {value?.startDate && value?.endDate ? 
+                  `${format(value.startDate, "MMM dd")} - ${format(value.endDate, "MMM dd, yyyy")}` : 
+                  "Loading..."
+                }
               </Badge>
               
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => navigatePeriod("next")}
-                disabled={value.endDate >= new Date()}
+                disabled={!value?.endDate || value.endDate >= new Date()}
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
@@ -128,7 +135,7 @@ const TimeFilter = ({ value, onChange, embedded = false }: TimeFilterProps) => {
           )}
 
           {/* Custom Date Range */}
-          {value.period === "custom" && (
+          {value?.period === "custom" && (
             <div className="flex items-center gap-2">
               <Popover>
                 <PopoverTrigger asChild>
@@ -136,18 +143,18 @@ const TimeFilter = ({ value, onChange, embedded = false }: TimeFilterProps) => {
                     variant="outline"
                     className={cn(
                       "justify-start text-left font-normal",
-                      !value.startDate && "text-muted-foreground"
+                      !value?.startDate && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {value.startDate ? format(value.startDate, "PPP") : "Start date"}
+                    {value?.startDate ? format(value.startDate, "PPP") : "Start date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={value.startDate}
-                    onSelect={(date) => date && onChange({ ...value, startDate: date })}
+                    selected={value?.startDate}
+                    onSelect={(date) => date && onChange({ ...(value || {}), startDate: date })}
                     initialFocus
                     className="p-3 pointer-events-auto"
                   />
@@ -162,18 +169,18 @@ const TimeFilter = ({ value, onChange, embedded = false }: TimeFilterProps) => {
                     variant="outline"
                     className={cn(
                       "justify-start text-left font-normal",
-                      !value.endDate && "text-muted-foreground"
+                      !value?.endDate && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {value.endDate ? format(value.endDate, "PPP") : "End date"}
+                    {value?.endDate ? format(value.endDate, "PPP") : "End date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={value.endDate}
-                    onSelect={(date) => date && onChange({ ...value, endDate: date })}
+                    selected={value?.endDate}
+                    onSelect={(date) => date && onChange({ ...(value || {}), endDate: date })}
                     initialFocus
                     className="p-3 pointer-events-auto"
                   />

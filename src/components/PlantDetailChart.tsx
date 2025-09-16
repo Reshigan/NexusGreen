@@ -1,4 +1,5 @@
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, AreaChart, Area, BarChart, Bar } from "recharts";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 // Mock detailed plant data - will be replaced with API integration
 const mockDetailData = [
@@ -29,6 +30,8 @@ interface PlantDetailChartProps {
 }
 
 const PlantDetailChart = ({ plantId }: PlantDetailChartProps) => {
+  const { formatAmount } = useCurrency();
+  
   return (
     <div className="space-y-8">
       {/* Real-time Power Output */}

@@ -24,7 +24,7 @@ COPY . .
 RUN npx vite --version
 
 # Build the application with memory optimization
-RUN npm run build
+RUN NODE_ENV=production npx vite build --mode production
 
 # Stage 2: Production stage
 FROM --platform=linux/arm64 nginx:alpine AS production
