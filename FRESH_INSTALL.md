@@ -4,6 +4,12 @@ This guide provides scripts to completely reset your server and perform a fresh 
 
 ## Quick Start (One-Liner)
 
+**With domain as parameter (recommended):**
+```bash
+curl -sSL https://raw.githubusercontent.com/Reshigan/NexusGreen/fix-production-deployment/fresh-production-install.sh | bash -s nexus.gonxt.tech
+```
+
+**Interactive mode:**
 ```bash
 curl -sSL https://raw.githubusercontent.com/Reshigan/NexusGreen/fix-production-deployment/fresh-production-install.sh | bash
 ```
@@ -25,6 +31,15 @@ chmod +x reset-server.sh
 
 ### Step 2: Fresh Installation
 
+**Option A: With domain parameter (recommended):**
+```bash
+# Download and run fresh installation script
+wget https://raw.githubusercontent.com/Reshigan/NexusGreen/fix-production-deployment/fresh-production-install.sh
+chmod +x fresh-production-install.sh
+./fresh-production-install.sh nexus.gonxt.tech
+```
+
+**Option B: Interactive mode:**
 ```bash
 # Download and run fresh installation script
 wget https://raw.githubusercontent.com/Reshigan/NexusGreen/fix-production-deployment/fresh-production-install.sh

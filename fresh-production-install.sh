@@ -16,18 +16,41 @@ echo "- At least 4GB RAM (t4g.medium recommended)"
 echo "- Port 80 and 443 available"
 echo "- Domain name pointing to this server (for SSL)"
 echo
-read -p "Continue with installation? (y/N): " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "Installation cancelled."
+
+# Check if domain provided as argument
+if [[ -n "$1" ]]; then
+    DOMAIN_NAME="$1"
+    echo "Using domain from command line: $DOMAIN_NAME"
+else
+    # Interactive mode
+    read -p "Continue with installation? (y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Installation cancelled."
+        exit 1
+    fi
+
+    # Get domain name for SSL
+    echo
+    echo "Please enter your domain name for SSL setup."
+    echo "Example: nexus.gonxt.tech"
+    echo -n "Domain name: "
+    read DOMAIN_NAME
+fi
+
+# Trim whitespace and validate
+DOMAIN_NAME=$(echo "$DOMAIN_NAME" | xargs)
+if [[ -z "$DOMAIN_NAME" ]]; then
+    echo "ERROR: Domain name is required for SSL setup."
+    echo "Usage: $0 [domain-name]"
+    echo "Example: $0 nexus.gonxt.tech"
     exit 1
 fi
 
-# Get domain name for SSL
-echo
-read -p "Enter your domain name (e.g., nexus.gonxt.tech): " DOMAIN_NAME
-if [[ -z "$DOMAIN_NAME" ]]; then
-    echo "Domain name is required for SSL setup."
+# Validate domain format
+if [[ ! "$DOMAIN_NAME" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}$ ]]; then
+    echo "ERROR: Invalid domain name format: $DOMAIN_NAME"
+    echo "Please provide a valid domain name (e.g., nexus.gonxt.tech)"
     exit 1
 fi
 
