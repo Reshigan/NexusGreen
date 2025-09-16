@@ -210,8 +210,11 @@ cd ~/NexusGreen || {
 print_status "Pulling latest changes from repository..."
 git pull origin main || print_warning "Could not pull latest changes"
 
+# Remove any existing docker-compose files that might have problematic configurations
+rm -f docker-compose.yml docker-compose.yaml docker-compose.override.yml 2>/dev/null || true
+
 # Create completely clean docker-compose.yml with ALL fixes applied (NO MULTI-PLATFORM)
-print_status "Creating clean docker-compose.yml with all fixes..."
+print_status "Creating clean docker-compose.yml with all fixes (no version, no platform specs)..."
 cat > docker-compose.yml << 'EOF'
 services:
   nexus-green:
@@ -546,12 +549,20 @@ fi
 # Configure Docker to avoid multi-platform build issues
 print_status "Configuring Docker for optimal build performance..."
 
-# Remove any existing buildx builders that might cause issues
-docker buildx ls | grep -v "default" | awk '{print $1}' | xargs -r docker buildx rm 2>/dev/null || true
+# Stop any running containers first
+docker-compose down 2>/dev/null || true
 
-# Use default Docker driver to avoid multi-platform issues
+# Remove any existing buildx builders that might cause issues
+print_status "Cleaning up Docker buildx configuration..."
+docker buildx ls | grep -v "default" | awk 'NR>1 {print $1}' | xargs -r docker buildx rm 2>/dev/null || true
+
+# Reset Docker buildx to use default driver
+docker buildx use default 2>/dev/null || true
+
+# Disable Docker BuildKit and Compose CLI build to avoid multi-platform issues
 export DOCKER_BUILDKIT=0
 export COMPOSE_DOCKER_CLI_BUILD=0
+export DOCKER_CLI_EXPERIMENTAL=disabled
 
 # Verify Docker configuration
 print_status "Verifying Docker configuration..."
@@ -560,13 +571,16 @@ docker version --format '{{.Server.Version}}' || {
     exit 1
 }
 
-# Build Docker images with no cache
-print_status "Building Docker images (this may take several minutes)..."
-docker-compose build --no-cache --parallel
+print_status "Docker BuildKit disabled: DOCKER_BUILDKIT=$DOCKER_BUILDKIT"
+print_status "Compose CLI build disabled: COMPOSE_DOCKER_CLI_BUILD=$COMPOSE_DOCKER_CLI_BUILD"
+
+# Build Docker images with legacy builder (no BuildKit)
+print_status "Building Docker images with legacy builder (this may take several minutes)..."
+DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 docker-compose build --no-cache --parallel
 
 # Start services
 print_status "Starting all services..."
-docker-compose up -d
+DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 docker-compose up -d
 
 # Wait for services to initialize
 print_status "Waiting for services to initialize (60 seconds)..."
