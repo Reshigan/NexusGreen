@@ -1,7 +1,7 @@
 # NexusGreen Production Deployment Fixes
 
 ## Summary
-Fixed critical production deployment issues for AWS t4g.medium Ubuntu 22.04 instances. The application now builds successfully without errors and is ready for production deployment.
+Fixed critical production deployment issues for AWS t4g.medium Ubuntu 22.04 instances. Resolved API failure, frontend rendering issues, and SSL configuration problems.
 
 ## Issues Fixed
 
@@ -134,3 +134,68 @@ The application is now ready for production deployment. The deployment script wi
 - Providing comprehensive status reporting
 
 Run `./deploy-aws-t4g.sh` on your AWS t4g.medium instance to deploy.
+
+## Recent Runtime Fixes (December 2024)
+
+### API Runtime Stability Issues ✅
+- **Problem**: API starts but fails health checks after a while, causing deployment timeouts
+- **Root Causes**:
+  - Memory limit too restrictive (256MB) for Node.js application
+  - Database connection timeout too short for ARM64 performance
+  - Too many database connections for memory constraints
+- **Solutions**:
+  - Increased API memory limit from 256MB to 512MB
+  - Increased database connection timeout from 2s to 10s
+  - Reduced max database connections from 20 to 10
+  - Added acquire timeout for database connections
+  - Enhanced CORS configuration for production domains
+
+### Frontend Rendering Issues ✅
+- **Problem**: Frontend doesn't render at all
+- **Root Cause**: Frontend API services trying to connect directly to port 3001 instead of using nginx proxy
+- **Solutions**:
+  - Updated all API service files to use `/api` endpoint via nginx proxy
+  - Fixed environment variable usage in API configuration
+  - Adjusted frontend memory allocation for better resource balance
+
+### SSL Configuration Problems ✅
+- **Problem**: Certbot can't find matching server block for nexus.gonxt.tech
+- **Root Cause**: Nginx only configured for localhost
+- **Solutions**:
+  - Added `nexus.gonxt.tech` to server_name directive
+  - Created dedicated HTTPS server block with SSL configuration
+  - Added proper SSL security headers and certificate paths
+
+## Updated Resource Allocation
+- **API**: 512MB (increased from 256MB for stability)
+- **Frontend**: 384MB (reduced from 512MB for balance)
+- **Database**: 512MB (unchanged)
+
+## SSL Certificate Installation
+After deploying the fixes, run:
+```bash
+sudo certbot --nginx
+# Select option 1 (reinstall existing certificate)
+```
+
+## Testing Script
+Use the provided test script to verify all fixes:
+```bash
+chmod +x test-deployment.sh
+./test-deployment.sh
+```
+
+## Production Deployment Commands
+```bash
+# Deploy with fixes
+./deploy-aws-t4g.sh
+
+# Test all endpoints
+curl https://nexus.gonxt.tech/api-health
+curl https://nexus.gonxt.tech/health
+curl https://nexus.gonxt.tech/
+
+# Monitor services
+docker-compose logs -f nexus-api
+docker-compose logs -f nexus-frontend
+```

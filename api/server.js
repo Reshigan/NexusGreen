@@ -12,9 +12,10 @@ const PORT = process.env.PORT || 3001;
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: false,  // Disable SSL for local Docker deployment
-  max: 20,
+  max: 10,  // Reduced for memory constraints
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 10000,  // Increased for ARM64 performance
+  acquireTimeoutMillis: 10000,
 });
 
 // Database connection retry function
@@ -46,7 +47,7 @@ app.use(helmet());
 app.use(compression());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['http://localhost', 'https://nexus.gonxt.tech', 'http://nexus.gonxt.tech']
+    ? ['http://localhost', 'https://nexus.gonxt.tech', 'http://nexus.gonxt.tech', 'https://localhost', 'http://127.0.0.1', 'https://127.0.0.1']
     : true,
   credentials: true
 }));

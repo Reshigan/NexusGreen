@@ -1,7 +1,7 @@
 // Production API Service for NexusGreen
 // Real backend integration with comprehensive error handling and caching
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 // Enhanced API Response Types
 export interface ApiResponse<T> {
