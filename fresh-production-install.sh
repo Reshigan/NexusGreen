@@ -47,10 +47,17 @@ if [[ -z "$DOMAIN_NAME" ]]; then
     exit 1
 fi
 
-# Validate domain format
-if [[ ! "$DOMAIN_NAME" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}$ ]]; then
+# Validate domain format (basic validation)
+if [[ ! "$DOMAIN_NAME" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*[a-zA-Z0-9]$ ]] || [[ ! "$DOMAIN_NAME" == *.* ]]; then
     echo "ERROR: Invalid domain name format: $DOMAIN_NAME"
     echo "Please provide a valid domain name (e.g., nexus.gonxt.tech)"
+    exit 1
+fi
+
+# Additional validation - check for valid TLD
+if [[ ${#DOMAIN_NAME} -lt 4 ]] || [[ ${#DOMAIN_NAME} -gt 253 ]]; then
+    echo "ERROR: Domain name length invalid: $DOMAIN_NAME"
+    echo "Domain must be between 4 and 253 characters"
     exit 1
 fi
 
