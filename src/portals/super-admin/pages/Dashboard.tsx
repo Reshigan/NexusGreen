@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
+import { motion } from 'framer-motion';
+import { ModernCard, ModernCardContent, ModernCardDescription, ModernCardHeader, ModernCardTitle } from '../../../components/ui/modern-card';
 import { Button } from '../../../components/ui/button';
 import { Badge } from '../../../components/ui/badge';
 import { 
@@ -15,7 +16,11 @@ import {
   Activity,
   Plus,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Sun,
+  Battery,
+  Gauge,
+  Shield
 } from 'lucide-react';
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
@@ -97,239 +102,352 @@ const SuperAdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-              Super Admin Dashboard
-            </h1>
-            <p className="mt-2 text-slate-600 dark:text-slate-400">
-              System overview and management console
-            </p>
-          </div>
-          <div className="flex items-center space-x-3">
-            <select
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
-              className="px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-sm"
+    <div className="space-y-6">
+      {/* Modern Header */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+      >
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
+            Super Admin Dashboard
+          </h1>
+          <p className="mt-1 text-sm sm:text-base text-slate-600 dark:text-slate-400">
+            System overview and management console
+          </p>
+        </div>
+        <div className="flex items-center space-x-3">
+          <select
+            value={timeRange}
+            onChange={(e) => setTimeRange(e.target.value)}
+              className="px-3 py-2 border border-slate-200/50 dark:border-slate-600/50 rounded-xl bg-white/50 dark:bg-slate-700/50 backdrop-blur-sm text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50"
             >
               <option value="7d">Last 7 days</option>
               <option value="30d">Last 30 days</option>
               <option value="90d">Last 90 days</option>
               <option value="1y">Last year</option>
             </select>
-            <Button>
+            <Button className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 shadow-lg shadow-purple-500/25">
               <Plus className="h-4 w-4 mr-2" />
               New Project
             </Button>
           </div>
         </div>
+      </motion.div>
+
+      {/* Modern Key Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {[
+          {
+            title: 'Total Projects',
+            value: stats.totalProjects,
+            change: '+12%',
+            changeType: 'positive',
+            icon: Building2,
+            gradient: 'from-blue-500 to-cyan-500',
+            bgGradient: 'from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20'
+          },
+          {
+            title: 'Active Sites',
+            value: stats.totalSites,
+            change: '+8%',
+            changeType: 'positive',
+            icon: MapPin,
+            gradient: 'from-green-500 to-emerald-500',
+            bgGradient: 'from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20'
+          },
+          {
+            title: 'System Users',
+            value: stats.totalUsers,
+            change: '+15%',
+            changeType: 'positive',
+            icon: Users,
+            gradient: 'from-purple-500 to-pink-500',
+            bgGradient: 'from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20'
+          },
+          {
+            title: 'Total Capacity',
+            value: `${stats.totalCapacity}MW`,
+            change: '+5%',
+            changeType: 'positive',
+            icon: Zap,
+            gradient: 'from-orange-500 to-red-500',
+            bgGradient: 'from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20'
+          }
+        ].map((metric, index) => {
+          const Icon = metric.icon;
+          return (
+            <motion.div
+              key={metric.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <ModernCard glass hover className="group">
+                <ModernCardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                        {metric.title}
+                      </p>
+                      <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
+                        {metric.value}
+                      </p>
+                      <div className={`flex items-center text-sm ${
+                        metric.changeType === 'positive' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {metric.changeType === 'positive' ? (
+                          <ArrowUpRight className="h-3 w-3 mr-1" />
+                        ) : (
+                          <ArrowDownRight className="h-3 w-3 mr-1" />
+                        )}
+                        {metric.change} from last month
+                      </div>
+                    </div>
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${metric.bgGradient} flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}>
+                      <Icon className={`h-6 w-6 bg-gradient-to-br ${metric.gradient} bg-clip-text text-transparent`} />
+                    </div>
+                  </div>
+                </ModernCardContent>
+              </ModernCard>
+            </motion.div>
+          );
+        })}
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Total Projects</p>
-                <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">{stats.totalProjects}</p>
-                <p className="text-sm text-green-600 flex items-center mt-1">
-                  <ArrowUpRight className="h-3 w-3 mr-1" />
-                  +12% from last month
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                <Building2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Active Sites</p>
-                <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">{stats.totalSites}</p>
-                <p className="text-sm text-green-600 flex items-center mt-1">
-                  <ArrowUpRight className="h-3 w-3 mr-1" />
-                  +8% from last month
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                <MapPin className="h-6 w-6 text-green-600 dark:text-green-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">System Users</p>
-                <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">{stats.totalUsers}</p>
-                <p className="text-sm text-green-600 flex items-center mt-1">
-                  <ArrowUpRight className="h-3 w-3 mr-1" />
-                  +15% from last month
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-                <Users className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Total Capacity</p>
-                <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">{stats.totalCapacity}MW</p>
-                <p className="text-sm text-green-600 flex items-center mt-1">
-                  <ArrowUpRight className="h-3 w-3 mr-1" />
-                  +5% from last month
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
-                <Zap className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      {/* Modern Charts Section */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Performance Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>System Performance</CardTitle>
-            <CardDescription>Energy generation and revenue trends</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={mockPerformanceData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Area type="monotone" dataKey="energy" stackId="1" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} />
-                <Area type="monotone" dataKey="revenue" stackId="2" stroke="#10b981" fill="#10b981" fillOpacity={0.6} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <ModernCard glass>
+            <ModernCardHeader>
+              <ModernCardTitle className="flex items-center">
+                <TrendingUp className="h-5 w-5 mr-2 text-blue-600" />
+                System Performance
+              </ModernCardTitle>
+              <ModernCardDescription>
+                Energy generation and revenue trends over time
+              </ModernCardDescription>
+            </ModernCardHeader>
+            <ModernCardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={mockPerformanceData}>
+                    <defs>
+                      <linearGradient id="energyGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                      </linearGradient>
+                      <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} />
+                    <XAxis 
+                      dataKey="month" 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 12, fill: '#64748b' }}
+                    />
+                    <YAxis 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 12, fill: '#64748b' }}
+                    />
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        border: 'none',
+                        borderRadius: '12px',
+                        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                        backdropFilter: 'blur(10px)'
+                      }}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="energy" 
+                      stroke="#3b82f6" 
+                      fill="url(#energyGradient)"
+                      strokeWidth={2}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="revenue" 
+                      stroke="#10b981" 
+                      fill="url(#revenueGradient)"
+                      strokeWidth={2}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </ModernCardContent>
+          </ModernCard>
+        </motion.div>
 
         {/* Portal Usage */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Portal Usage Distribution</CardTitle>
-            <CardDescription>User activity across different portals</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={mockPortalUsage}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={120}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {mockPortalUsage.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              {mockPortalUsage.map((item, index) => (
-                <div key={index} className="flex items-center">
-                  <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.color }} />
-                  <span className="text-sm text-slate-600 dark:text-slate-400">{item.name}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.6 }}
+        >
+          <ModernCard glass>
+            <ModernCardHeader>
+              <ModernCardTitle className="flex items-center">
+                <Shield className="h-5 w-5 mr-2 text-purple-600" />
+                Portal Usage Distribution
+              </ModernCardTitle>
+              <ModernCardDescription>
+                User activity across different portals
+              </ModernCardDescription>
+            </ModernCardHeader>
+            <ModernCardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={mockPortalUsage}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={120}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {mockPortalUsage.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        border: 'none',
+                        borderRadius: '12px',
+                        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                        backdropFilter: 'blur(10px)'
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-6 grid grid-cols-2 gap-4">
+                {mockPortalUsage.map((item, index) => (
+                  <motion.div 
+                    key={index} 
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.7 + index * 0.1 }}
+                    className="flex items-center p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50"
+                  >
+                    <div className="w-3 h-3 rounded-full mr-3" style={{ backgroundColor: item.color }} />
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{item.name}</span>
+                    <span className="ml-auto text-xs text-slate-500">{item.value}%</span>
+                  </motion.div>
+                ))}
+              </div>
+            </ModernCardContent>
+          </ModernCard>
+        </motion.div>
       </div>
 
-      {/* Status Cards and Activity */}
+      {/* Modern Status and Activity Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* System Status */}
-        <Card>
-          <CardHeader>
-            <CardTitle>System Status</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                <span className="text-sm">System Uptime</span>
-              </div>
-              <Badge variant="secondary">{stats.systemUptime}%</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <AlertTriangle className="h-5 w-5 text-orange-500 mr-2" />
-                <span className="text-sm">Active Alerts</span>
-              </div>
-              <Badge variant="destructive">{stats.activeAlerts}</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Clock className="h-5 w-5 text-blue-500 mr-2" />
-                <span className="text-sm">Pending Maintenance</span>
-              </div>
-              <Badge variant="outline">{stats.pendingMaintenance}</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <DollarSign className="h-5 w-5 text-green-500 mr-2" />
-                <span className="text-sm">Monthly Revenue</span>
-              </div>
-              <span className="text-sm font-medium">{formatCurrency(stats.totalRevenue)}</span>
-            </div>
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+        >
+          <ModernCard glass>
+            <ModernCardHeader>
+              <ModernCardTitle className="flex items-center">
+                <Gauge className="h-5 w-5 mr-2 text-green-600" />
+                System Status
+              </ModernCardTitle>
+            </ModernCardHeader>
+            <ModernCardContent className="space-y-4">
+              {[
+                { icon: CheckCircle, label: 'System Uptime', value: `${stats.systemUptime}%`, color: 'text-green-500', bgColor: 'bg-green-100 dark:bg-green-900/20' },
+                { icon: AlertTriangle, label: 'Active Alerts', value: stats.activeAlerts, color: 'text-orange-500', bgColor: 'bg-orange-100 dark:bg-orange-900/20' },
+                { icon: Clock, label: 'Pending Maintenance', value: stats.pendingMaintenance, color: 'text-blue-500', bgColor: 'bg-blue-100 dark:bg-blue-900/20' },
+                { icon: DollarSign, label: 'Monthly Revenue', value: formatCurrency(stats.totalRevenue), color: 'text-green-500', bgColor: 'bg-green-100 dark:bg-green-900/20' }
+              ].map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <motion.div
+                    key={item.label}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.8 + index * 0.1 }}
+                    className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50"
+                  >
+                    <div className="flex items-center">
+                      <div className={`w-8 h-8 rounded-lg ${item.bgColor} flex items-center justify-center mr-3`}>
+                        <Icon className={`h-4 w-4 ${item.color}`} />
+                      </div>
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{item.label}</span>
+                    </div>
+                    <Badge variant={item.label === 'Active Alerts' ? 'destructive' : 'secondary'} className="font-medium">
+                      {item.value}
+                    </Badge>
+                  </motion.div>
+                );
+              })}
+            </ModernCardContent>
+          </ModernCard>
+        </motion.div>
 
         {/* Recent Activity */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Latest system events and user actions</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {mockRecentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${getActivityColor(activity.type)} bg-opacity-10`}>
-                    {getActivityIcon(activity.type)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-slate-900 dark:text-slate-100">{activity.description}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      {activity.timestamp} • by {activity.user}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-              <Button variant="outline" className="w-full">
-                View All Activity
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+          className="lg:col-span-2"
+        >
+          <ModernCard glass>
+            <ModernCardHeader>
+              <ModernCardTitle className="flex items-center">
+                <Activity className="h-5 w-5 mr-2 text-blue-600" />
+                Recent Activity
+              </ModernCardTitle>
+              <ModernCardDescription>
+                Latest system events and user actions
+              </ModernCardDescription>
+            </ModernCardHeader>
+            <ModernCardContent>
+              <div className="space-y-4">
+                {mockRecentActivity.map((activity, index) => (
+                  <motion.div
+                    key={activity.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.9 + index * 0.1 }}
+                    className="flex items-start space-x-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-colors duration-200"
+                  >
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${getActivityColor(activity.type)} bg-opacity-10`}>
+                      {getActivityIcon(activity.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{activity.description}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        {activity.timestamp} • by {activity.user}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+              <div className="mt-6 pt-4 border-t border-slate-200/50 dark:border-slate-700/50">
+                <Button variant="outline" className="w-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                  View All Activity
+                </Button>
+            </ModernCardContent>
+          </ModernCard>
+        </motion.div>
       </div>
     </div>
   );
