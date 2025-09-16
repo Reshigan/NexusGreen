@@ -1,25 +1,22 @@
-# Nexus Green Production Docker Compose - Optimized for AWS t4g.medium
-
 services:
   nexus-green:
     build:
       context: .
       dockerfile: Dockerfile
       target: production
-      platforms:
-        - linux/arm64
     container_name: nexus-green
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "8080:80"
     environment:
       - VITE_APP_NAME=NexusGreen
-      - VITE_APP_VERSION=6.1.0
-      - VITE_API_URL=/api
+      - VITE_APP_VERSION=7.0.0
+      - VITE_API_BASE_URL=https://nexus.gonxt.tech/api
       - VITE_ENVIRONMENT=production
       - VITE_COMPANY_NAME=SolarTech Solutions (Pty) Ltd
       - VITE_COMPANY_REG=2019/123456/07
       - VITE_PPA_RATE=1.20
+      - NODE_ENV=production
     networks:
       - nexus-network
     depends_on:
@@ -33,55 +30,67 @@ services:
       start_period: 40s
     labels:
       - "com.nexusgreen.service=frontend"
-      - "com.nexusgreen.version=6.1.0"
-    # Memory limits for t4g.medium
-    mem_limit: 384m
-    memswap_limit: 384m
+      - "com.nexusgreen.version=7.0.0"
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+        reservations:
+          memory: 192M
 
   # API backend service
   nexus-api:
     build:
       context: ./api
       dockerfile: Dockerfile
-      platforms:
-        - linux/arm64
     container_name: nexus-api
     restart: unless-stopped
-    expose:
-      - "3001"
+    ports:
+      - "3001:3001"
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - DATABASE_URL=postgresql://nexususer:nexuspass123@nexus-db:5432/nexusgreen
-      - JWT_SECRET=nexus-green-jwt-secret-2024
-      - SOLAX_SYNC_INTERVAL_MINUTES=60
-      - CORS_ORIGIN=*
+      - DB_HOST=nexus-db
+      - DB_PORT=5432
+      - DB_NAME=nexusgreen
+      - DB_USER=nexususer
+      - DB_PASSWORD=nexuspass123
+      - DB_TIMEOUT=15000
+      - DB_MAX_CONNECTIONS=8
+      - JWT_SECRET=nexus-green-jwt-secret-2024-v7
+      - CORS_ORIGIN=https://nexus.gonxt.tech,http://localhost:8080
+      - API_BASE_URL=https://nexus.gonxt.tech/api
     networks:
       - nexus-network
     depends_on:
       nexus-db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
       interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    # Memory limits for t4g.medium
-    mem_limit: 512m
-    memswap_limit: 512m
+      timeout: 15s
+      retries: 5
+      start_period: 60s
+    labels:
+      - "com.nexusgreen.service=api"
+      - "com.nexusgreen.version=7.0.0"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
 
   # Database service with seeding
   nexus-db:
     image: postgres:15-alpine
-    platform: linux/arm64
     container_name: nexus-db
     restart: unless-stopped
     environment:
       - POSTGRES_DB=nexusgreen
       - POSTGRES_USER=nexususer
       - POSTGRES_PASSWORD=nexuspass123
-      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
     volumes:
       - nexus-db-data:/var/lib/postgresql/data
       - ./database/init:/docker-entrypoint-initdb.d
@@ -89,19 +98,28 @@ services:
       - nexus-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U nexususer -d nexusgreen"]
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 10s
       retries: 5
-      start_period: 30s
-    # Memory limits for t4g.medium
-    mem_limit: 512m
-    memswap_limit: 512m
-    shm_size: 128m
+      start_period: 60s
+    labels:
+      - "com.nexusgreen.service=database"
+      - "com.nexusgreen.version=7.0.0"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
 
 networks:
   nexus-network:
     driver: bridge
+    labels:
+      - "com.nexusgreen.network=main"
 
 volumes:
   nexus-db-data:
-    name: nexus-green-db-data
+    driver: local
+    labels:
+      - "com.nexusgreen.volume=database"
