@@ -10,7 +10,11 @@ const PORT = process.env.PORT || 3001;
 
 // Database connection with retry logic
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || 5432,
+  database: process.env.DB_NAME || 'nexus_green',
+  user: process.env.DB_USER || 'nexus_user',
+  password: process.env.DB_PASSWORD || 'nexus_password_2024',
   ssl: false,  // Disable SSL for local Docker deployment
   max: 10,  // Reduced for memory constraints
   idleTimeoutMillis: 30000,
