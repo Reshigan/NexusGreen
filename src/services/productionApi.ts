@@ -244,7 +244,7 @@ class ProductionApiService {
 
   // Authentication endpoints
   async login(email: string, password: string): Promise<ApiResponse<{ token: string; user: User }>> {
-    const response = await this.request<{ token: string; user: User }>('/api/auth/login', {
+    const response = await this.request<{ token: string; user: User }>('/api/v1/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
@@ -257,7 +257,7 @@ class ProductionApiService {
   }
 
   async logout(): Promise<ApiResponse<void>> {
-    const response = await this.request<void>('/api/auth/logout', {
+    const response = await this.request<void>('/api/v1/auth/logout', {
       method: 'POST',
     });
     this.clearToken();
@@ -265,7 +265,7 @@ class ProductionApiService {
   }
 
   async getCurrentUser(): Promise<ApiResponse<User>> {
-    return this.request<User>('/api/auth/me', {}, true, 10);
+    return this.request<User>('/api/v1/auth/me', {}, true, 10);
   }
 
   // Dashboard endpoints

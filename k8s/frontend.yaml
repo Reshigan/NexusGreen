@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: nexus-frontend
-        image: nexus-frontend:latest
+        image: nexus-frontend:live
         imagePullPolicy: Never
         ports:
         - containerPort: 80

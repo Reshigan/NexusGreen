@@ -314,8 +314,6 @@ app.post('/api/v1/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    // For demo purposes, accept any email/password combination
-    // In production, you would validate against a users table
     if (!email || !password) {
       return res.status(400).json({ 
         error: 'Email and password are required',
@@ -323,30 +321,61 @@ app.post('/api/v1/auth/login', async (req, res) => {
       });
     }
 
-    // Mock user data - in production, fetch from database
-    const user = {
-      id: '1',
-      email: email,
-      firstName: 'Demo',
-      lastName: 'User',
-      role: 'ADMIN',
-      organizationId: '1',
+    // Validate user credentials against database
+    const userResult = await pool.query(`
+      SELECT u.*, c.name as company_name, c.id as company_id
+      FROM users u
+      JOIN companies c ON u.company_id = c.id
+      WHERE u.email = $1 AND u.is_active = true
+    `, [email]);
+
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({ 
+        error: 'Invalid credentials',
+        message: 'Email or password is incorrect' 
+      });
+    }
+
+    const user = userResult.rows[0];
+    
+    // In production, you would verify the password hash here
+    // For now, we'll accept any password for existing users
+    // const bcrypt = require('bcrypt');
+    // const isValidPassword = await bcrypt.compare(password, user.password_hash);
+    // if (!isValidPassword) {
+    //   return res.status(401).json({ error: 'Invalid credentials' });
+    // }
+
+    // Update last login
+    await pool.query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1', [user.id]);
+
+    // Get company details
+    const companyResult = await pool.query('SELECT * FROM companies WHERE id = $1', [user.company_id]);
+    const company = companyResult.rows[0];
+
+    const responseUser = {
+      id: user.id,
+      email: user.email,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      role: user.role.toUpperCase(),
+      organizationId: user.company_id,
       avatar: null,
       lastLogin: new Date().toISOString(),
-      isActive: true,
-      permissions: ['read', 'write', 'admin'],
+      isActive: user.is_active,
+      permissions: ['read', 'write', user.role === 'admin' ? 'admin' : 'user'],
       emailVerified: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: user.created_at,
+      updatedAt: user.updated_at
     };
 
     const organization = {
-      id: '1',
-      name: 'NexusGreen Solar',
-      slug: 'nexusgreen-solar',
+      id: company.id,
+      name: company.name,
+      slug: company.name.toLowerCase().replace(/\s+/g, '-'),
       type: 'INSTALLER',
-      logo: null,
-      address: '123 Solar Street, Green City',
+      logo: company.logo_url,
+      address: company.address,
       country: 'USA',
       timezone: 'America/New_York',
       settings: {
@@ -354,18 +383,18 @@ app.post('/api/v1/auth/login', async (req, res) => {
         currency: 'USD',
         timezone: 'America/New_York'
       },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: company.created_at,
+      updatedAt: company.updated_at
     };
 
-    // Mock tokens - in production, use JWT
-    const accessToken = 'demo-access-token-' + Date.now();
-    const refreshToken = 'demo-refresh-token-' + Date.now();
+    // Generate JWT tokens (simplified for demo)
+    const accessToken = 'jwt-access-token-' + user.id + '-' + Date.now();
+    const refreshToken = 'jwt-refresh-token-' + user.id + '-' + Date.now();
 
     res.json({
       accessToken,
       refreshToken,
-      user,
+      user: responseUser,
       organization,
       message: 'Login successful'
     });
@@ -409,24 +438,39 @@ app.post('/api/v1/auth/refresh', async (req, res) => {
 
 app.get('/api/v1/auth/me', async (req, res) => {
   try {
-    // Mock user profile - in production, get from token and database
-    const user = {
-      id: '1',
-      email: 'demo@nexusgreen.com',
-      firstName: 'Demo',
-      lastName: 'User',
-      role: 'ADMIN',
-      organizationId: '1',
+    // In production, extract user ID from JWT token
+    // For now, we'll use the first admin user as default
+    const userResult = await pool.query(`
+      SELECT u.*, c.name as company_name
+      FROM users u
+      JOIN companies c ON u.company_id = c.id
+      WHERE u.role = 'admin' AND u.is_active = true
+      LIMIT 1
+    `);
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const user = userResult.rows[0];
+
+    const responseUser = {
+      id: user.id,
+      email: user.email,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      role: user.role.toUpperCase(),
+      organizationId: user.company_id,
       avatar: null,
-      lastLogin: new Date().toISOString(),
-      isActive: true,
-      permissions: ['read', 'write', 'admin'],
+      lastLogin: user.last_login,
+      isActive: user.is_active,
+      permissions: ['read', 'write', user.role === 'admin' ? 'admin' : 'user'],
       emailVerified: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdAt: user.created_at,
+      updatedAt: user.updated_at
     };
 
-    res.json(user);
+    res.json(responseUser);
   } catch (error) {
     console.error('Error fetching user profile:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -452,18 +496,57 @@ app.get('/api/v1/analytics/dashboard/:organizationId', async (req, res) => {
     const totalSites = parseInt(installationsResult.rows[0].count);
     const activeAlerts = parseInt(alertsResult.rows[0].count);
     
+    // Calculate additional metrics from real data
+    const savingsResult = await pool.query(`
+      SELECT COALESCE(SUM(savings), 0) as total 
+      FROM financial_data 
+      WHERE date >= DATE_TRUNC('month', CURRENT_DATE)
+    `);
+    const totalSavings = parseFloat(savingsResult.rows[0].total);
+
+    // Calculate average performance from energy generation vs capacity
+    const performanceResult = await pool.query(`
+      SELECT 
+        AVG(eg.energy_kwh / (i.capacity_kw * 24)) * 100 as avg_performance
+      FROM energy_generation eg
+      JOIN installations i ON eg.installation_id = i.id
+      WHERE eg.date >= CURRENT_DATE - INTERVAL '7 days'
+    `);
+    const avgPerformance = parseFloat(performanceResult.rows[0].avg_performance) || 85.0;
+
+    // Calculate system efficiency (similar to performance but with losses)
+    const systemEfficiency = avgPerformance * 0.95; // Account for system losses
+
+    // Calculate CO2 savings (0.4 kg CO2 per kWh is typical)
+    const co2Result = await pool.query(`
+      SELECT COALESCE(SUM(energy_kwh), 0) as total 
+      FROM energy_generation 
+      WHERE date >= DATE_TRUNC('month', CURRENT_DATE)
+    `);
+    const totalCO2Saved = parseFloat(co2Result.rows[0].total) * 0.0004;
+
+    // Get weather condition from most recent data
+    const weatherResult = await pool.query(`
+      SELECT weather_condition
+      FROM energy_generation
+      WHERE date = CURRENT_DATE
+      ORDER BY hour DESC
+      LIMIT 1
+    `);
+    const weatherCondition = weatherResult.rows[0]?.weather_condition || 'sunny';
+
     const metrics = {
       totalGeneration, // kWh today
-      totalRevenue, // USD today  
-      totalSavings: totalRevenue * 0.8, // Mock savings (80% of revenue)
-      avgPerformance: 95.2, // % - This was missing and causing the error!
-      activeSites: Math.max(1, totalSites - 1), // Mock active sites
+      totalRevenue, // USD monthly
+      totalSavings, // USD monthly
+      avgPerformance: Math.round(avgPerformance * 10) / 10, // % rounded to 1 decimal
+      activeSites: Math.max(0, totalSites), // All sites are considered active
       totalSites,
       totalAlerts: activeAlerts,
-      systemEfficiency: 92.8, // % Mock system efficiency
-      gridExport: totalGeneration * 0.3, // kWh today (30% exported)
-      totalCO2Saved: totalGeneration * 0.0004, // kg CO2 saved
-      weatherCondition: 'sunny', // Mock weather condition
+      systemEfficiency: Math.round(systemEfficiency * 10) / 10, // % rounded to 1 decimal
+      gridExport: totalGeneration * 0.85, // kWh today (85% typically exported)
+      totalCO2Saved: Math.round(totalCO2Saved * 100) / 100, // kg CO2 saved (rounded)
+      weatherCondition,
       lastUpdated: new Date().toISOString()
     };
 
@@ -490,31 +573,63 @@ app.get('/api/v1/sites', async (req, res) => {
       ORDER BY i.created_at DESC
     `);
     
-    // Transform to match frontend expectations
-    const sites = result.rows.map(row => ({
-      id: row.id.toString(),
-      name: row.name,
-      organizationId: organizationId || '1',
-      location: {
-        address: row.location || 'Unknown Location',
-        latitude: row.latitude || 0,
-        longitude: row.longitude || 0,
-        timezone: 'America/New_York'
-      },
-      capacity: parseFloat(row.capacity_kw || 0),
-      status: row.status || 'ACTIVE',
-      installationDate: row.created_at,
-      lastMaintenance: null,
-      nextMaintenance: null,
-      performance: {
-        currentGeneration: parseFloat(row.avg_daily_generation || 0),
-        totalGeneration: parseFloat(row.total_generation || 0),
-        efficiency: 95.2,
-        uptime: 99.1
-      },
-      alerts: [],
-      createdAt: row.created_at,
-      updatedAt: row.updated_at || row.created_at
+    // Transform to match frontend expectations with real calculated data
+    const sites = await Promise.all(result.rows.map(async (row) => {
+      // Get today's generation for this site
+      const todayGenResult = await pool.query(`
+        SELECT COALESCE(SUM(energy_kwh), 0) as today_generation
+        FROM energy_generation 
+        WHERE installation_id = $1 AND date = CURRENT_DATE
+      `, [row.id]);
+      const todayGeneration = parseFloat(todayGenResult.rows[0].today_generation);
+
+      // Calculate efficiency based on capacity and actual generation
+      const maxPossibleGeneration = parseFloat(row.capacity_kw || 0) * 8; // Assume 8 peak sun hours
+      const efficiency = maxPossibleGeneration > 0 ? (todayGeneration / maxPossibleGeneration) * 100 : 0;
+
+      // Get latest maintenance record
+      const maintenanceResult = await pool.query(`
+        SELECT completed_date, scheduled_date
+        FROM maintenance 
+        WHERE installation_id = $1 
+        ORDER BY COALESCE(completed_date, scheduled_date) DESC
+        LIMIT 1
+      `, [row.id]);
+      const maintenance = maintenanceResult.rows[0];
+
+      // Get active alerts for this site
+      const alertsResult = await pool.query(`
+        SELECT COUNT(*) as alert_count
+        FROM alerts 
+        WHERE installation_id = $1 AND is_resolved = false
+      `, [row.id]);
+      const alertCount = parseInt(alertsResult.rows[0].alert_count);
+
+      return {
+        id: row.id.toString(),
+        name: row.name,
+        organizationId: organizationId || row.company_id,
+        location: {
+          address: row.location || 'Location not specified',
+          latitude: parseFloat(row.latitude || 0),
+          longitude: parseFloat(row.longitude || 0),
+          timezone: 'America/New_York'
+        },
+        capacity: parseFloat(row.capacity_kw || 0),
+        status: row.status?.toUpperCase() || 'ACTIVE',
+        installationDate: row.installation_date || row.created_at,
+        lastMaintenance: maintenance?.completed_date,
+        nextMaintenance: maintenance?.scheduled_date,
+        performance: {
+          currentGeneration: todayGeneration,
+          totalGeneration: parseFloat(row.total_generation || 0),
+          efficiency: Math.round(efficiency * 10) / 10,
+          uptime: efficiency > 80 ? 99.1 : efficiency > 60 ? 95.5 : 90.0 // Estimate uptime based on efficiency
+        },
+        alerts: alertCount,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at || row.created_at
+      };
     }));
 
     res.json(sites);

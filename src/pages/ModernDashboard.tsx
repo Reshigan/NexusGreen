@@ -40,7 +40,7 @@ import PlantOverviewChart from "@/components/PlantOverviewChart";
 import PlantListView from "@/components/PlantListView";
 import TimeFilter from "@/components/TimeFilter";
 import PlantsMap from "@/components/PlantsMap";
-import { smartDataService, type DashboardMetrics, type SiteData } from "@/services/api";
+import { productionDataService, type DashboardMetrics, type SiteData } from "@/services/api";
 
 // Animation variants
 const containerVariants = {

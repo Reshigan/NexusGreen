@@ -29,7 +29,7 @@ import PlantListView from "@/components/PlantListView";
 import TimeFilter from "@/components/TimeFilter";
 import PlantsMap from "@/components/PlantsMap";
 import NexusGreenLogo from "@/components/NexusGreenLogo";
-import { smartDataService, type DashboardMetrics, type SiteData } from "@/services/api";
+import { productionDataService, type DashboardMetrics, type SiteData } from "@/services/api";
 
 // Enhanced mock data for solar energy management platform (fallback only)
 const mockStats = {
@@ -118,13 +118,13 @@ const Dashboard = () => {
       setIsLoading(true);
       try {
         // Check API health first
-        const isApiHealthy = await smartDataService.checkApiHealth();
+        const isApiHealthy = await productionDataService.checkApiHealth();
         setApiConnected(isApiHealthy);
 
         // Load dashboard metrics and sites data
         const [metricsData, sitesData] = await Promise.all([
-          smartDataService.getDashboardMetrics(),
-          smartDataService.getSites()
+          productionDataService.getDashboardMetrics(),
+          productionDataService.getSites()
         ]);
 
         setDashboardMetrics(metricsData);

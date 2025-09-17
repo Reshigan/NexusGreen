@@ -252,161 +252,75 @@ class ApiService {
 // Create singleton instance
 export const apiService = new ApiService();
 
-// Fallback data service for development/demo mode
-export class FallbackDataService {
-  private static instance: FallbackDataService;
-  private yearlyData: any[] = [];
-  private monthlyData: any[] = [];
+// Production data service - API only, no fallbacks
+export class ProductionDataService {
+  private apiService: ApiService;
 
-  static getInstance(): FallbackDataService {
-    if (!FallbackDataService.instance) {
-      FallbackDataService.instance = new FallbackDataService();
-    }
-    return FallbackDataService.instance;
-  }
-
-  async initializeData() {
-    // Import demo data dynamically
-    const { currentYearData, monthlyAggregates, yearSummary } = await import('../data/generateYearlyData');
-    this.yearlyData = currentYearData;
-    this.monthlyData = monthlyAggregates;
-    return yearSummary;
+  constructor() {
+    this.apiService = apiService;
   }
 
   async getDashboardMetrics(): Promise<DashboardMetrics> {
-    const summary = await this.initializeData();
-    const today = new Date().toISOString().split('T')[0];
-    const todayData = this.yearlyData.filter(d => d.date === today);
+    const response = await this.apiService.getDashboardMetrics();
+    if (response.success && response.data) {
+      return response.data;
+    }
     
-    return {
-      totalGeneration: todayData.reduce((sum, d) => sum + d.generation, 0),
-      activeSites: 2,
-      totalCapacity: summary.totalCapacity,
-      performance: summary.avgEfficiency,
-      activeAlerts: Math.floor(Math.random() * 5),
-      totalRevenue: summary.totalRevenue,
-      co2Saved: summary.totalCo2Saved,
-      batteryLevel: 85 + Math.random() * 10,
-      lastUpdated: new Date().toISOString()
-    };
+    throw new Error(response.error || 'Failed to fetch dashboard metrics');
   }
 
   async getSites(): Promise<SiteData[]> {
-    const { demoSites } = await import('../data/demoCompany');
-    const today = new Date().toISOString().split('T')[0];
+    const response = await this.apiService.getSites();
+    if (response.success && response.data) {
+      return response.data;
+    }
     
-    return demoSites.map(site => {
-      const todayData = this.yearlyData.find(d => d.date === today && d.siteId === site.id);
-      const siteYearData = this.yearlyData.filter(d => d.siteId === site.id);
-      
-      return {
-        id: site.id,
-        name: site.name,
-        location: site.location.address,
-        capacity: site.system.capacity,
-        currentGeneration: todayData?.generation || 0,
-        efficiency: todayData?.efficiency || 85,
-        status: todayData?.efficiency > 90 ? 'optimal' : 
-                todayData?.efficiency > 80 ? 'good' : 
-                todayData?.efficiency > 70 ? 'warning' : 'error',
-        lastMaintenance: '2024-01-15',
-        nextMaintenance: '2024-07-15',
-        totalGeneration: siteYearData.reduce((sum, d) => sum + d.generation, 0),
-        revenue: siteYearData.reduce((sum, d) => sum + d.revenue, 0)
-      };
-    });
+    throw new Error(response.error || 'Failed to fetch sites');
   }
 
   async getGenerationData(siteId?: string, timeRange: string = '24h'): Promise<TimeSeriesData[]> {
-    await this.initializeData();
-    
-    let data = this.yearlyData;
-    if (siteId) {
-      data = data.filter(d => d.siteId === siteId);
-    }
-
-    // Filter by time range
-    const now = new Date();
-    let startDate: Date;
-    
-    switch (timeRange) {
-      case '24h':
-        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-        break;
-      case '7d':
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        break;
-      case '30d':
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        break;
-      default:
-        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    }
-
-    return data
-      .filter(d => new Date(d.date) >= startDate)
-      .map(d => ({
-        timestamp: d.date,
-        value: d.generation,
-        siteId: d.siteId
-      }))
-      .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-  }
-}
-
-export const fallbackDataService = FallbackDataService.getInstance();
-
-// Smart data service that tries API first, falls back to demo data
-export class SmartDataService {
-  private useApi: boolean = true;
-
-  async getDashboardMetrics(): Promise<DashboardMetrics> {
-    if (this.useApi) {
-      const response = await apiService.getDashboardMetrics();
-      if (response.success && response.data) {
-        return response.data;
-      }
-      console.warn('API failed, falling back to demo data');
-      this.useApi = false;
+    const response = await this.apiService.getGenerationData(siteId, timeRange);
+    if (response.success && response.data) {
+      return response.data;
     }
     
-    return fallbackDataService.getDashboardMetrics();
+    throw new Error(response.error || 'Failed to fetch generation data');
   }
 
-  async getSites(): Promise<SiteData[]> {
-    if (this.useApi) {
-      const response = await apiService.getSites();
-      if (response.success && response.data) {
-        return response.data;
-      }
-      console.warn('API failed, falling back to demo data');
-      this.useApi = false;
+  async getPerformanceData(siteId?: string, timeRange: string = '24h'): Promise<TimeSeriesData[]> {
+    const response = await this.apiService.getPerformanceData(siteId, timeRange);
+    if (response.success && response.data) {
+      return response.data;
     }
     
-    return fallbackDataService.getSites();
+    throw new Error(response.error || 'Failed to fetch performance data');
   }
 
-  async getGenerationData(siteId?: string, timeRange: string = '24h'): Promise<TimeSeriesData[]> {
-    if (this.useApi) {
-      const response = await apiService.getGenerationData(siteId, timeRange);
-      if (response.success && response.data) {
-        return response.data;
-      }
-      console.warn('API failed, falling back to demo data');
-      this.useApi = false;
+  async getRevenueData(siteId?: string, timeRange: string = '30d'): Promise<TimeSeriesData[]> {
+    const response = await this.apiService.getRevenueData(siteId, timeRange);
+    if (response.success && response.data) {
+      return response.data;
     }
     
-    return fallbackDataService.getGenerationData(siteId, timeRange);
+    throw new Error(response.error || 'Failed to fetch revenue data');
+  }
+
+  async getAlerts(): Promise<AlertData[]> {
+    const response = await this.apiService.getAlerts();
+    if (response.success && response.data) {
+      return response.data;
+    }
+    
+    throw new Error(response.error || 'Failed to fetch alerts');
   }
 
   // Health check to determine if API is available
   async checkApiHealth(): Promise<boolean> {
-    const response = await apiService.healthCheck();
-    this.useApi = response.success;
-    return this.useApi;
+    const response = await this.apiService.healthCheck();
+    return response.success;
   }
 }
 
-export const smartDataService = new SmartDataService();
+export const productionDataService = new ProductionDataService();
 
 export default apiService;

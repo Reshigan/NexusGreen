@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
       - name: nexus-api
-        image: nexus-api:latest
+        image: nexus-api:live
         imagePullPolicy: Never
         ports:
         - containerPort: 3001
