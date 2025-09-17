@@ -16,8 +16,8 @@ interface ModernLoginProps {
 }
 
 const ModernLogin: React.FC<ModernLoginProps> = ({ onLogin, onSwitchToSignup, onForgotPassword }) => {
-  const [email, setEmail] = useState('admin@gonxt.tech');
-  const [password, setPassword] = useState('Demo2024!');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -37,12 +37,7 @@ const ModernLogin: React.FC<ModernLoginProps> = ({ onLogin, onSwitchToSignup, on
     }
   };
 
-  const demoUsers = [
-    { email: 'admin@gonxt.tech', role: 'Super Admin', password: 'Demo2024!' },
-    { email: 'manager@gonxt.tech', role: 'Manager', password: 'Demo2024!' },
-    { email: 'operator@gonxt.tech', role: 'Operator', password: 'Demo2024!' },
-    { email: 'demo@nexusgreen.com', role: 'Viewer', password: 'Demo2024!' }
-  ];
+
 
   return (
     <div 
@@ -231,30 +226,7 @@ const ModernLogin: React.FC<ModernLoginProps> = ({ onLogin, onSwitchToSignup, on
               </button>
             </div>
 
-            <Separator className="my-6" />
 
-            {/* Demo Accounts */}
-            <div className="space-y-3">
-              <p className="text-xs text-gray-500 text-center font-medium">Demo Accounts</p>
-              <div className="grid grid-cols-2 gap-2">
-                {demoUsers.map((user, index) => (
-                  <motion.button
-                    key={user.email}
-                    initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 + index * 0.1 }}
-                    onClick={() => {
-                      setEmail(user.email);
-                      setPassword(user.password);
-                    }}
-                    className="p-2 text-xs rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-all duration-200"
-                  >
-                    <div className="font-medium text-gray-700">{user.role}</div>
-                    <div className="text-gray-500 truncate">{user.email}</div>
-                  </motion.button>
-                ))}
-              </div>
-            </div>
 
             {/* Features Preview */}
             <motion.div

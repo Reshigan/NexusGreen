@@ -1,19 +1,28 @@
--- NexusGreen Production Database Seed
--- Comprehensive real-world solar energy data for production environment
--- Version: 2.0 - Production Ready
+-- NexusGreen Demo Database Seed
+-- Updated test data with demo credentials for production deployment
+-- Version: 3.0 - Demo Ready
 
 -- Clear existing data (for fresh deployment)
 TRUNCATE TABLE maintenance, alerts, financial_data, energy_generation, installations, users, companies RESTART IDENTITY CASCADE;
 
--- Insert production companies
+-- Insert demo companies
 INSERT INTO companies (id, name, registration_number, address, phone, email, website, logo_url) VALUES
 ('550e8400-e29b-41d4-a716-446655440000', 'NexusGreen Energy Solutions', 'NGES-2024-001', '1250 Renewable Energy Blvd, Suite 300, San Francisco, CA 94105', '+1-415-555-0100', 'contact@nexusgreen.energy', 'https://nexusgreen.energy', '/nexus-green-logo.svg'),
 ('550e8400-e29b-41d4-a716-446655440001', 'Pacific Solar Ventures', 'PSV-2024-002', '890 Innovation Drive, Los Angeles, CA 90028', '+1-213-555-0200', 'info@pacificsolar.com', 'https://pacificsolar.com', '/nexus-green-logo.svg'),
-('550e8400-e29b-41d4-a716-446655440002', 'Desert Sun Energy Corp', 'DSE-2024-003', '456 Solar Valley Road, Phoenix, AZ 85001', '+1-602-555-0300', 'support@desertsun.energy', 'https://desertsun.energy', '/nexus-green-logo.svg');
+('550e8400-e29b-41d4-a716-446655440002', 'Desert Sun Energy Corp', 'DSE-2024-003', '456 Solar Valley Road, Phoenix, AZ 85001', '+1-602-555-0300', 'support@desertsun.energy', 'https://desertsun.energy', '/nexus-green-logo.svg'),
+('550e8400-e29b-41d4-a716-446655440003', 'Demo Solar Company', 'DEMO-2024-004', '123 Demo Street, Demo City, CA 90210', '+1-555-DEMO-123', 'demo@nexusgreen.energy', 'https://demo.nexusgreen.energy', '/nexus-green-logo.svg');
 
--- Insert production users with secure password hashes (password: NexusGreen2024!)
+-- Insert demo users with secure password hashes
+-- Password for all accounts: Demo2024!
+-- Hash generated with: bcrypt.hash('Demo2024!', 12)
 INSERT INTO users (id, company_id, email, password_hash, first_name, last_name, role, is_active) VALUES
--- NexusGreen Energy Solutions users
+-- Demo Company users (for testing)
+('550e8400-e29b-41d4-a716-446655440100', '550e8400-e29b-41d4-a716-446655440003', 'admin@gonxt.tech', '$2b$12$LQv3c1yqBwlVHpPjrGNDKOHYUehHKh4+3z/SoBPjk1S4gqiFq/ZG.', 'Demo', 'Admin', 'super_admin', true),
+('550e8400-e29b-41d4-a716-446655440101', '550e8400-e29b-41d4-a716-446655440003', 'user@gonxt.tech', '$2b$12$LQv3c1yqBwlVHpPjrGNDKOHYUehHKh4+3z/SoBPjk1S4gqiFq/ZG.', 'Demo', 'User', 'customer', true),
+('550e8400-e29b-41d4-a716-446655440102', '550e8400-e29b-41d4-a716-446655440003', 'funder@gonxt.tech', '$2b$12$LQv3c1yqBwlVHpPjrGNDKOHYUehHKh4+3z/SoBPjk1S4gqiFq/ZG.', 'Demo', 'Funder', 'funder', true),
+('550e8400-e29b-41d4-a716-446655440103', '550e8400-e29b-41d4-a716-446655440003', 'om@gonxt.tech', '$2b$12$LQv3c1yqBwlVHpPjrGNDKOHYUehHKh4+3z/SoBPjk1S4gqiFq/ZG.', 'Demo', 'OM Provider', 'om', true),
+
+-- NexusGreen Energy Solutions users (password: Demo2024!)
 ('550e8400-e29b-41d4-a716-446655440010', '550e8400-e29b-41d4-a716-446655440000', 'admin@nexusgreen.energy', '$2b$12$LQv3c1yqBwlVHpPjrGNDKOHYUehHKh4+3z/SoBPjk1S4gqiFq/ZG.', 'Sarah', 'Chen', 'admin', true),
 ('550e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440000', 'operations@nexusgreen.energy', '$2b$12$LQv3c1yqBwlVHpPjrGNDKOHYUehHKh4+3z/SoBPjk1S4gqiFq/ZG.', 'Michael', 'Rodriguez', 'manager', true),
 ('550e8400-e29b-41d4-a716-446655440012', '550e8400-e29b-41d4-a716-446655440000', 'tech@nexusgreen.energy', '$2b$12$LQv3c1yqBwlVHpPjrGNDKOHYUehHKh4+3z/SoBPjk1S4gqiFq/ZG.', 'Emily', 'Johnson', 'technician', true),

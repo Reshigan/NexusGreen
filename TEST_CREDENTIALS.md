@@ -6,30 +6,44 @@ The production deployment includes comprehensive seeded data with multiple test 
 
 ### Test Login Credentials
 
-**Password for all accounts**: `NexusGreen2024!`
+**Password for all accounts**: `Demo2024!`
+
+#### Demo Company (Primary Test Accounts)
+- **Super Admin**: `admin@gonxt.tech` / `Demo2024!`
+  - User: Demo Admin (Super Admin)
+  - Full system access across all portals
+- **Customer**: `user@gonxt.tech` / `Demo2024!`
+  - User: Demo User (Customer)
+  - Customer portal access
+- **Funder**: `funder@gonxt.tech` / `Demo2024!`
+  - User: Demo Funder (Funder)
+  - Funder portal access
+- **OM Provider**: `om@gonxt.tech` / `Demo2024!`
+  - User: Demo OM Provider (Operations & Maintenance)
+  - OM Provider portal access
 
 #### NexusGreen Energy Solutions
-- **Admin**: `admin@nexusgreen.energy` / `NexusGreen2024!`
-  - User: Sarah Chen (Admin)
+- **Admin**: `admin@nexusgreen.energy` / `Demo2024!`
+  - User: Sarah Chen (Super Admin)
   - Full system access
-- **Manager**: `operations@nexusgreen.energy` / `NexusGreen2024!`
-  - User: Michael Rodriguez (Manager)
-  - Operations management access
-- **Technician**: `tech@nexusgreen.energy` / `NexusGreen2024!`
-  - User: Emily Johnson (Technician)
-  - Technical operations access
+- **Manager**: `operations@nexusgreen.energy` / `Demo2024!`
+  - User: Michael Rodriguez (Customer)
+  - Customer portal access
+- **Technician**: `tech@nexusgreen.energy` / `Demo2024!`
+  - User: Emily Johnson (OM Provider)
+  - OM Provider portal access
 
 #### Pacific Solar Ventures
-- **Admin**: `admin@pacificsolar.com` / `NexusGreen2024!`
-  - User: David Kim (Admin)
+- **Admin**: `admin@pacificsolar.com` / `Demo2024!`
+  - User: David Kim (Super Admin)
   - Full system access
-- **Manager**: `manager@pacificsolar.com` / `NexusGreen2024!`
-  - User: Lisa Thompson (Manager)
-  - Operations management access
+- **Manager**: `manager@pacificsolar.com` / `Demo2024!`
+  - User: Lisa Thompson (Customer)
+  - Customer portal access
 
 #### Desert Sun Energy Corp
-- **Admin**: `admin@desertsun.energy` / `NexusGreen2024!`
-  - User: Robert Martinez (Admin)
+- **Admin**: `admin@desertsun.energy` / `Demo2024!`
+  - User: Robert Martinez (Super Admin)
   - Full system access
 
 ## Test Data Included
@@ -75,8 +89,8 @@ The production deployment includes comprehensive seeded data with multiple test 
    - HTTPS: `https://nexus.gonxt.tech/` (after SSL setup)
 
 3. **Login with any test account**:
-   - Email: `admin@nexusgreen.energy`
-   - Password: `NexusGreen2024!`
+   - Email: `admin@gonxt.tech`
+   - Password: `Demo2024!`
 
 4. **Explore features**:
    - Dashboard with real-time data
@@ -96,7 +110,7 @@ curl https://nexus.gonxt.tech/api-health
 # Login (get auth token)
 curl -X POST https://nexus.gonxt.tech/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@nexusgreen.energy","password":"NexusGreen2024!"}'
+  -d '{"email":"admin@gonxt.tech","password":"Demo2024!"}'
 
 # Get installations (with auth token)
 curl https://nexus.gonxt.tech/api/installations \

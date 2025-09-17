@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nexus-green-prod
+  labels:
+    name: nexus-green-prod
+    environment: production

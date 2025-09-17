@@ -135,7 +135,7 @@ class ApiService {
 
   // Authentication endpoints
   async login(email: string, password: string): Promise<ApiResponse<{ token: string; user: any }>> {
-    const response = await this.request<{ token: string; user: any }>('/api/auth/login', {
+    const response = await this.request<{ token: string; user: any }>('/api/v1/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
@@ -148,7 +148,7 @@ class ApiService {
   }
 
   async logout(): Promise<ApiResponse<void>> {
-    const response = await this.request<void>('/api/auth/logout', {
+    const response = await this.request<void>('/api/v1/auth/logout', {
       method: 'POST',
     });
     this.clearToken();

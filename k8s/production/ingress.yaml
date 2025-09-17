@@ -1,0 +1,56 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nexus-green-ingress
+  namespace: nexus-green-prod
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+    traefik.ingress.kubernetes.io/redirect-entry-point: https
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+  - hosts:
+    - nexusgreen.com  # Replace with your domain
+    - www.nexusgreen.com  # Replace with your domain
+    secretName: nexus-green-tls
+  rules:
+  - host: nexusgreen.com  # Replace with your domain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nexus-frontend
+            port:
+              number: 80
+  - host: www.nexusgreen.com  # Replace with your domain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nexus-frontend
+            port:
+              number: 80
+---
+# HTTP-only ingress for IP access (fallback)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nexus-green-http
+  namespace: nexus-green-prod
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nexus-frontend
+            port:
+              number: 80

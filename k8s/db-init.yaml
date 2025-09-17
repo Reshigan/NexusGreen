@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: nexus-db-schema
+  namespace: nexus-green-prod
+spec:
+  template:
+    spec:
+      containers:
+      - name: db-schema
+        image: nexus-green-api:latest
+        command: ["npm", "run", "db:migrate"]
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://nexusgreen:nexusgreen_secure_password_2024@postgres:5432/nexusgreen"
+      restartPolicy: OnFailure
+  backoffLimit: 3
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: nexus-db-seed
+  namespace: nexus-green-prod
+spec:
+  template:
+    spec:
+      containers:
+      - name: db-seed
+        image: nexus-green-api:latest
+        command: ["npm", "run", "db:seed"]
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://nexusgreen:nexusgreen_secure_password_2024@postgres:5432/nexusgreen"
+      restartPolicy: OnFailure
+  backoffLimit: 3

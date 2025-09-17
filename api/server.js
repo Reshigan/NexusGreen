@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const { Pool } = require('pg');
+const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 const app = express();
@@ -338,13 +339,14 @@ app.post('/api/v1/auth/login', async (req, res) => {
 
     const user = userResult.rows[0];
     
-    // In production, you would verify the password hash here
-    // For now, we'll accept any password for existing users
-    // const bcrypt = require('bcrypt');
-    // const isValidPassword = await bcrypt.compare(password, user.password_hash);
-    // if (!isValidPassword) {
-    //   return res.status(401).json({ error: 'Invalid credentials' });
-    // }
+    // Verify the password hash
+    const isValidPassword = await bcrypt.compare(password, user.password_hash);
+    if (!isValidPassword) {
+      return res.status(401).json({ 
+        error: 'Invalid credentials',
+        message: 'Email or password is incorrect' 
+      });
+    }
 
     // Update last login
     await pool.query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1', [user.id]);

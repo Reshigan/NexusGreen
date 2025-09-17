@@ -107,14 +107,7 @@ const Login = () => {
             </Button>
           </form>
           
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-            <h4 className="text-sm font-semibold text-green-800 mb-2">Demo Credentials</h4>
-            <div className="text-xs text-green-700 space-y-1">
-              <p><strong>Admin:</strong> admin@gonxt.tech / Demo2024!</p>
-              <p><strong>User:</strong> user@gonxt.tech / Demo2024!</p>
-            </div>
-          </div>
+
           
           <div className="mt-6 text-center text-sm text-gray-500 space-y-2">
             <p>
