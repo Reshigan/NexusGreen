@@ -358,13 +358,12 @@ app.post('/api/v1/auth/login', async (req, res) => {
       email: user.email,
       firstName: user.first_name,
       lastName: user.last_name,
-      role: user.role.toUpperCase(),
-      organizationId: user.company_id,
+      role: user.role,
+      companyId: user.company_id,
       avatar: null,
       lastLogin: new Date().toISOString(),
       isActive: user.is_active,
-      permissions: ['read', 'write', user.role === 'admin' ? 'admin' : 'user'],
-      emailVerified: true,
+      permissions: user.permissions || {},
       createdAt: user.created_at,
       updatedAt: user.updated_at
     };

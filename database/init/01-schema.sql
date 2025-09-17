@@ -18,7 +18,7 @@ CREATE TABLE companies (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Users table
+-- Users table with 4 user profiles: super_admin, customer, funder, om (Operations & Maintenance)
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
@@ -26,7 +26,8 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
-    role VARCHAR(50) DEFAULT 'user',
+    role VARCHAR(50) DEFAULT 'customer' CHECK (role IN ('super_admin', 'customer', 'funder', 'om')),
+    permissions JSONB DEFAULT '{}',
     is_active BOOLEAN DEFAULT true,
     last_login TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,

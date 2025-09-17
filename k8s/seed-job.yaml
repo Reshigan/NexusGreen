@@ -31,7 +31,7 @@ spec:
             sleep 2
           done
           echo "PostgreSQL is ready, running seeding script..."
-          psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -f /seed/seed-production.sql
+          psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -f /seed/seed-demo.sql
           echo "Database seeding completed successfully!"
         volumeMounts:
         - name: seed-script
@@ -49,392 +49,84 @@ metadata:
   name: db-seed-script
   namespace: nexus-green
 data:
-  seed-production.sql: |
-    -- NexusGreen Production Database Seeding Script
-    -- Comprehensive production-ready data for live deployment
-    -- Version: 3.0 - Live Production Data
-
-    -- Clear existing data for fresh deployment
-    TRUNCATE TABLE maintenance, alerts, financial_data, energy_generation, installations, users, companies RESTART IDENTITY CASCADE;
-
-    -- Insert production companies with real-world data
+  seed-demo.sql: |
+    -- Demo seed data for NexusGreen Solar Platform
+    -- Contains one demo user for each of the 4 user profiles
+    
+    -- Insert demo company
     INSERT INTO companies (id, name, registration_number, address, phone, email, website, logo_url) VALUES
-    ('550e8400-e29b-41d4-a716-446655440000', 'NexusGreen Energy Solutions', 'NGES-2024-001', '1250 Renewable Energy Blvd, Suite 300, San Francisco, CA 94105', '+1-415-555-0100', 'contact@nexusgreen.energy', 'https://nexusgreen.energy', '/nexus-green-logo.svg'),
-    ('550e8400-e29b-41d4-a716-446655440001', 'Pacific Solar Ventures', 'PSV-2024-002', '890 Innovation Drive, Los Angeles, CA 90028', '+1-213-555-0200', 'info@pacificsolar.com', 'https://pacificsolar.com', '/nexus-green-logo.svg'),
-    ('550e8400-e29b-41d4-a716-446655440002', 'Desert Sun Energy Corp', 'DSE-2024-003', '456 Solar Valley Road, Phoenix, AZ 85001', '+1-602-555-0300', 'support@desertsun.energy', 'https://desertsun.energy', '/nexus-green-logo.svg'),
-    ('550e8400-e29b-41d4-a716-446655440003', 'GreenTech Solar Systems', 'GTS-2024-004', '789 Clean Energy Way, Austin, TX 78701', '+1-512-555-0400', 'hello@greentech.solar', 'https://greentech.solar', '/nexus-green-logo.svg'),
-    ('550e8400-e29b-41d4-a716-446655440004', 'Sunshine Power Solutions', 'SPS-2024-005', '321 Solar Park Drive, Miami, FL 33101', '+1-305-555-0500', 'info@sunshinepower.com', 'https://sunshinepower.com', '/nexus-green-logo.svg');
-
-    -- Insert production users with secure password hashes (password: NexusGreen2024!)
-    INSERT INTO users (id, company_id, email, password_hash, first_name, last_name, role, is_active) VALUES
-    -- NexusGreen Energy Solutions users
-    ('550e8400-e29b-41d4-a716-446655440010', '550e8400-e29b-41d4-a716-446655440000', 'admin@nexusgreen.energy', '$2b$12$LQv3c1yqBwlVHpPjrGNDKOHYUehHKh4+3z/SoBPjk1S4gqiFq/ZG.', 'Sarah', 'Chen', 'admin', true),
-    ('550e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440000', 'operations@nexusgreen.energy', '$2b$12$LQv3c1yqBwlVHpPjrGNDKOHYUehHKh4+3z/SoBPjk1S4gqiFq/ZG.', 'Michael', 'Rodriguez', 'manager', true),
-    ('550e8400-e29b-41d4-a716-446655440012', '550e8400-e29b-41d4-a716-446655440000', 'tech@nexusgreen.energy', '$2b$12$LQv3c1yqBwlVHpPjrGNDKOHYUehHKh4+3z/SoBPjk1S4gqiFq/ZG.', 'Emily', 'Johnson', 'technician', true),
-
-    -- Pacific Solar Ventures users
-    ('550e8400-e29b-41d4-a716-446655440013', '550e8400-e29b-41d4-a716-446655440001', 'admin@pacificsolar.com', '$2b$12$LQv3c1yqBwlVHpPjrGNDKOHYUehHKh4+3z/SoBPjk1S4gqiFq/ZG.', 'David', 'Kim', 'admin', true),
-    ('550e8400-e29b-41d4-a716-446655440014', '550e8400-e29b-41d4-a716-446655440001', 'manager@pacificsolar.com', '$2b$12$LQv3c1yqBwlVHpPjrGNDKOHYUehHKh4+3z/SoBPjk1S4gqiFq/ZG.', 'Lisa', 'Thompson', 'manager', true),
-
-    -- Desert Sun Energy Corp users
-    ('550e8400-e29b-41d4-a716-446655440015', '550e8400-e29b-41d4-a716-446655440002', 'admin@desertsun.energy', '$2b$12$LQv3c1yqBwlVHpPjrGNDKOHYUehHKh4+3z/SoBPjk1S4gqiFq/ZG.', 'Robert', 'Martinez', 'admin', true),
-    ('550e8400-e29b-41d4-a716-446655440016', '550e8400-e29b-41d4-a716-446655440002', 'operations@desertsun.energy', '$2b$12$LQv3c1yqBwlVHpPjrGNDKOHYUehHKh4+3z/SoBPjk1S4gqiFq/ZG.', 'Maria', 'Garcia', 'manager', true),
-
-    -- GreenTech Solar Systems users
-    ('550e8400-e29b-41d4-a716-446655440017', '550e8400-e29b-41d4-a716-446655440003', 'admin@greentech.solar', '$2b$12$LQv3c1yqBwlVHpPjrGNDKOHYUehHKh4+3z/SoBPjk1S4gqiFq/ZG.', 'James', 'Wilson', 'admin', true),
-    ('550e8400-e29b-41d4-a716-446655440018', '550e8400-e29b-41d4-a716-446655440003', 'tech@greentech.solar', '$2b$12$LQv3c1yqBwlVHpPjrGNDKOHYUehHKh4+3z/SoBPjk1S4gqiFq/ZG.', 'Jennifer', 'Brown', 'technician', true),
-
-    -- Sunshine Power Solutions users
-    ('550e8400-e29b-41d4-a716-446655440019', '550e8400-e29b-41d4-a716-446655440004', 'admin@sunshinepower.com', '$2b$12$LQv3c1yqBwlVHpPjrGNDKOHYUehHKh4+3z/SoBPjk1S4gqiFq/ZG.', 'Carlos', 'Hernandez', 'admin', true),
-    ('550e8400-e29b-41d4-a716-446655440020', '550e8400-e29b-41d4-a716-446655440004', 'manager@sunshinepower.com', '$2b$12$LQv3c1yqBwlVHpPjrGNDKOHYUehHKh4+3z/SoBPjk1S4gqiFq/ZG.', 'Ana', 'Lopez', 'manager', true);
-
-    -- Insert comprehensive solar installations across multiple states
+    ('550e8400-e29b-41d4-a716-446655440000', 'NexusGreen Demo Corp', 'NGC-2024-001', '123 Solar Street, Green Valley, CA 90210', '+1-555-SOLAR-01', 'info@nexusgreen.demo', 'https://nexusgreen.demo', '/nexus-green-logo.svg');
+    
+    -- Insert 4 demo users with different roles
+    -- Password for all users: Demo2024! (hashed with bcrypt)
+    INSERT INTO users (id, company_id, email, password_hash, first_name, last_name, role, permissions, is_active) VALUES
+    -- Super Admin
+    ('550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440000', 'admin@nexusgreen.demo', '$2b$10$8K1p/a0drtIEaYKTty6aou6BcQQUrkFHPfOcf5aq2i4/6b7n3PDUO', 'Super', 'Admin', 'super_admin', '{"all_access": true, "manage_users": true, "manage_companies": true, "view_all_data": true, "system_config": true}', true),
+    
+    -- Customer
+    ('550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440000', 'customer@nexusgreen.demo', '$2b$10$8K1p/a0drtIEaYKTty6aou6BcQQUrkFHPfOcf5aq2i4/6b7n3PDUO', 'John', 'Customer', 'customer', '{"view_own_installations": true, "view_reports": true, "manage_profile": true}', true),
+    
+    -- Funder/Investor
+    ('550e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440000', 'funder@nexusgreen.demo', '$2b$10$8K1p/a0drtIEaYKTty6aou6BcQQUrkFHPfOcf5aq2i4/6b7n3PDUO', 'Sarah', 'Investor', 'funder', '{"view_financial_data": true, "view_roi_reports": true, "view_portfolio": true, "export_reports": true}', true),
+    
+    -- Operations & Maintenance
+    ('550e8400-e29b-41d4-a716-446655440004', '550e8400-e29b-41d4-a716-446655440000', 'om@nexusgreen.demo', '$2b$10$8K1p/a0drtIEaYKTty6aou6BcQQUrkFHPfOcf5aq2i4/6b7n3PDUO', 'Mike', 'Technician', 'om', '{"manage_maintenance": true, "view_alerts": true, "update_system_status": true, "schedule_maintenance": true}', true);
+    
+    -- Insert demo solar installations
     INSERT INTO installations (id, company_id, name, location, latitude, longitude, capacity_kw, installation_date, system_type, panel_count, inverter_type, status) VALUES
-    -- NexusGreen Energy Solutions installations (California)
-    ('550e8400-e29b-41d4-a716-446655440030', '550e8400-e29b-41d4-a716-446655440000', 'Bay Area Corporate Campus', 'Palo Alto, CA', 37.4419, -122.1430, 2500.00, '2023-03-15', 'Grid-tied Commercial', 8333, 'SMA Sunny Central 2500-EV', 'active'),
-    ('550e8400-e29b-41d4-a716-446655440031', '550e8400-e29b-41d4-a716-446655440000', 'Fremont Manufacturing Facility', 'Fremont, CA', 37.5485, -121.9886, 1800.00, '2023-06-20', 'Grid-tied Industrial', 6000, 'Fronius Eco 25.0-3-S', 'active'),
-    ('550e8400-e29b-41d4-a716-446655440032', '550e8400-e29b-41d4-a716-446655440000', 'San Jose Distribution Center', 'San Jose, CA', 37.3382, -121.8863, 3200.00, '2023-09-10', 'Grid-tied Commercial', 10667, 'SolarEdge SE82.8K', 'active'),
-    ('550e8400-e29b-41d4-a716-446655440033', '550e8400-e29b-41d4-a716-446655440000', 'Napa Valley Winery', 'Napa, CA', 38.2975, -122.2869, 850.00, '2024-01-25', 'Grid-tied Agricultural', 2833, 'Enphase IQ8M-72-2-US', 'active'),
-    ('550e8400-e29b-41d4-a716-446655440034', '550e8400-e29b-41d4-a716-446655440000', 'Sacramento Government Complex', 'Sacramento, CA', 38.5816, -121.4944, 1950.00, '2024-03-12', 'Grid-tied Government', 6500, 'SMA Sunny Tripower CORE1', 'active'),
-
-    -- Pacific Solar Ventures installations (California)
-    ('550e8400-e29b-41d4-a716-446655440035', '550e8400-e29b-41d4-a716-446655440001', 'LAX Cargo Terminal Solar', 'Los Angeles, CA', 33.9425, -118.4081, 4500.00, '2023-02-28', 'Grid-tied Commercial', 15000, 'SMA Sunny Central 4600CP XT', 'active'),
-    ('550e8400-e29b-41d4-a716-446655440036', '550e8400-e29b-41d4-a716-446655440001', 'Long Beach Port Authority', 'Long Beach, CA', 33.7701, -118.1937, 3800.00, '2023-07-15', 'Grid-tied Industrial', 12667, 'ABB PVS980-Central-2500', 'active'),
-    ('550e8400-e29b-41d4-a716-446655440037', '550e8400-e29b-41d4-a716-446655440001', 'Riverside Logistics Hub', 'Riverside, CA', 33.9533, -117.3962, 2200.00, '2023-11-08', 'Grid-tied Commercial', 7333, 'Fronius Symo 24.0-3-M', 'active'),
-    ('550e8400-e29b-41d4-a716-446655440038', '550e8400-e29b-41d4-a716-446655440001', 'San Diego Tech Campus', 'San Diego, CA', 32.7157, -117.1611, 2800.00, '2024-02-20', 'Grid-tied Commercial', 9333, 'SolarEdge SE100K', 'active'),
-
-    -- Desert Sun Energy Corp installations (Arizona)
-    ('550e8400-e29b-41d4-a716-446655440039', '550e8400-e29b-41d4-a716-446655440002', 'Phoenix Sky Harbor Solar Farm', 'Phoenix, AZ', 33.4484, -112.0740, 5200.00, '2023-04-12', 'Utility-scale', 17333, 'SMA Sunny Central 5000CP XT', 'active'),
-    ('550e8400-e29b-41d4-a716-446655440040', '550e8400-e29b-41d4-a716-446655440002', 'Tucson Medical Center', 'Tucson, AZ', 32.2226, -110.9747, 1600.00, '2023-08-30', 'Grid-tied Commercial', 5333, 'SolarEdge SE55K', 'active'),
-    ('550e8400-e29b-41d4-a716-446655440041', '550e8400-e29b-41d4-a716-446655440002', 'Scottsdale Corporate Plaza', 'Scottsdale, AZ', 33.4942, -111.9261, 2800.00, '2024-02-14', 'Grid-tied Commercial', 9333, 'Fronius Primo GEN24 Plus', 'active'),
-    ('550e8400-e29b-41d4-a716-446655440042', '550e8400-e29b-41d4-a716-446655440002', 'Mesa Industrial Park', 'Mesa, AZ', 33.4152, -111.8315, 3400.00, '2024-04-08', 'Grid-tied Industrial', 11333, 'Huawei SUN2000-215KTL-H0', 'active'),
-
-    -- GreenTech Solar Systems installations (Texas)
-    ('550e8400-e29b-41d4-a716-446655440043', '550e8400-e29b-41d4-a716-446655440003', 'Austin Tech District', 'Austin, TX', 30.2672, -97.7431, 3600.00, '2023-05-18', 'Grid-tied Commercial', 12000, 'SMA Sunny Central 3600CP XT', 'active'),
-    ('550e8400-e29b-41d4-a716-446655440044', '550e8400-e29b-41d4-a716-446655440003', 'Houston Energy Corridor', 'Houston, TX', 29.7604, -95.3698, 4200.00, '2023-09-25', 'Grid-tied Commercial', 14000, 'ABB PVS980-Central-3150', 'active'),
-    ('550e8400-e29b-41d4-a716-446655440045', '550e8400-e29b-41d4-a716-446655440003', 'Dallas Distribution Center', 'Dallas, TX', 32.7767, -96.7970, 2900.00, '2024-01-15', 'Grid-tied Industrial', 9667, 'Fronius Eco 27.0-3-S', 'active'),
-    ('550e8400-e29b-41d4-a716-446655440046', '550e8400-e29b-41d4-a716-446655440003', 'San Antonio Medical Complex', 'San Antonio, TX', 29.4241, -98.4936, 2100.00, '2024-03-28', 'Grid-tied Healthcare', 7000, 'SolarEdge SE82.8K', 'active'),
-
-    -- Sunshine Power Solutions installations (Florida)
-    ('550e8400-e29b-41d4-a716-446655440047', '550e8400-e29b-41d4-a716-446655440004', 'Miami International Airport', 'Miami, FL', 25.7617, -80.1918, 5800.00, '2023-01-20', 'Grid-tied Commercial', 19333, 'SMA Sunny Central 5800CP XT', 'active'),
-    ('550e8400-e29b-41d4-a716-446655440048', '550e8400-e29b-41d4-a716-446655440004', 'Orlando Theme Park Resort', 'Orlando, FL', 28.5383, -81.3792, 3900.00, '2023-06-12', 'Grid-tied Commercial', 13000, 'ABB PVS980-Central-2900', 'active'),
-    ('550e8400-e29b-41d4-a716-446655440049', '550e8400-e29b-41d4-a716-446655440004', 'Tampa Bay Logistics Center', 'Tampa, FL', 27.9506, -82.4572, 2600.00, '2023-10-30', 'Grid-tied Industrial', 8667, 'Fronius Symo 20.0-3-M', 'active'),
-    ('550e8400-e29b-41d4-a716-446655440050', '550e8400-e29b-41d4-a716-446655440004', 'Jacksonville Port Authority', 'Jacksonville, FL', 30.3322, -81.6557, 3100.00, '2024-02-05', 'Grid-tied Industrial', 10333, 'SolarEdge SE100K', 'active');
-
-    -- Generate comprehensive energy generation data for the last 120 days
-    DO $$
-    DECLARE
-        installation_record RECORD;
-        current_date DATE;
-        hour_val INTEGER;
-        base_generation DECIMAL;
-        weather_factor DECIMAL;
-        hour_factor DECIMAL;
-        seasonal_factor DECIMAL;
-        location_factor DECIMAL;
-        day_of_year INTEGER;
-        state_factor DECIMAL;
-    BEGIN
-        FOR installation_record IN SELECT id, capacity_kw, latitude, longitude FROM installations LOOP
-            FOR i IN 0..119 LOOP
-                current_date := CURRENT_DATE - INTERVAL '1 day' * i;
-                day_of_year := EXTRACT(DOY FROM current_date);
-                
-                -- Seasonal adjustment (higher in summer, lower in winter)
-                seasonal_factor := 0.7 + 0.5 * SIN(2 * PI() * (day_of_year - 80) / 365);
-                
-                -- State-based location factor
-                state_factor := CASE 
-                    WHEN installation_record.latitude > 37 THEN 0.9  -- Northern CA
-                    WHEN installation_record.latitude > 33 AND installation_record.longitude < -115 THEN 1.0  -- Southern CA
-                    WHEN installation_record.latitude > 30 AND installation_record.longitude > -105 THEN 1.15  -- Texas
-                    WHEN installation_record.latitude > 25 AND installation_record.longitude > -85 THEN 1.1  -- Florida
-                    ELSE 1.2  -- Arizona (highest solar potential)
-                END;
-                
-                FOR hour_val IN 5..19 LOOP
-                    -- Realistic solar generation curve based on sun position
-                    hour_factor := CASE 
-                        WHEN hour_val = 5 THEN 0.02
-                        WHEN hour_val = 6 THEN 0.12
-                        WHEN hour_val = 7 THEN 0.28
-                        WHEN hour_val = 8 THEN 0.48
-                        WHEN hour_val = 9 THEN 0.68
-                        WHEN hour_val = 10 THEN 0.85
-                        WHEN hour_val = 11 THEN 0.95
-                        WHEN hour_val = 12 THEN 1.00
-                        WHEN hour_val = 13 THEN 0.98
-                        WHEN hour_val = 14 THEN 0.88
-                        WHEN hour_val = 15 THEN 0.72
-                        WHEN hour_val = 16 THEN 0.52
-                        WHEN hour_val = 17 THEN 0.32
-                        WHEN hour_val = 18 THEN 0.15
-                        WHEN hour_val = 19 THEN 0.03
-                        ELSE 0.0
-                    END;
-                    
-                    -- Weather variability with regional patterns
-                    weather_factor := CASE 
-                        WHEN installation_record.longitude > -85 THEN  -- Florida (more variable weather)
-                            CASE 
-                                WHEN RANDOM() < 0.15 THEN 0.1 + (RANDOM() * 0.3)  -- 15% rainy days
-                                WHEN RANDOM() < 0.35 THEN 0.4 + (RANDOM() * 0.4)  -- 20% cloudy days
-                                ELSE 0.75 + (RANDOM() * 0.25)  -- 65% sunny days
-                            END
-                        WHEN installation_record.longitude > -105 THEN  -- Texas (moderate variability)
-                            CASE 
-                                WHEN RANDOM() < 0.08 THEN 0.15 + (RANDOM() * 0.35)  -- 8% rainy days
-                                WHEN RANDOM() < 0.25 THEN 0.5 + (RANDOM() * 0.35)  -- 17% cloudy days
-                                ELSE 0.8 + (RANDOM() * 0.2)  -- 75% sunny days
-                            END
-                        ELSE  -- California/Arizona (mostly sunny)
-                            CASE 
-                                WHEN RANDOM() < 0.05 THEN 0.2 + (RANDOM() * 0.3)  -- 5% rainy days
-                                WHEN RANDOM() < 0.20 THEN 0.6 + (RANDOM() * 0.3)  -- 15% cloudy days
-                                ELSE 0.85 + (RANDOM() * 0.15)  -- 80% sunny days
-                            END
-                    END;
-                    
-                    base_generation := installation_record.capacity_kw * hour_factor * weather_factor * seasonal_factor * state_factor;
-                    
-                    INSERT INTO energy_generation (installation_id, date, hour, energy_kwh, irradiance, temperature, weather_condition)
-                    VALUES (
-                        installation_record.id,
-                        current_date,
-                        hour_val,
-                        GREATEST(0, base_generation + (RANDOM() - 0.5) * base_generation * 0.08), -- Add 8% noise
-                        CASE 
-                            WHEN weather_factor < 0.4 THEN 150 + (RANDOM() * 350)  -- Low irradiance for bad weather
-                            WHEN weather_factor < 0.7 THEN 450 + (RANDOM() * 450)  -- Medium irradiance for cloudy
-                            ELSE 750 + (RANDOM() * 250)  -- High irradiance for sunny
-                        END,
-                        CASE 
-                            WHEN installation_record.longitude > -85 THEN 22 + (RANDOM() * 18)  -- Florida: 22-40°C
-                            WHEN installation_record.longitude > -105 THEN 18 + (RANDOM() * 22)  -- Texas: 18-40°C
-                            WHEN installation_record.latitude > 37 THEN 12 + (RANDOM() * 23)  -- Northern CA: 12-35°C
-                            WHEN installation_record.latitude > 33 THEN 15 + (RANDOM() * 25)  -- Southern CA: 15-40°C
-                            ELSE 18 + (RANDOM() * 27)  -- Arizona: 18-45°C
-                        END,
-                        CASE 
-                            WHEN weather_factor < 0.4 THEN 'rainy'
-                            WHEN weather_factor < 0.7 THEN 'cloudy'
-                            ELSE 'sunny'
-                        END
-                    );
-                END LOOP;
-            END LOOP;
-        END LOOP;
-    END $$;
-
-    -- Generate comprehensive financial data with regional market rates
-    DO $$
-    DECLARE
-        installation_record RECORD;
-        current_date DATE;
-        daily_generation DECIMAL;
-        ppa_rate DECIMAL;
-        grid_rate DECIMAL;
-        state_grid_rate DECIMAL;
-    BEGIN
-        FOR installation_record IN SELECT id, capacity_kw, latitude, longitude FROM installations LOOP
-            -- Set state-specific grid rates
-            state_grid_rate := CASE 
-                WHEN installation_record.longitude > -85 THEN 0.32  -- Florida: $0.32/kWh
-                WHEN installation_record.longitude > -105 THEN 0.28  -- Texas: $0.28/kWh
-                WHEN installation_record.latitude > 33 AND installation_record.longitude < -115 THEN 0.35  -- California: $0.35/kWh
-                ELSE 0.30  -- Arizona: $0.30/kWh
-            END;
-            
-            FOR i IN 0..119 LOOP
-                current_date := CURRENT_DATE - INTERVAL '1 day' * i;
-                
-                -- Variable PPA rates based on installation size, date, and location
-                ppa_rate := CASE 
-                    WHEN installation_record.capacity_kw > 4000 THEN 0.07 + (RANDOM() * 0.02)  -- Large installations: $0.07-0.09/kWh
-                    WHEN installation_record.capacity_kw > 2500 THEN 0.09 + (RANDOM() * 0.02)  -- Medium-large: $0.09-0.11/kWh
-                    WHEN installation_record.capacity_kw > 1500 THEN 0.11 + (RANDOM() * 0.02)  -- Medium: $0.11-0.13/kWh
-                    ELSE 0.13 + (RANDOM() * 0.02)  -- Small installations: $0.13-0.15/kWh
-                END;
-                
-                -- Add time-based escalation (rates increase over time)
-                ppa_rate := ppa_rate * (1 + (120 - i) * 0.0001); -- Small escalation over time
-                
-                -- Calculate daily generation
-                SELECT COALESCE(SUM(energy_kwh), 0) INTO daily_generation
-                FROM energy_generation 
-                WHERE installation_id = installation_record.id AND date = current_date;
-                
-                INSERT INTO financial_data (installation_id, date, energy_sold_kwh, revenue, ppa_rate, savings)
-                VALUES (
-                    installation_record.id,
-                    current_date,
-                    daily_generation * 0.92, -- 92% of generation is sold (8% for system losses)
-                    daily_generation * 0.92 * ppa_rate,
-                    ppa_rate,
-                    daily_generation * 0.92 * (state_grid_rate - ppa_rate) -- Savings vs grid electricity
-                );
-            END LOOP;
-        END LOOP;
-    END $$;
-
-    -- Insert comprehensive system alerts with realistic scenarios
-    INSERT INTO alerts (installation_id, type, severity, title, message, is_resolved, created_at) VALUES
-    -- Critical alerts requiring immediate attention
-    ('550e8400-e29b-41d4-a716-446655440035', 'performance', 'critical', 'Inverter String Failure', 'String 2 inverter has failed completely - zero output detected. Immediate replacement required.', false, CURRENT_TIMESTAMP - INTERVAL '4 hours'),
-    ('550e8400-e29b-41d4-a716-446655440039', 'system', 'critical', 'Communication System Down', 'Data logger communication lost for 6+ hours. Unable to monitor system performance.', false, CURRENT_TIMESTAMP - INTERVAL '8 hours'),
-
-    -- High priority alerts
-    ('550e8400-e29b-41d4-a716-446655440030', 'performance', 'error', 'Significant Generation Drop', 'Daily generation 35% below forecast for 3 consecutive days. Possible panel damage or soiling.', false, CURRENT_TIMESTAMP - INTERVAL '1 day'),
-    ('550e8400-e29b-41d4-a716-446655440043', 'maintenance', 'error', 'Overdue Critical Maintenance', 'Annual safety inspection is 30 days overdue. System may be shut down for compliance.', false, CURRENT_TIMESTAMP - INTERVAL '2 days'),
-    ('550e8400-e29b-41d4-a716-446655440047', 'weather', 'error', 'Hurricane Warning', 'Category 2 hurricane approaching within 48 hours. Prepare for system shutdown and securing.', false, CURRENT_TIMESTAMP - INTERVAL '6 hours'),
-
-    -- Medium priority alerts
-    ('550e8400-e29b-41d4-a716-446655440031', 'performance', 'warning', 'Below Expected Generation', 'Daily generation 18% below forecast. Possible panel soiling or shading issues.', false, CURRENT_TIMESTAMP - INTERVAL '2 days'),
-    ('550e8400-e29b-41d4-a716-446655440036', 'maintenance', 'warning', 'Scheduled Maintenance Due', 'Quarterly maintenance inspection due within 7 days. Schedule technician visit.', false, CURRENT_TIMESTAMP - INTERVAL '3 days'),
-    ('550e8400-e29b-41d4-a716-446655440040', 'system', 'warning', 'High Temperature Alert', 'Inverter operating temperature exceeded 85°C for 4+ hours. Check cooling system.', false, CURRENT_TIMESTAMP - INTERVAL '1 day'),
-    ('550e8400-e29b-41d4-a716-446655440044', 'weather', 'warning', 'Severe Weather Advisory', 'Hail storm warning issued for area. Monitor system for potential damage.', false, CURRENT_TIMESTAMP - INTERVAL '12 hours'),
-    ('550e8400-e29b-41d4-a716-446655440048', 'performance', 'warning', 'Inverter Efficiency Drop', 'String 4 inverter efficiency dropped to 92%. Schedule inspection within 2 weeks.', false, CURRENT_TIMESTAMP - INTERVAL '5 days'),
-
-    -- Low priority informational alerts
-    ('550e8400-e29b-41d4-a716-446655440032', 'system', 'info', 'Firmware Update Available', 'New inverter firmware v3.2.1 available. Includes performance optimizations.', false, CURRENT_TIMESTAMP - INTERVAL '1 week'),
-    ('550e8400-e29b-41d4-a716-446655440037', 'performance', 'info', 'Exceptional Generation Day', 'Daily generation exceeded forecast by 28% due to optimal weather conditions.', false, CURRENT_TIMESTAMP - INTERVAL '1 day'),
-    ('550e8400-e29b-41d4-a716-446655440041', 'maintenance', 'info', 'Preventive Maintenance Completed', 'Quarterly inspection and cleaning completed successfully. All systems optimal.', false, CURRENT_TIMESTAMP - INTERVAL '3 days'),
-    ('550e8400-e29b-41d4-a716-446655440045', 'system', 'info', 'Grid Export Milestone', 'System has exported 1 million kWh to the grid since installation.', false, CURRENT_TIMESTAMP - INTERVAL '2 days'),
-
-    -- Recently resolved alerts (showing system reliability)
-    ('550e8400-e29b-41d4-a716-446655440033', 'performance', 'warning', 'Generation Restored', 'Panel cleaning completed. Generation returned to expected levels.', true, CURRENT_TIMESTAMP - INTERVAL '1 week'),
-    ('550e8400-e29b-41d4-a716-446655440038', 'maintenance', 'error', 'Emergency Repair Completed', 'Damaged weather station replaced. All monitoring systems operational.', true, CURRENT_TIMESTAMP - INTERVAL '10 days'),
-    ('550e8400-e29b-41d4-a716-446655440042', 'system', 'warning', 'Communication Restored', 'Network connectivity issue resolved. Data logging resumed normally.', true, CURRENT_TIMESTAMP - INTERVAL '5 days'),
-    ('550e8400-e29b-41d4-a716-446655440046', 'weather', 'warning', 'Storm Damage Assessment Complete', 'Post-storm inspection completed. No damage found, all systems operational.', true, CURRENT_TIMESTAMP - INTERVAL '2 weeks'),
-    ('550e8400-e29b-41d4-a716-446655440049', 'performance', 'info', 'Optimization Update Applied', 'Inverter settings optimized for local conditions. 3% efficiency improvement achieved.', true, CURRENT_TIMESTAMP - INTERVAL '1 week');
-
-    -- Insert comprehensive maintenance records covering all aspects
-    INSERT INTO maintenance (installation_id, type, description, scheduled_date, completed_date, status, cost, technician, created_at, updated_at) VALUES
-    -- Urgent maintenance (scheduled soon)
-    ('550e8400-e29b-41d4-a716-446655440035', 'Emergency', 'Replace failed string inverter and perform electrical safety testing', CURRENT_DATE + INTERVAL '1 day', NULL, 'urgent', 8500.00, 'Pacific Solar Emergency Response Team', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('550e8400-e29b-41d4-a716-446655440039', 'Corrective', 'Replace data logger and restore communication systems', CURRENT_DATE + INTERVAL '2 days', NULL, 'urgent', 3200.00, 'Desert Sun Technical Services', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('550e8400-e29b-41d4-a716-446655440043', 'Compliance', 'Annual safety inspection and electrical testing (overdue)', CURRENT_DATE + INTERVAL '3 days', NULL, 'urgent', 4500.00, 'GreenTech Compliance Team', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-
-    -- Scheduled preventive maintenance
-    ('550e8400-e29b-41d4-a716-446655440030', 'Preventive', 'Quarterly system inspection, panel cleaning, and performance optimization', CURRENT_DATE + INTERVAL '5 days', NULL, 'scheduled', 3800.00, 'NexusGreen Maintenance Team A', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('550e8400-e29b-41d4-a716-446655440036', 'Preventive', 'Semi-annual inverter maintenance and cooling system service', CURRENT_DATE + INTERVAL '1 week', NULL, 'scheduled', 2900.00, 'Pacific Solar Maintenance Division', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('550e8400-e29b-41d4-a716-446655440047', 'Preventive', 'Hurricane season preparation and system securing', CURRENT_DATE + INTERVAL '10 days', NULL, 'scheduled', 5200.00, 'Sunshine Power Storm Prep Team', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('550e8400-e29b-41d4-a716-446655440044', 'Preventive', 'Annual comprehensive system audit and performance analysis', CURRENT_DATE + INTERVAL '2 weeks', NULL, 'scheduled', 6800.00, 'GreenTech Senior Technical Team', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    ('550e8400-e29b-41d4-a716-446655440031', 'Preventive', 'Panel cleaning and bird deterrent maintenance', CURRENT_DATE + INTERVAL '3 weeks', NULL, 'scheduled', 2100.00, 'CleanSolar Professional Services', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-
-    -- Recently completed maintenance
-    ('550e8400-e29b-41d4-a716-446655440032', 'Preventive', 'Quarterly inspection, thermal imaging, and electrical testing', CURRENT_DATE - INTERVAL '3 days', CURRENT_DATE - INTERVAL '3 days', 'completed', 3500.00, 'NexusGreen Technical Services', CURRENT_TIMESTAMP - INTERVAL '1 week', CURRENT_TIMESTAMP - INTERVAL '3 days'),
-    ('550e8400-e29b-41d4-a716-446655440037', 'Corrective', 'Replace damaged weather monitoring equipment and recalibrate', CURRENT_DATE - INTERVAL '1 week', CURRENT_DATE - INTERVAL '1 week', 'completed', 2800.00, 'WeatherTech Solar Solutions', CURRENT_TIMESTAMP - INTERVAL '2 weeks', CURRENT_TIMESTAMP - INTERVAL '1 week'),
-    ('550e8400-e29b-41d4-a716-446655440040', 'Preventive', 'Panel washing, vegetation management, and access road maintenance', CURRENT_DATE - INTERVAL '10 days', CURRENT_DATE - INTERVAL '8 days', 'completed', 1950.00, 'Desert Maintenance Specialists', CURRENT_TIMESTAMP - INTERVAL '2 weeks', CURRENT_TIMESTAMP - INTERVAL '8 days'),
-    ('550e8400-e29b-41d4-a716-446655440041', 'Corrective', 'Inverter cooling fan replacement and temperature sensor calibration', CURRENT_DATE - INTERVAL '2 weeks', CURRENT_DATE - INTERVAL '12 days', 'completed', 1200.00, 'Desert Sun Field Services', CURRENT_TIMESTAMP - INTERVAL '3 weeks', CURRENT_TIMESTAMP - INTERVAL '12 days'),
-    ('550e8400-e29b-41d4-a716-446655440045', 'Preventive', 'Transformer maintenance and electrical connection inspection', CURRENT_DATE - INTERVAL '3 weeks', CURRENT_DATE - INTERVAL '20 days', 'completed', 4200.00, 'ElectroSolar Specialists', CURRENT_TIMESTAMP - INTERVAL '1 month', CURRENT_TIMESTAMP - INTERVAL '20 days'),
-    ('550e8400-e29b-41d4-a716-446655440048', 'Corrective', 'Lightning protection system upgrade and grounding verification', CURRENT_DATE - INTERVAL '1 month', CURRENT_DATE - INTERVAL '25 days', 'completed', 3600.00, 'Lightning Protection Systems Inc', CURRENT_TIMESTAMP - INTERVAL '6 weeks', CURRENT_TIMESTAMP - INTERVAL '25 days'),
-    ('550e8400-e29b-41d4-a716-446655440033', 'Preventive', 'Post-installation 90-day warranty inspection and optimization', CURRENT_DATE - INTERVAL '6 weeks', CURRENT_DATE - INTERVAL '40 days', 'completed', 1800.00, 'NexusGreen Installation Team', CURRENT_TIMESTAMP - INTERVAL '2 months', CURRENT_TIMESTAMP - INTERVAL '40 days'),
-    ('550e8400-e29b-41d4-a716-446655440050', 'Preventive', 'Initial commissioning and performance validation', CURRENT_DATE - INTERVAL '2 months', CURRENT_DATE - INTERVAL '55 days', 'completed', 2500.00, 'Sunshine Power Commissioning Team', CURRENT_TIMESTAMP - INTERVAL '3 months', CURRENT_TIMESTAMP - INTERVAL '55 days');
-
-    -- Create performance summary views for better dashboard performance
-    CREATE OR REPLACE VIEW installation_performance_summary AS
+    ('550e8400-e29b-41d4-a716-446655440010', '550e8400-e29b-41d4-a716-446655440000', 'Demo Solar Farm Alpha', 'Green Valley, CA', 34.0522, -118.2437, 500.00, '2023-06-15', 'Grid-Tied', 2000, 'SolarEdge SE27.6K', 'active'),
+    ('550e8400-e29b-41d4-a716-446655440011', '550e8400-e29b-41d4-a716-446655440000', 'Demo Rooftop Beta', 'Los Angeles, CA', 34.0522, -118.2437, 250.00, '2023-08-20', 'Grid-Tied', 1000, 'Enphase IQ8+', 'active'),
+    ('550e8400-e29b-41d4-a716-446655440012', '550e8400-e29b-41d4-a716-446655440000', 'Demo Commercial Gamma', 'San Diego, CA', 32.7157, -117.1611, 750.00, '2023-09-10', 'Grid-Tied', 3000, 'SMA Sunny Tripower', 'active');
+    
+    -- Insert sample energy generation data for the last 30 days
+    INSERT INTO energy_generation (installation_id, date, hour, energy_kwh, irradiance, temperature, weather_condition)
     SELECT 
         i.id,
-        i.name,
-        i.company_id,
-        i.capacity_kw,
-        i.status,
-        COALESCE(SUM(eg.energy_kwh), 0) as total_generation_30d,
-        COALESCE(AVG(eg.energy_kwh), 0) as avg_daily_generation,
-        COALESCE(SUM(fd.revenue), 0) as total_revenue_30d,
-        COALESCE(SUM(fd.savings), 0) as total_savings_30d,
-        COUNT(CASE WHEN a.is_resolved = false THEN 1 END) as active_alerts,
-        MAX(eg.date) as last_generation_date,
-        AVG(CASE WHEN eg.weather_condition = 'sunny' THEN eg.energy_kwh END) as avg_sunny_generation,
-        AVG(CASE WHEN eg.weather_condition = 'cloudy' THEN eg.energy_kwh END) as avg_cloudy_generation
+        CURRENT_DATE - INTERVAL '1 day' * generate_series(0, 29),
+        generate_series(6, 18) as hour,
+        CASE 
+            WHEN generate_series(6, 18) BETWEEN 10 AND 16 THEN 
+                (i.capacity_kw * 0.8 * RANDOM() * 0.5) + (i.capacity_kw * 0.3)
+            ELSE 
+                i.capacity_kw * 0.2 * RANDOM()
+        END as energy_kwh,
+        CASE 
+            WHEN generate_series(6, 18) BETWEEN 10 AND 16 THEN 
+                800 + (RANDOM() * 200)
+            ELSE 
+                200 + (RANDOM() * 300)
+        END as irradiance,
+        20 + (RANDOM() * 15) as temperature,
+        CASE 
+            WHEN RANDOM() > 0.8 THEN 'Cloudy'
+            WHEN RANDOM() > 0.9 THEN 'Rainy'
+            ELSE 'Sunny'
+        END as weather_condition
     FROM installations i
-    LEFT JOIN energy_generation eg ON i.id = eg.installation_id 
-        AND eg.date >= CURRENT_DATE - INTERVAL '30 days'
-    LEFT JOIN financial_data fd ON i.id = fd.installation_id 
-        AND fd.date >= CURRENT_DATE - INTERVAL '30 days'
-    LEFT JOIN alerts a ON i.id = a.installation_id
-    GROUP BY i.id, i.name, i.company_id, i.capacity_kw, i.status;
-
-    -- Create company performance summary
-    CREATE OR REPLACE VIEW company_performance_summary AS
+    WHERE i.company_id = '550e8400-e29b-41d4-a716-446655440000';
+    
+    -- Insert financial data
+    INSERT INTO financial_data (installation_id, date, energy_sold_kwh, revenue, ppa_rate, savings)
     SELECT 
-        c.id,
-        c.name,
-        COUNT(i.id) as total_installations,
-        SUM(i.capacity_kw) as total_capacity_kw,
-        COALESCE(SUM(eg.energy_kwh), 0) as total_generation_30d,
-        COALESCE(SUM(fd.revenue), 0) as total_revenue_30d,
-        COALESCE(SUM(fd.savings), 0) as total_savings_30d,
-        COUNT(CASE WHEN a.is_resolved = false THEN 1 END) as total_active_alerts,
-        AVG(i.capacity_kw) as avg_installation_size,
-        COUNT(CASE WHEN i.status = 'active' THEN 1 END) as active_installations
-    FROM companies c
-    LEFT JOIN installations i ON c.id = i.company_id
-    LEFT JOIN energy_generation eg ON i.id = eg.installation_id 
-        AND eg.date >= CURRENT_DATE - INTERVAL '30 days'
-    LEFT JOIN financial_data fd ON i.id = fd.installation_id 
-        AND fd.date >= CURRENT_DATE - INTERVAL '30 days'
-    LEFT JOIN alerts a ON i.id = a.installation_id
-    GROUP BY c.id, c.name;
-
-    -- Insert summary statistics for quick dashboard loading
-    CREATE TABLE IF NOT EXISTS dashboard_cache (
-        id SERIAL PRIMARY KEY,
-        cache_key VARCHAR(255) UNIQUE NOT NULL,
-        cache_data JSONB NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        expires_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP + INTERVAL '1 hour'
-    );
-
-    -- Pre-populate dashboard cache with current metrics
-    INSERT INTO dashboard_cache (cache_key, cache_data) VALUES
-    ('system_overview', jsonb_build_object(
-        'total_installations', (SELECT COUNT(*) FROM installations),
-        'total_capacity_kw', (SELECT COALESCE(SUM(capacity_kw), 0) FROM installations),
-        'total_companies', (SELECT COUNT(*) FROM companies),
-        'total_users', (SELECT COUNT(*) FROM users WHERE is_active = true),
-        'last_updated', CURRENT_TIMESTAMP
-    )),
-    ('generation_summary', jsonb_build_object(
-        'today_generation', (SELECT COALESCE(SUM(energy_kwh), 0) FROM energy_generation WHERE date = CURRENT_DATE),
-        'month_generation', (SELECT COALESCE(SUM(energy_kwh), 0) FROM energy_generation WHERE date >= DATE_TRUNC('month', CURRENT_DATE)),
-        'year_generation', (SELECT COALESCE(SUM(energy_kwh), 0) FROM energy_generation WHERE date >= DATE_TRUNC('year', CURRENT_DATE)),
-        'last_updated', CURRENT_TIMESTAMP
-    )),
-    ('financial_summary', jsonb_build_object(
-        'month_revenue', (SELECT COALESCE(SUM(revenue), 0) FROM financial_data WHERE date >= DATE_TRUNC('month', CURRENT_DATE)),
-        'month_savings', (SELECT COALESCE(SUM(savings), 0) FROM financial_data WHERE date >= DATE_TRUNC('month', CURRENT_DATE)),
-        'year_revenue', (SELECT COALESCE(SUM(revenue), 0) FROM financial_data WHERE date >= DATE_TRUNC('year', CURRENT_DATE)),
-        'year_savings', (SELECT COALESCE(SUM(savings), 0) FROM financial_data WHERE date >= DATE_TRUNC('year', CURRENT_DATE)),
-        'last_updated', CURRENT_TIMESTAMP
-    ));
-
-    -- Create indexes for optimal performance
-    CREATE INDEX IF NOT EXISTS idx_energy_generation_date_hour ON energy_generation(date, hour);
-    CREATE INDEX IF NOT EXISTS idx_financial_data_date ON financial_data(date);
-    CREATE INDEX IF NOT EXISTS idx_alerts_severity_resolved ON alerts(severity, is_resolved);
-    CREATE INDEX IF NOT EXISTS idx_maintenance_status_date ON maintenance(status, scheduled_date);
-    CREATE INDEX IF NOT EXISTS idx_installations_company_status ON installations(company_id, status);
-    CREATE INDEX IF NOT EXISTS idx_users_company_active ON users(company_id, is_active);
-
-    -- Final data validation and statistics
-    DO $$
-    DECLARE
-        total_installations INTEGER;
-        total_generation DECIMAL;
-        total_revenue DECIMAL;
-        total_alerts INTEGER;
-    BEGIN
-        SELECT COUNT(*) INTO total_installations FROM installations;
-        SELECT COALESCE(SUM(energy_kwh), 0) INTO total_generation FROM energy_generation;
-        SELECT COALESCE(SUM(revenue), 0) INTO total_revenue FROM financial_data;
-        SELECT COUNT(*) INTO total_alerts FROM alerts WHERE is_resolved = false;
-        
-        RAISE NOTICE 'Production database seeding completed successfully!';
-        RAISE NOTICE 'Total installations: %', total_installations;
-        RAISE NOTICE 'Total energy generation: % kWh', total_generation;
-        RAISE NOTICE 'Total revenue: $%', total_revenue;
-        RAISE NOTICE 'Active alerts: %', total_alerts;
-        RAISE NOTICE 'Database is ready for production use.';
-    END $$;
+        i.id,
+        CURRENT_DATE - INTERVAL '1 day' * generate_series(0, 29),
+        SUM(eg.energy_kwh) as energy_sold_kwh,
+        SUM(eg.energy_kwh) * 0.12 as revenue,
+        0.12 as ppa_rate,
+        SUM(eg.energy_kwh) * 0.08 as savings
+    FROM installations i
+    JOIN energy_generation eg ON i.id = eg.installation_id
+    WHERE i.company_id = '550e8400-e29b-41d4-a716-446655440000'
+    GROUP BY i.id, eg.date;
+    
+    -- Insert sample alerts
+    INSERT INTO alerts (installation_id, type, severity, title, message, is_resolved) VALUES
+    ('550e8400-e29b-41d4-a716-446655440010', 'maintenance', 'warning', 'Scheduled Maintenance Due', 'Quarterly maintenance check is due for Demo Solar Farm Alpha', false),
+    ('550e8400-e29b-41d4-a716-446655440011', 'performance', 'info', 'Performance Above Average', 'Demo Rooftop Beta is performing 5% above expected output', true),
+    ('550e8400-e29b-41d4-a716-446655440012', 'weather', 'low', 'Weather Alert', 'High winds expected in the area. Monitor system performance.', false);
+    
+    -- Insert maintenance records
+    INSERT INTO maintenance (installation_id, type, description, scheduled_date, completed_date, cost, technician, status) VALUES
+    ('550e8400-e29b-41d4-a716-446655440010', 'Preventive', 'Quarterly inspection and cleaning', '2024-09-20', NULL, 500.00, 'Mike Technician', 'scheduled'),
+    ('550e8400-e29b-41d4-a716-446655440011', 'Corrective', 'Replace faulty inverter', '2024-09-15', '2024-09-16', 1200.00, 'Mike Technician', 'completed'),
+    ('550e8400-e29b-41d4-a716-446655440012', 'Preventive', 'Annual system inspection', '2024-10-01', NULL, 800.00, 'Mike Technician', 'scheduled');

@@ -12,13 +12,12 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'SUPER_ADMIN' | 'ADMIN' | 'MANAGER' | 'OPERATOR' | 'VIEWER';
-  organizationId: string;
+  role: 'super_admin' | 'customer' | 'funder' | 'om';
+  companyId: string;
   avatar?: string;
   lastLogin?: string;
   isActive: boolean;
-  permissions: string[];
-  emailVerified: boolean;
+  permissions: Record<string, boolean>;
   createdAt: string;
   updatedAt: string;
 }

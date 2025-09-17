@@ -1,52 +1,18 @@
-# Nexus Green Production Dockerfile
-# Multi-stage build optimized for ARM64 (AWS t4g.medium)
-
-# Stage 1: Build stage
-FROM --platform=linux/arm64 node:18-alpine AS builder
+FROM node:18-alpine as build
 
 WORKDIR /app
 
-# Set memory limits for ARM64 builds
-ENV NODE_OPTIONS="--max-old-space-size=3072"
-ENV VITE_ENVIRONMENT=production
-
-# Copy package files first for better caching
 COPY package*.json ./
+RUN npm ci
 
-# Install ALL dependencies (including devDependencies for build)
-# Don't set NODE_ENV=production yet as we need devDependencies
-RUN npm ci --include=dev --silent --no-audit --no-fund
-
-# Copy source code
 COPY . .
+RUN npm run build
 
-# Verify vite is available
-RUN npx vite --version
+FROM nginx:alpine
 
-# Build the application with memory optimization
-RUN NODE_ENV=production npx vite build --mode production
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Stage 2: Production stage
-FROM --platform=linux/arm64 nginx:alpine AS production
-
-# Install curl for health checks
-RUN apk add --no-cache curl
-
-# Copy built application from builder stage
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Copy nginx configuration
-COPY nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
-
-# Set proper permissions
-RUN chown -R nginx:nginx /usr/share/nginx/html
-
-# Expose port
 EXPOSE 80
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost/health || exit 1
-
-# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
