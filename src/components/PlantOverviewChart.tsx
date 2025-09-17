@@ -1,6 +1,7 @@
 import { ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend, BarChart, Bar, LineChart, Line, ComposedChart, LabelList } from "recharts";
 import { useEffect, useMemo, useState } from "react";
 import { Tooltip as InfoTooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./ui/tooltip";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 type HistoryPoint = { month: string; totalYield: number | null };
 
@@ -11,6 +12,7 @@ type TimeFilter = {
 };
 
 const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
+  const { formatAmount } = useCurrency();
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +32,7 @@ const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
   const [avgDailyYield, setAvgDailyYield] = useState<number | null>(null);
 
   const monthsInRange = useMemo(() => {
+    if (!timeFilter?.startDate || !timeFilter?.endDate) return 1;
     const start = timeFilter.startDate;
     const end = timeFilter.endDate;
     const startY = start.getFullYear();
@@ -38,7 +41,7 @@ const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
     const endM = end.getMonth();
     const diff = (endY - startY) * 12 + (endM - startM) + 1;
     return Math.max(1, Math.min(60, diff));
-  }, [timeFilter.startDate, timeFilter.endDate]);
+  }, [timeFilter?.startDate, timeFilter?.endDate]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -76,6 +79,7 @@ const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
 
   // Fetch device list for filter from backend devices endpoint
   useEffect(() => {
+    if (!timeFilter?.startDate || !timeFilter?.endDate) return;
     const controller = new AbortController();
     const run = async () => {
       try {
@@ -97,10 +101,11 @@ const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
     };
     run();
     return () => controller.abort();
-  }, [timeFilter.startDate, timeFilter.endDate]);
+  }, [timeFilter?.startDate, timeFilter?.endDate]);
 
   // Fetch monthly yield with optional device filter
   useEffect(() => {
+    if (!timeFilter?.startDate || !timeFilter?.endDate) return;
     const controller = new AbortController();
     const run = async () => {
       try {
@@ -126,9 +131,10 @@ const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
     };
     run();
     return () => controller.abort();
-  }, [timeFilter.startDate, timeFilter.endDate, selectedDevice]);
+  }, [timeFilter?.startDate, timeFilter?.endDate, selectedDevice]);
 
   useEffect(() => {
+    if (!timeFilter?.startDate || !timeFilter?.endDate) return;
     const controller = new AbortController();
     const fetchEarnings = async () => {
       try {
@@ -167,10 +173,11 @@ const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
     };
     fetchEarnings();
     return () => controller.abort();
-  }, [timeFilter.startDate, timeFilter.endDate, selectedDevice]);
+  }, [timeFilter?.startDate, timeFilter?.endDate, selectedDevice]);
 
   // Fetch monthly earnings with change (device optional)
   useEffect(() => {
+    if (!timeFilter?.startDate || !timeFilter?.endDate) return;
     const controller = new AbortController();
     const run = async () => {
       try {
@@ -204,7 +211,7 @@ const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
     };
     run();
     return () => controller.abort();
-  }, [timeFilter.startDate, timeFilter.endDate, selectedDevice]);
+  }, [timeFilter?.startDate, timeFilter?.endDate, selectedDevice]);
 
   // Fetch avg daily yield once on mount
   useEffect(() => {
@@ -261,7 +268,7 @@ const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
               </button>
             </TooltipTrigger>
             <TooltipContent side="left" className="max-w-xs">
-              Shows daily yield (kWh) and daily earnings (ZAR) for each day in the selected range. Yield is measured from inverter data; earnings are calculated using the configured ZAR rate.
+              Shows daily yield (kWh) and daily earnings for each day in the selected range. Yield is measured from inverter data; earnings are calculated using the configured exchange rate.
             </TooltipContent>
           </InfoTooltip>
         </div>
@@ -286,15 +293,15 @@ const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
                 yAxisId="earning" 
                 orientation="right" 
               className="text-muted-foreground text-xs"
-                tickFormatter={(v) => `R${Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                label={{ value: 'Earnings (ZAR)', angle: -90, position: 'insideRight' }}
+                tickFormatter={(v) => formatAmount(Number(v))}
+                label={{ value: 'Earnings', angle: -90, position: 'insideRight' }}
             />
             <Tooltip 
                 contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
                 labelStyle={{ color: 'hsl(var(--foreground))' }}
                 formatter={(value, name) => {
                   const n = String(name);
-                  if (n.includes('Earnings')) return [`R${Number(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, n];
+                  if (n.includes('Earnings')) return [formatAmount(Number(value)), n];
                   return [`${Number(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kWh`, n];
                 }}
               />
@@ -336,7 +343,7 @@ const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
                   }}
                 />
               </Bar>
-              <Bar yAxisId="earning" dataKey="dailyEarningsZAR" name="Earnings (ZAR)" fill="#d62728" barSize={18} radius={[3,3,0,0]}>
+              <Bar yAxisId="earning" dataKey="dailyEarningsZAR" name="Earnings" fill="#d62728" barSize={18} radius={[3,3,0,0]}>
                 <LabelList
                   dataKey="dailyEarningsZAR"
                   position="top"
@@ -366,7 +373,7 @@ const PlantOverviewChart = ({ timeFilter }: { timeFilter: TimeFilter }) => {
                           fill="#d62728"
                           style={{ pointerEvents: 'none' }}
                         >
-                          {`R${Number(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                          {formatAmount(Number(value))}
                         </text>
                       </g>
                     );

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,8 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import NexusGreenLogo from "@/components/NexusGreenLogo";
-
-const API_URL = import.meta.env.VITE_API_URL || "";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -16,6 +15,14 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login, user } = useAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,17 +32,7 @@ const Login = () => {
     }
     try {
       setIsLoading(true);
-      const res = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ email, password }),
-      });
-      const ct = res.headers.get('content-type') || '';
-      const raw = await res.text();
-      let data: any = {};
-      if (ct.includes('application/json') && raw) { try { data = JSON.parse(raw); } catch {} }
-      if (!res.ok || data.error) { throw new Error(data?.error || `Failed with status ${res.status}`); }
+      await login(email, password);
       toast({ title: 'Login Successful', description: 'Welcome to Nexus Green Dashboard' });
       navigate('/dashboard');
     } catch (err: any) {

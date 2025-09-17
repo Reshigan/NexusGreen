@@ -301,7 +301,7 @@ const ModernDashboard = () => {
     // Set up real-time updates every 60 seconds
     const interval = setInterval(loadDashboardData, 60000);
     return () => clearInterval(interval);
-  }, [timeFilter]);
+  }, []); // Fixed: Removed timeFilter dependency to prevent infinite loop
 
   const handleRefresh = async () => {
     setIsRefreshing(true);

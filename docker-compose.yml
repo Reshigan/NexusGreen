@@ -55,6 +55,7 @@ services:
       - DB_NAME=nexusgreen
       - DB_USER=nexususer
       - DB_PASSWORD=nexuspass123
+      - DATABASE_URL=postgresql://nexususer:nexuspass123@nexus-db:5432/nexusgreen
       - DB_TIMEOUT=15000
       - DB_MAX_CONNECTIONS=8
       - JWT_SECRET=nexus-green-jwt-secret-2024-v7

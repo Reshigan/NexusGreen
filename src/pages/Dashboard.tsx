@@ -173,6 +173,7 @@ const Dashboard = () => {
   };
 
   const handleExportCSV = async (type: "overview" | "detailed") => {
+    if (!timeFilter?.startDate || !timeFilter?.endDate) return;
     try {
       const start = timeFilter.startDate.toISOString().slice(0, 10);
       const end = timeFilter.endDate.toISOString().slice(0, 10);
@@ -306,6 +307,7 @@ const Dashboard = () => {
   };
 
   const handleExportPDF = async () => {
+    if (!timeFilter?.startDate || !timeFilter?.endDate) return;
     const { default: jsPDF } = await import('jspdf');
     const html2canvas = (await import('html2canvas')).default;
     const start = timeFilter.startDate.toISOString().slice(0, 10);
@@ -339,6 +341,7 @@ const Dashboard = () => {
   };
 
   const handleExportJSON = async () => {
+    if (!timeFilter?.startDate || !timeFilter?.endDate) return;
     try {
       const start = timeFilter.startDate.toISOString().slice(0, 10);
       const end = timeFilter.endDate.toISOString().slice(0, 10);

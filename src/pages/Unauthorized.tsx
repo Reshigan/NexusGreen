@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-export const Unauthorized: React.FC = () => {
+const Unauthorized: React.FC = () => {
   const { user } = useAuth();
 
   const getDashboardPath = () => {
@@ -172,3 +172,5 @@ export const NoProjectAssigned: React.FC = () => {
     </div>
   );
 };
+
+export default Unauthorized;

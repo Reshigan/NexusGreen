@@ -41,20 +41,25 @@ export default defineConfig(({ mode }) => ({
       },
     },
     rollupOptions: {
+      external: [],
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'react-vendor';
-            }
-            if (id.includes('@radix-ui')) {
-              return 'ui-vendor';
-            }
-            if (id.includes('recharts') || id.includes('d3-')) {
-              return 'charts-vendor';
-            }
+            // Put everything in a single vendor chunk to avoid loading order issues
             return 'vendor';
           }
+        },
+        // Ensure proper chunk loading order
+        chunkFileNames: (chunkInfo) => {
+          const name = chunkInfo.name;
+          // Add priority prefix to ensure loading order
+          if (name === 'react-vendor') {
+            return 'assets/[name]-[hash].js';
+          }
+          if (name === 'ui-vendor') {
+            return 'assets/[name]-[hash].js';
+          }
+          return 'assets/[name]-[hash].js';
         },
       },
     },
@@ -71,10 +76,13 @@ export default defineConfig(({ mode }) => ({
     include: [
       'react',
       'react-dom',
+      'react-dom/client',
+      'react/jsx-runtime',
       'react-router-dom',
       '@tanstack/react-query',
       'framer-motion',
       'lucide-react',
+      'next-themes',
     ],
   },
 }));

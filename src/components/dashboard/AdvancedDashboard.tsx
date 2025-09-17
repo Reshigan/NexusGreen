@@ -28,6 +28,8 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useCurrency } from '@/contexts/CurrencyContext';
+import CurrencySelector from '@/components/CurrencySelector';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -52,6 +54,7 @@ const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ user, organizatio
   const [sites, setSites] = useState<Site[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
+  const { formatAmount } = useCurrency();
 
   // Update time every second
   useEffect(() => {
@@ -245,6 +248,7 @@ const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ user, organizatio
               </div>
               
               <div className="flex items-center space-x-3">
+                <CurrencySelector />
                 <Button
                   variant="outline"
                   size="sm"
@@ -318,13 +322,13 @@ const AdvancedDashboard: React.FC<AdvancedDashboardProps> = ({ user, organizatio
         />
         <MetricCard
           title="Revenue Today"
-          value={`$${(dashboardMetrics.totalRevenue / 1000).toFixed(1)}k`}
+          value={formatAmount(dashboardMetrics.totalRevenue, { compact: true })}
           unit=""
           icon={DollarSign}
           trend={12.5}
           color={nexusTheme.colors.primary[500]}
           gradient={getGradient('success')}
-          description="Feed-in tariff: $0.12/kWh"
+          description="Feed-in tariff: 0.12/kWh"
         />
         <MetricCard
           title="System Performance"
