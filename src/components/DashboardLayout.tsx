@@ -20,6 +20,7 @@ import {
   Moon, Sun,
   LayoutDashboard, 
   BarChart3, 
+  TrendingUp,
   LogOut,
   Settings
 } from "lucide-react";
@@ -44,6 +45,11 @@ const menuItems = [
     title: "Analytics & AI",
     url: "/analytics", 
     icon: BarChart3,
+  },
+  {
+    title: "Advanced Analytics",
+    url: "/advanced-analytics", 
+    icon: TrendingUp,
   },
 ];
 

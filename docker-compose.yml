@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: nexusgreen-postgres
+    environment:
+      POSTGRES_DB: nexusgreen
+      POSTGRES_USER: nexusgreen
+      POSTGRES_PASSWORD: nexusgreen123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - nexusgreen-network
+    restart: unless-stopped
+
+  # Backend API Server
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: nexusgreen-backend
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=nexusgreen
+      - DB_USER=nexusgreen
+      - DB_PASSWORD=nexusgreen123
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+    networks:
+      - nexusgreen-network
+    restart: unless-stopped
+    volumes:
+      - ./backend-logs:/app/logs
+
+  # Frontend (React App served by nginx)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: nexusgreen-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - nexusgreen-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  nexusgreen-network:
+    driver: bridge

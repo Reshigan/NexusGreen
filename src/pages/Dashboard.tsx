@@ -470,6 +470,30 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Phase 2 Feature Announcement */}
+        <Card className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-blue-200 shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-blue-900">Phase 2: Advanced Data Visualizations</h3>
+                  <p className="text-blue-700">Interactive charts, real-time analytics, and comprehensive performance monitoring now available!</p>
+                </div>
+              </div>
+              <Button 
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                onClick={() => window.location.href = '/advanced-analytics'}
+              >
+                <TrendingUp className="h-4 w-4 mr-2" />
+                Explore Advanced Analytics
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Key Performance Metrics - Edgy Design */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 shadow-lg hover:shadow-xl transition-all duration-300 group">

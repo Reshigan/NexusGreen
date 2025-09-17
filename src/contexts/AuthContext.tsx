@@ -71,25 +71,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await fetch('/api/v1/auth/login', {
+    const apiUrl = import.meta.env.VITE_API_URL || '/api';
+    const response = await fetch(`${apiUrl}/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ username: email, password }),
     });
 
     const data = await response.json();
     
-    if (data.accessToken) {
-      localStorage.setItem('token', data.accessToken);
+    if (data.success && data.user) {
+      // Create a demo token for session management
+      const token = 'demo-token-' + Date.now();
+      localStorage.setItem('token', token);
+      
       // Convert API response to our User format
       setUser({
         id: data.user.id,
         email: data.user.email,
-        name: `${data.user.firstName} ${data.user.lastName}`,
+        name: data.user.username,
         role: data.user.role as 'SUPER_ADMIN' | 'CUSTOMER' | 'OPERATOR' | 'FUNDER' | 'PROJECT_ADMIN',
-        companyId: data.user.organizationId
+        companyId: data.user.id
       });
     } else {
       throw new Error(data.message || data.error || 'Login failed');

@@ -16,6 +16,7 @@ import ModernDashboard from "./pages/ModernDashboard";
 import PlantDetails from "./pages/PlantDetails";
 import Projects from "./pages/Projects";
 import Analytics from "./pages/Analytics";
+import AdvancedAnalytics from "./pages/AdvancedAnalytics";
 import SuperAdmin from "./pages/SuperAdmin";
 import NotFound from "./pages/NotFound";
 import Unauthorized from "./pages/Unauthorized";
@@ -70,6 +71,11 @@ const App = () => (
               <Route path="/analytics" element={
                 <ProtectedRoute>
                   <Analytics />
+                </ProtectedRoute>
+              } />
+              <Route path="/advanced-analytics" element={
+                <ProtectedRoute>
+                  <AdvancedAnalytics />
                 </ProtectedRoute>
               } />
               <Route path="/superadmin" element={
